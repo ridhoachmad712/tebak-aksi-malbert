@@ -108,6 +108,29 @@ class PerbaikanTest extends TestCase
         $this->assertSame(2, Murid::count());
     }
 
+    public function test_halaman_murid_admin_dimulai_dari_pilih_kelas(): void
+    {
+        $k1 = Kelas::create(['tahun_ajaran_id' => $this->ta->id, 'tingkat' => 1, 'nama' => '1A']);
+        $k2 = Kelas::create(['tahun_ajaran_id' => $this->ta->id, 'tingkat' => 2, 'nama' => '2A']);
+        $k1->murid()->attach(Murid::create(['nama' => 'Ani Satu'])->id);
+        $k2->murid()->attach(Murid::create(['nama' => 'Budi Dua'])->id);
+        Murid::create(['nama' => 'Citra Tanpa Kelas']);
+
+        $this->actingAs(User::where('peran', 'admin')->first());
+
+        $this->get('/admin/murid')->assertOk()
+            ->assertSee('Pilih kelas untuk melihat')
+            ->assertSee('Kelas 1A')->assertSee('Kelas 2A')
+            ->assertSee('1 murid aktif belum punya kelas')
+            ->assertDontSee('Ani Satu');
+
+        $this->get('/admin/murid?kelas='.$k1->id)->assertOk()
+            ->assertSee('Murid Kelas 1A')->assertSee('Ani Satu')->assertDontSee('Budi Dua');
+
+        $this->get('/admin/murid?kelas=tanpa')->assertOk()
+            ->assertSee('Citra Tanpa Kelas')->assertDontSee('Ani Satu');
+    }
+
     public function test_pengaduan_publik_tersimpan_dan_jebakan_bot_diabaikan(): void
     {
         $this->post('/pengaduan', ['kategori' => 'saran', 'isi' => 'Mohon tambah buku cerita bergambar untuk kelas satu.'])

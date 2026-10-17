@@ -18,10 +18,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use UnitEnum;
 
@@ -84,15 +82,9 @@ class MuridResource extends Resource
                 TextColumn::make('nisn')->label('NISN')->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('aktif')->boolean(),
             ])
+            // Pemilahan per kelas dilakukan di halaman pilih kelas (ManageMurid)
             ->filters([
-                SelectFilter::make('kelas')->label('Kelas')->options(fn () => static::opsiKelasAktif())
-                    ->query(fn (Builder $query, array $data) => $query->when($data['value'], fn ($q, $id) => $q->whereHas('kelas', fn ($k) => $k->whereKey($id)))),
-                TernaryFilter::make('aktif')->default(true),
-                TernaryFilter::make('tanpa_kelas')->label('Belum punya kelas')
-                    ->queries(
-                        true: fn ($query) => $query->whereDoesntHave('kelas', fn ($k) => $k->aktif()),
-                        false: fn ($query) => $query->whereHas('kelas', fn ($k) => $k->aktif()),
-                    ),
+                TernaryFilter::make('aktif')->label('Status')->trueLabel('Aktif')->falseLabel('Nonaktif')->placeholder('Semua')->default(true),
             ])
             ->recordActions([
                 EditAction::make()->using(function (Murid $record, array $data) {
