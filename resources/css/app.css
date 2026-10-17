@@ -109,6 +109,23 @@
         @apply border border-garis bg-white text-slate-700 hover:bg-slate-50;
     }
 
+    /* Motif identitas halaman depan: kertas bergaris dengan garis margin, seperti buku jurnal literasi murid */
+    .halaman-jurnal {
+        background-color: #fffdf8;
+        background-image:
+            linear-gradient(90deg, transparent 2.6rem, #f3b6a3 2.6rem, #f3b6a3 calc(2.6rem + 2px), transparent calc(2.6rem + 2px)),
+            repeating-linear-gradient(180deg, transparent 0, transparent calc(3rem - 1px), #e6dccb calc(3rem - 1px), #e6dccb 3rem);
+        background-position: 0 0, 0 1.5rem;
+    }
+
+    @media (min-width: 640px) {
+        .halaman-jurnal {
+            background-image:
+                linear-gradient(90deg, transparent 3.1rem, #f3b6a3 3.1rem, #f3b6a3 calc(3.1rem + 2px), transparent calc(3.1rem + 2px)),
+                repeating-linear-gradient(180deg, transparent 0, transparent calc(3rem - 1px), #e6dccb calc(3rem - 1px), #e6dccb 3rem);
+        }
+    }
+
     .tabel-kepala {
         @apply border-b border-garis bg-krem text-left text-xs font-bold text-slate-600;
     }

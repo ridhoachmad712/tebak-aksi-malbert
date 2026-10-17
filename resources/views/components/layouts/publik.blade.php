@@ -29,18 +29,18 @@
 
     <header x-data="{ buka: false }" class="sticky top-0 z-30 border-b border-garis bg-white">
         <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
-            <a href="{{ route('beranda') }}"><x-logo /></a>
+            <a href="{{ route('beranda') }}" class="shrink-0"><x-logo kecil /></a>
 
             <nav class="hidden h-full items-stretch gap-1 xl:flex" aria-label="Menu utama">
                 @foreach ($menu as $m)
                     <a href="{{ $m['url'] }}" @if ($m['aktif']) aria-current="page" @endif
-                       @class(['flex items-center border-b-2 px-3 text-sm font-bold',
+                       @class(['flex items-center whitespace-nowrap border-b-2 px-3 text-sm font-bold',
                            'border-brand-700 text-brand-800' => $m['aktif'],
                            'border-transparent text-slate-600 hover:text-slate-900' => ! $m['aktif']])>{{ $m['label'] }}</a>
                 @endforeach
-                <span class="ml-2 flex items-center">
-                    <a href="{{ auth()->check() ? route('masuk.arah') : route('login') }}" class="tombol-utama">
-                        {{ auth()->check() ? 'Buka aplikasi' : 'Masuk guru' }}
+                <span class="ml-3 flex items-center">
+                    <a href="{{ auth()->check() ? route('masuk.arah') : route('login') }}" class="tombol-utama whitespace-nowrap">
+                        {{ auth()->check() ? 'Buka aplikasi' : 'Masuk' }}
                     </a>
                 </span>
             </nav>
