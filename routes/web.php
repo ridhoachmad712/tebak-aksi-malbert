@@ -1,10 +1,12 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\MonevCetakController;
 use App\Http\Controllers\PublikController;
 use App\Http\Controllers\RekapUnduhController;
 use App\Livewire\Guru;
 use App\Livewire\Monev;
+use App\Livewire\MonevKelas;
 use Illuminate\Support\Facades\Route;
 
 // Halaman publik
@@ -56,4 +58,6 @@ Route::middleware(['auth', 'peran:guru,admin,kepsek'])->group(function () {
 
 Route::middleware(['auth', 'peran:admin,kepsek'])->group(function () {
     Route::get('/monev', Monev::class)->name('monev');
+    Route::get('/monev/cetak', MonevCetakController::class)->name('monev.cetak');
+    Route::get('/monev/kelas/{kelas}', MonevKelas::class)->name('monev.kelas');
 });

@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Guru;
 
+use App\Livewire\Concerns\PilihPeriode;
 use App\Livewire\Guru\Concerns\PilihKelas;
+use App\Models\KegiatanHarian;
+use App\Models\Pengaturan;
 use App\Services\Rekap;
-use Illuminate\Support\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -15,6 +17,7 @@ use Livewire\Component;
 class RekapKelas extends Component
 {
     use PilihKelas;
+    use PilihPeriode;
 
     public const LAPORAN = [
         'budaya' => 'Budaya Membaca',
@@ -23,50 +26,77 @@ class RekapKelas extends Component
         'ekosistem' => 'Ekosistem Literat',
     ];
 
-    #[Url]
-    public string $periode = 'bulan'; // bulan | semester
+    /** Nilai yang dipakai untuk urutan, saringan, dan ringkasan pada setiap laporan. */
+    public const NILAI_UTAMA = [
+        'budaya' => 'budaya_persen',
+        'literasi' => 'literasi_persen',
+        'ekosistem' => 'hadir_persen',
+    ];
 
-    #[Url]
-    public string $bulan = '';
-
-    #[Url]
-    public string $semester = '';
+    public const URUTAN = [
+        'nama' => 'Urut nama',
+        'terendah' => 'Nilai terendah dulu',
+        'tertinggi' => 'Nilai tertinggi dulu',
+    ];
 
     #[Url]
     public string $laporan = 'budaya';
 
+    #[Url]
+    public string $urut = 'nama';
+
+    #[Url(as: 'perhatian')]
+    public bool $hanyaPerhatian = false;
+
     public function mount(): void
     {
         $this->inisialisasiKelas(request()->integer('kelas') ?: null);
-        $this->periode = $this->periode === 'semester' ? 'semester' : 'bulan';
-        $this->bulan = preg_match('/^\d{4}-\d{2}$/', $this->bulan) ? $this->bulan : today()->format('Y-m');
-        $this->semester = in_array($this->semester, ['1', '2'], true) ? $this->semester : (string) Rekap::semesterDari(today());
+        $this->inisialisasiPeriode();
         $this->laporan = array_key_exists($this->laporan, self::LAPORAN) ? $this->laporan : 'budaya';
+        $this->urut = array_key_exists($this->urut, self::URUTAN) ? $this->urut : 'nama';
     }
 
-    /** Parameter periode untuk tautan unduhan. */
-    public function parameterPeriode(): array
+    /** Murid "perlu perhatian" = nilai utamanya di bawah kategori Baik (Cukup atau Perlu Bimbingan). */
+    public static function perluPerhatian(?float $persen): bool
     {
-        return $this->periode === 'semester' ? ['semester' => $this->semester] : ['bulan' => $this->bulan];
+        return $persen !== null && $persen < Pengaturan::angka('batas_baik');
     }
 
     public function render()
     {
         $data = ['daftarLaporan' => self::LAPORAN];
-        $ta = Rekap::tahunAjaranAktif();
 
         if ($this->kelas) {
-            if ($this->periode === 'semester' && $ta) {
-                [$dari, $sampai] = Rekap::periodeSemester($ta, (int) $this->semester);
-                $data['labelPeriode'] = Rekap::labelSemester((int) $this->semester, $ta);
-            } else {
-                $tgl = Carbon::createFromFormat('Y-m-d', $this->bulan.'-01');
-                [$dari, $sampai] = Rekap::periodeBulan($tgl->year, $tgl->month);
-                $data['labelPeriode'] = Rekap::labelBulan($tgl);
+            $periode = $this->dataPeriode();
+            $data['labelPeriode'] = $periode['label'];
+            $data['unduh'] = $periode['unduh'];
+            $data['rekap'] = Rekap::rekapKelas($this->kelas, $periode['dari'], $periode['sampai']);
+            $data['kasus'] = $this->laporan === 'pelanggaran' ? Rekap::kasus($periode['dari'], $periode['sampai'], $this->kelas) : collect();
+            $data['guru'] = $this->laporan === 'ekosistem' ? Rekap::rekapGuru($periode['dari'], $periode['sampai'], $this->kelas) : null;
+
+            if ($kunci = self::NILAI_UTAMA[$this->laporan] ?? null) {
+                $semua = $data['rekap']['murid'];
+                $perhatian = $semua->filter(fn ($b) => self::perluPerhatian($b[$kunci]));
+                $tampil = $this->hanyaPerhatian ? $perhatian : $semua;
+                $tampil = match ($this->urut) {
+                    'terendah' => $tampil->sortBy(fn ($b) => $b[$kunci] ?? -1),
+                    'tertinggi' => $tampil->sortByDesc(fn ($b) => $b[$kunci] ?? -1),
+                    default => $tampil,
+                };
+
+                $data['murid'] = $tampil->values();
+                $data['ringkasan'] = [
+                    'rerata' => Rekap::rerata($semua->pluck($kunci)->all()),
+                    'perhatian' => $perhatian->count(),
+                    'jumlah' => $semua->count(),
+                ];
+                // Baris rata-rata kelas untuk setiap kolom persen
+                $data['rerata'] = collect(array_keys(KegiatanHarian::INDIKATOR))
+                    ->mapWithKeys(fn ($i) => [$i => Rekap::rerata($semua->pluck($i.'_persen')->all())])
+                    ->put('budaya', Rekap::rerata($semua->pluck('budaya_persen')->all()))
+                    ->put('literasi', Rekap::rerata($semua->pluck('literasi_persen')->all()))
+                    ->put('karya', $semua->sum('karya'));
             }
-            $data['rekap'] = Rekap::rekapKelas($this->kelas, $dari, $sampai);
-            $data['kasus'] = $this->laporan === 'pelanggaran' ? Rekap::kasus($dari, $sampai, $this->kelas) : collect();
-            $data['guru'] = $this->laporan === 'ekosistem' ? Rekap::rekapGuru($dari, $sampai, $this->kelas) : null;
         }
 
         return view('livewire.guru.rekap-kelas', $data);

@@ -1,3 +1,5 @@
+@use('App\Services\Rekap')
+
 <div class="space-y-5">
     <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
@@ -6,18 +8,7 @@
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <x-pilih-kelas :daftar="$this->daftarKelas" />
-            <select wire:model.live="periode" aria-label="Jenis periode" class="isian w-auto pr-9 font-bold">
-                <option value="bulan">Per bulan</option>
-                <option value="semester">Per semester</option>
-            </select>
-            @if ($periode === 'semester')
-                <select wire:model.live="semester" aria-label="Semester" class="isian w-auto pr-9 font-bold">
-                    <option value="1">Semester Ganjil</option>
-                    <option value="2">Semester Genap</option>
-                </select>
-            @else
-                <input type="month" wire:model.live="bulan" max="{{ today()->format('Y-m') }}" aria-label="Bulan" class="isian w-auto font-bold">
-            @endif
+            <x-pilih-periode :periode="$periode" />
         </div>
     </div>
 
@@ -32,15 +23,38 @@
                 @endforeach
             </div>
             <div class="flex gap-2">
-                <a href="{{ route('rekap.unduh', ['kelas' => $kelasId, 'laporan' => $laporan, 'format' => 'pdf'] + $this->parameterPeriode()) }}" target="_blank" class="tombol-kedua"><x-heroicon-o-printer class="h-4 w-4" /> Cetak PDF</a>
-                <a href="{{ route('rekap.unduh', ['kelas' => $kelasId, 'laporan' => $laporan, 'format' => 'xlsx'] + $this->parameterPeriode()) }}" class="tombol-kedua"><x-heroicon-o-arrow-down-tray class="h-4 w-4" /> Excel</a>
+                <a href="{{ route('rekap.unduh', ['kelas' => $kelasId, 'laporan' => $laporan, 'format' => 'pdf'] + $unduh) }}" target="_blank" class="tombol-kedua"><x-heroicon-o-printer class="h-4 w-4" /> Cetak PDF</a>
+                <a href="{{ route('rekap.unduh', ['kelas' => $kelasId, 'laporan' => $laporan, 'format' => 'xlsx'] + $unduh) }}" class="tombol-kedua"><x-heroicon-o-arrow-down-tray class="h-4 w-4" /> Excel</a>
             </div>
         </div>
 
-        <section class="kartu overflow-hidden">
+        <section class="kartu overflow-hidden" wire:loading.class="opacity-60">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-garis px-4 py-3">
-                <h2 class="font-extrabold">{{ $daftarLaporan[$laporan] }}, Kelas {{ $this->kelas->nama }}, {{ $labelPeriode }}</h2>
-                <span class="text-sm font-semibold text-slate-600">{{ $rekap['n'] }} hari kegiatan</span>
+                <div>
+                    <h2 class="font-extrabold">{{ $daftarLaporan[$laporan] }}, Kelas {{ $this->kelas->nama }}, {{ $labelPeriode }}</h2>
+                    <p class="text-sm text-slate-700">
+                        {{ $rekap['n'] }} hari kegiatan
+                        @isset($ringkasan)
+                            · {{ $laporan === 'ekosistem' ? 'Rata-rata kehadiran murid' : 'Rata-rata kelas' }} <b class="tabular-nums">{{ Rekap::persenTeks($ringkasan['rerata']) }}</b>
+                            · <b class="tabular-nums">{{ $ringkasan['perhatian'] }}</b> dari {{ $ringkasan['jumlah'] }} murid perlu perhatian
+                        @else
+                            · <b class="tabular-nums">{{ $kasus->count() }}</b> kasus, {{ $kasus->whereNull('status_akhir')->count() }} masih dibina
+                        @endisset
+                    </p>
+                </div>
+                @isset($ringkasan)
+                    <div class="flex flex-wrap items-center gap-3">
+                        <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-bold">
+                            <input type="checkbox" wire:model.live="hanyaPerhatian" class="h-5 w-5 rounded border-slate-400">
+                            Hanya yang perlu perhatian
+                        </label>
+                        <select wire:model.live="urut" aria-label="Urutan" class="isian w-auto pr-9 text-sm font-bold">
+                            @foreach (\App\Livewire\Guru\RekapKelas::URUTAN as $nilai => $teks)
+                                <option value="{{ $nilai }}">{{ $teks }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endisset
             </div>
             <div class="overflow-x-auto">
                 @include('rekap.tabel-'.$laporan)

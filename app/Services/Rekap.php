@@ -81,6 +81,66 @@ class Rekap
         return 'Semester '.($semester === 1 ? 'Ganjil' : 'Genap').($ta ? ' '.$ta->nama : '');
     }
 
+    /**
+     * Periode laporan dari pilihan pengguna, beserta periode sebelumnya sebagai pembanding.
+     *
+     * @return array{dari: Carbon, sampai: Carbon, label: string, unduh: array, sebelumnya: ?array{dari: Carbon, sampai: Carbon, label: string}}
+     */
+    public static function periode(string $jenis, string $bulan, string $semester): array
+    {
+        $ta = self::tahunAjaranAktif();
+
+        if ($jenis === 'semester' && $ta) {
+            $s = (int) $semester;
+            [$dari, $sampai] = self::periodeSemester($ta, $s);
+            $sebelumnya = $s === 2
+                ? (fn ($p) => ['dari' => $p[0], 'sampai' => $p[1], 'label' => self::labelSemester(1)])(self::periodeSemester($ta, 1))
+                : null;
+
+            return ['dari' => $dari, 'sampai' => $sampai, 'label' => self::labelSemester($s, $ta), 'unduh' => ['semester' => $s], 'sebelumnya' => $sebelumnya];
+        }
+
+        $tgl = Carbon::createFromFormat('!Y-m', $bulan);
+        [$dari, $sampai] = self::periodeBulan($tgl->year, $tgl->month);
+        $lalu = $tgl->copy()->subMonth();
+        [$dariLalu, $sampaiLalu] = self::periodeBulan($lalu->year, $lalu->month);
+        // Bulan sebelum tahun ajaran dimulai tidak dipakai sebagai pembanding
+        $sebelumnya = (! $ta || $sampaiLalu->gte($ta->mulai))
+            ? ['dari' => $dariLalu, 'sampai' => $sampaiLalu, 'label' => self::BULAN[$lalu->month]]
+            : null;
+
+        return ['dari' => $dari, 'sampai' => $sampai, 'label' => self::labelBulan($tgl), 'unduh' => ['bulan' => $tgl->format('Y-m')], 'sebelumnya' => $sebelumnya];
+    }
+
+    /** Pilihan bulan dalam bahasa Indonesia untuk tahun ajaran aktif, terbaru di atas. */
+    public static function daftarBulan(): array
+    {
+        $ta = self::tahunAjaranAktif();
+        $akhir = today()->startOfMonth();
+        $awal = $ta ? $ta->mulai->copy()->startOfMonth() : $akhir->copy()->subMonths(11);
+        if ($ta && $ta->selesai->lt($akhir)) {
+            $akhir = $ta->selesai->copy()->startOfMonth();
+        }
+
+        $daftar = [];
+        for ($b = $akhir->copy(); $b->gte($awal); $b->subMonth()) {
+            $daftar[$b->format('Y-m')] = self::labelBulan($b);
+        }
+
+        return $daftar ?: [today()->format('Y-m') => self::labelBulan(today())];
+    }
+
+    /** Persen dengan format Indonesia: 81,9% atau 100%. */
+    public static function persenTeks(?float $nilai, bool $tandaPersen = true): string
+    {
+        if ($nilai === null) {
+            return '–';
+        }
+        $teks = fmod($nilai, 1.0) === 0.0 ? number_format($nilai, 0, ',', '.') : number_format($nilai, 1, ',', '.');
+
+        return $tandaPersen ? $teks.'%' : $teks;
+    }
+
     public static function labelBulan(Carbon $tanggal): string
     {
         return self::BULAN[$tanggal->month].' '.$tanggal->year;
@@ -278,8 +338,11 @@ class Rekap
 
     public static function indikator(Carbon $dari, Carbon $sampai, ?Kelas $kelasFilter = null): array
     {
-        $kelasList = $kelasFilter ? collect([$kelasFilter]) : Kelas::aktif()->orderBy('tingkat')->orderBy('nama')->get();
+        $kelasList = $kelasFilter ? collect([$kelasFilter->loadMissing('waliKelas')]) : Kelas::aktif()->with('waliKelas')->orderBy('tingkat')->orderBy('nama')->get();
         $rekap = self::rekapBanyakKelas($kelasList, $dari, $sampai);
+
+        $kasusAktif = KasusPembinaan::dalamPembinaan()->whereIn('kelas_id', $kelasList->pluck('id'))
+            ->selectRaw('kelas_id, COUNT(*) as jml')->groupBy('kelas_id')->pluck('jml', 'kelas_id');
 
         $semuaMurid = collect();
         $perKelas = [];
@@ -295,6 +358,7 @@ class Rekap
                 'persen' => self::persen($aktif, $murid->count()),
                 'budaya' => self::rerata($murid->pluck('budaya_persen')->all()),
                 'literasi' => self::rerata($murid->pluck('literasi_persen')->all()),
+                'kasus_aktif' => (int) ($kasusAktif[$kelas->id] ?? 0),
             ];
         }
 
@@ -340,6 +404,8 @@ class Rekap
                 'nilai' => self::persen($berhasil, $statusMurid->count()),
                 'target' => Pengaturan::angka('target_keberhasilan_pembinaan'),
                 'keterangan' => $statusMurid->isEmpty() ? 'Belum ada murid binaan pada periode ini' : $berhasil.' dari '.$statusMurid->count().' murid binaan berubah positif',
+                // Persentase dari kurang dari 5 murid binaan belum bisa dijadikan kesimpulan
+                'cukup' => $statusMurid->count() >= 5,
             ],
             'penurunan_pelanggaran' => [
                 'nilai' => $penurunan['persen'] ?? null,
