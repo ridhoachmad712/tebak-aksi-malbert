@@ -53,12 +53,7 @@ class Beranda extends Component
             // Pengingat hari kosong hanya untuk wali kelas (atau admin); guru mapel tidak bertanggung jawab atas catatan harian kelas
             $data['belumDicatat'] = collect();
             if ($user->isAdmin() || $kelas->wali_kelas_id === $user->id) {
-                $batas = (int) Pengaturan::angka('batas_ubah_hari');
-                $tercatat = KegiatanHarian::where('kelas_id', $kelas->id)
-                    ->whereDate('tanggal', '>=', $hariIni->copy()->subDays($batas))
-                    ->pluck('tanggal')->map(fn ($t) => $t->toDateString());
-                $data['belumDicatat'] = Rekap::hariKegiatan($hariIni->copy()->subDays($batas), $hariIni->copy()->subDay())
-                    ->reject(fn ($t) => $tercatat->contains($t->toDateString()))->values();
+                $data['belumDicatat'] = Rekap::hariBelumDicatat($kelas);
             }
 
             $kasus = KasusPembinaan::with(['murid', 'kelas', 'pemantauan', 'jenisPelanggaran'])
@@ -76,7 +71,9 @@ class Beranda extends Component
                 'kasus' => $kasus->where('kelas_id', $kelas->id)->count(),
                 'karya' => KaryaLiterasi::where('kelas_id', $kelas->id)->whereBetween('tanggal', [$dari->toDateString(), $sampai->toDateString()])->count(),
             ];
-            $data['muridPerhatian'] = RingkasanMonev::muridPerluPerhatian($rekap);
+            // Murid baru dinilai bila bulan ini sudah ada catatan; tanpa catatan semua akan tampak 0%
+            $data['adaCatatan'] = KegiatanHarian::where('kelas_id', $kelas->id)->whereBetween('tanggal', [$dari->toDateString(), $sampai->toDateString()])->exists();
+            $data['muridPerhatian'] = $data['adaCatatan'] ? RingkasanMonev::muridPerluPerhatian($rekap) : collect();
         }
 
         return view('livewire.guru.beranda', $data);

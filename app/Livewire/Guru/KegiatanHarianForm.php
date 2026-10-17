@@ -82,7 +82,7 @@ class KegiatanHarianForm extends Component
 
     protected function muat(): void
     {
-        unset($this->kegiatan, $this->murid, $this->bolehUbah, $this->hariKegiatan);
+        unset($this->kegiatan, $this->murid, $this->bolehUbah, $this->hariKegiatan, $this->belumDicatat);
         $this->centang = [];
         $kosong = array_fill_keys(array_keys(KegiatanHarian::INDIKATOR), false);
 
@@ -119,6 +119,27 @@ class KegiatanHarianForm extends Component
     public function hariKegiatan(): bool
     {
         return Rekap::hariKegiatanIni(Carbon::parse($this->tanggal));
+    }
+
+    /** Hari kegiatan yang belum dicatat (terbaru dulu), selain tanggal yang sedang dibuka; hanya untuk wali kelas dan admin. */
+    #[Computed]
+    public function belumDicatat()
+    {
+        $user = auth()->user();
+        if (! $this->kelas || (! $user->isAdmin() && $this->kelas->wali_kelas_id !== $user->id)) {
+            return collect();
+        }
+
+        return Rekap::hariBelumDicatat($this->kelas)->reverse()->reject(fn ($t) => $t->toDateString() === $this->tanggal)->values();
+    }
+
+    /** Lompat ke hari terbaru yang belum dicatat, untuk menyusul catatan yang tertinggal. */
+    public function keBelumDicatat(): void
+    {
+        if ($tgl = $this->belumDicatat->first()) {
+            $this->tanggal = $tgl->toDateString();
+            $this->muat();
+        }
     }
 
     /** Guru hanya boleh mengubah catatan dalam batas hari yang diatur admin; admin kapan saja. */

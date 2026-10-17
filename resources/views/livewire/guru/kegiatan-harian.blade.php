@@ -28,6 +28,16 @@
             <button wire:click="pindahHari(1)" @disabled($tgl->isToday()) class="tombol-kedua px-3" aria-label="Hari kegiatan berikutnya"><x-heroicon-m-chevron-right class="h-5 w-5" /></button>
         </div>
 
+        @if ($this->belumDicatat->isNotEmpty())
+            @php $berikut = $this->belumDicatat->first(); @endphp
+            <div class="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-garis bg-white px-4 py-2.5 text-sm">
+                <span class="text-slate-700">Masih ada <b>{{ $this->belumDicatat->count() }} hari</b> kegiatan lain yang belum dicatat.</span>
+                <button type="button" wire:click="keBelumDicatat" class="tombol-kedua min-h-10 text-sm">
+                    Catat {{ Rekap::namaHari($berikut) }}, {{ $berikut->day }} {{ mb_substr(Rekap::BULAN[$berikut->month], 0, 3) }} <x-heroicon-m-arrow-right class="h-4 w-4" />
+                </button>
+            </div>
+        @endif
+
         @if (! $this->hariKegiatan)
             <div class="kartu p-6">
                 <p class="text-lg font-extrabold">Tanggal ini bukan hari kegiatan</p>

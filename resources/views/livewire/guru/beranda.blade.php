@@ -89,30 +89,65 @@
                                 </div>
                             </li>
                         @endforeach
-                        @foreach ($siapDitutup as $k)
-                            <li>
-                                <a href="{{ route('guru.pembinaan.detail', $k) }}" wire:navigate class="flex items-center gap-3 px-4 py-3 hover:bg-krem">
-                                    <x-heroicon-o-flag class="h-6 w-6 shrink-0 text-toska-700" />
-                                    <span class="min-w-0 flex-1">
-                                        <span class="block font-bold">Tetapkan status akhir {{ $k->murid->nama }}</span>
-                                        <span class="block text-sm text-slate-600">Pemantauan 4 minggu sudah lengkap.</span>
-                                    </span>
-                                    <x-heroicon-m-chevron-right class="h-5 w-5 text-slate-400" />
-                                </a>
+                        {{-- Murid yang siap ditetapkan status akhirnya juga diringkas menjadi satu butir --}}
+                        @if ($siapDitutup->isNotEmpty())
+                            <li class="px-4 py-3">
+                                <div class="flex items-start gap-3">
+                                    <x-heroicon-o-flag class="mt-0.5 h-6 w-6 shrink-0 text-toska-700" />
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-bold">{{ $siapDitutup->count() }} murid siap ditetapkan status akhirnya</p>
+                                        <p class="text-sm text-slate-600">Pemantauan 4 minggu sudah lengkap. Ketuk nama untuk menetapkan.</p>
+                                        <div class="mt-2 flex flex-wrap gap-1.5">
+                                            @foreach ($siapDitutup->take(6) as $k)
+                                                <a href="{{ route('guru.pembinaan.detail', $k) }}" wire:navigate
+                                                    class="inline-flex min-h-10 items-center rounded-lg border border-garis bg-white px-3 text-sm font-bold text-slate-800 hover:border-slate-500">{{ $k->murid->nama }}</a>
+                                            @endforeach
+                                            @if ($siapDitutup->count() > 6)
+                                                <a href="{{ route('guru.pembinaan') }}" wire:navigate class="inline-flex min-h-10 items-center px-2 text-sm font-bold text-slate-700 hover:underline">dan {{ $siapDitutup->count() - 6 }} lainnya</a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
                             </li>
-                        @endforeach
-                        @foreach ($belumDicatat as $tgl)
-                            <li>
-                                <a href="{{ route('guru.kegiatan', ['kelas' => $kelas->id, 'tanggal' => $tgl->toDateString()]) }}" wire:navigate class="flex items-center gap-3 px-4 py-3 hover:bg-krem">
-                                    <x-heroicon-o-calendar class="h-6 w-6 shrink-0 text-rose-700" />
-                                    <span class="min-w-0 flex-1">
-                                        <span class="block font-bold">Catat {{ Rekap::tanggalPanjang($tgl) }}</span>
-                                        <span class="block text-sm text-slate-600">Kegiatan harian Kelas {{ $kelas->nama }} belum dicatat.</span>
-                                    </span>
-                                    <x-heroicon-m-chevron-right class="h-5 w-5 text-slate-400" />
-                                </a>
+                        @endif
+                        {{-- Hari yang belum dicatat diringkas menjadi satu butir, berapa pun batas ubah yang diatur admin --}}
+                        @if ($belumDicatat->isNotEmpty())
+                            @php $terbaru = $belumDicatat->reverse()->values(); @endphp
+                            <li class="px-4 py-3">
+                                <div class="flex items-start gap-3">
+                                    <x-heroicon-o-calendar class="mt-0.5 h-6 w-6 shrink-0 text-rose-700" />
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-bold">{{ $belumDicatat->count() === 1 ? '1 hari kegiatan belum dicatat' : $belumDicatat->count().' hari kegiatan belum dicatat' }}</p>
+                                        <p class="text-sm text-slate-600">
+                                            Kelas {{ $kelas->nama }}{{ $belumDicatat->count() > 1 ? ', sejak '.Rekap::tanggalPanjang($belumDicatat->first()) : '' }}. Mulai dari yang terbaru selagi masih ingat.
+                                        </p>
+                                        <div class="mt-2 flex flex-wrap gap-1.5">
+                                            @foreach ($terbaru->take(3) as $tgl)
+                                                <a href="{{ route('guru.kegiatan', ['kelas' => $kelas->id, 'tanggal' => $tgl->toDateString()]) }}" wire:navigate
+                                                    class="inline-flex min-h-10 items-center rounded-lg border border-garis bg-white px-3 text-sm font-bold text-slate-800 hover:border-slate-500">
+                                                    {{ Rekap::namaHari($tgl) }}, {{ $tgl->day }} {{ mb_substr(Rekap::BULAN[$tgl->month], 0, 3) }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                        @if ($terbaru->count() > 3)
+                                            <details class="mt-2">
+                                                <summary class="cursor-pointer text-sm font-bold text-slate-700 hover:underline">Lihat {{ $terbaru->count() - 3 }} tanggal lainnya</summary>
+                                                @foreach ($terbaru->slice(3)->groupBy(fn ($t) => Rekap::labelBulan($t)) as $bulan => $daftar)
+                                                    <p class="mt-2 text-xs font-bold uppercase tracking-wide text-slate-500">{{ $bulan }}</p>
+                                                    <div class="mt-1 flex flex-wrap gap-1.5">
+                                                        @foreach ($daftar as $tgl)
+                                                            <a href="{{ route('guru.kegiatan', ['kelas' => $kelas->id, 'tanggal' => $tgl->toDateString()]) }}" wire:navigate
+                                                                class="inline-flex min-h-9 min-w-9 items-center justify-center rounded-md border border-garis bg-white px-2 text-sm font-bold tabular-nums text-slate-800 hover:border-slate-500"
+                                                                title="{{ Rekap::tanggalPanjang($tgl) }}">{{ $tgl->day }}</a>
+                                                        @endforeach
+                                                    </div>
+                                                @endforeach
+                                            </details>
+                                        @endif
+                                    </div>
+                                </div>
                             </li>
-                        @endforeach
+                        @endif
                     </ul>
                 @else
                     <div class="kartu p-5 text-sm text-slate-600">
@@ -130,11 +165,11 @@
                     </div>
                     <div class="flex items-center justify-between gap-3 px-4 py-3">
                         <dt class="text-slate-600">Rata-rata hadir membaca</dt>
-                        <dd><x-lencana-kategori :persen="$ringkasan['hadir']" /></dd>
+                        <dd><x-lencana-kategori :persen="$adaCatatan ? $ringkasan['hadir'] : null" /></dd>
                     </div>
                     <div class="flex items-center justify-between gap-3 px-4 py-3">
                         <dt class="text-slate-600">Rata-rata kemampuan literasi</dt>
-                        <dd><x-lencana-kategori :persen="$ringkasan['literasi']" /></dd>
+                        <dd><x-lencana-kategori :persen="$adaCatatan ? $ringkasan['literasi'] : null" /></dd>
                     </div>
                     <div class="flex items-center justify-between gap-3 px-4 py-3">
                         <dt class="text-slate-600">Murid dalam pembinaan</dt>
@@ -161,7 +196,7 @@
                         <a href="{{ route('guru.rekap', ['perhatian' => 1, 'urut' => 'terendah']) }}" wire:navigate class="tautan mt-3 inline-block text-sm">Lihat {{ $muridPerhatian->count() - 3 }} murid lainnya</a>
                     @endif
                 @else
-                    <p class="kartu p-4 text-sm text-slate-600">{{ $ringkasan['hari'] ? 'Semua murid sudah aktif membaca dengan kategori Baik atau lebih bulan ini.' : 'Belum ada hari kegiatan bulan ini.' }}</p>
+                    <p class="kartu p-4 text-sm text-slate-600">{{ ! $ringkasan['hari'] ? 'Belum ada hari kegiatan bulan ini.' : ($adaCatatan ? 'Semua murid sudah aktif membaca dengan kategori Baik atau lebih bulan ini.' : 'Belum ada catatan kegiatan bulan ini. Daftar ini terisi setelah Kegiatan Harian dicatat.') }}</p>
                 @endif
             </section>
         </div>

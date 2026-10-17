@@ -207,4 +207,24 @@ class AlurGuruTest extends TestCase
             ->assertSee('Pilih yang sedang dicentang')
             ->assertSee('Belum dicentang Hadir');
     }
+
+    public function test_hari_belum_dicatat_diringkas_menjadi_satu_butir(): void
+    {
+        \App\Models\Pengaturan::updateOrCreate(['kunci' => 'batas_ubah_hari'], ['nilai' => '60']);
+        $jumlah = Rekap::hariBelumDicatat($this->kelas)->count();
+        $this->assertGreaterThan(20, $jumlah);
+
+        $halaman = $this->actingAs($this->guru)->get('/guru')->assertOk()
+            ->assertSee($jumlah.' hari kegiatan belum dicatat')
+            ->assertSee('Selasa, 13 Okt')
+            ->assertSee('tanggal lainnya')
+            ->assertSee('Belum ada catatan kegiatan bulan ini');
+        $this->assertSame(1, substr_count($halaman->getContent(), 'hari kegiatan belum dicatat'));
+
+        // Di halaman Kegiatan Harian ada tombol menuju hari terbaru yang belum dicatat
+        Livewire::actingAs($this->guru)->test(KegiatanHarianForm::class, ['kelas' => $this->kelas->id])
+            ->assertSee('Catat Selasa, 13 Okt')
+            ->call('keBelumDicatat')
+            ->assertSet('tanggal', '2026-10-13');
+    }
 }
