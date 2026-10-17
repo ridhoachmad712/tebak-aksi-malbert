@@ -41,6 +41,7 @@ class Pengaturan extends Model
         'kota_ttd' => 'Makassar',
         'logo_sekolah' => '',
         'kontak_sekolah' => '',
+        'cadangan_terakhir' => '',
 
         // Tampilan situs (diatur admin di menu Tampilan Situs)
         'tema_warna' => 'jingga',

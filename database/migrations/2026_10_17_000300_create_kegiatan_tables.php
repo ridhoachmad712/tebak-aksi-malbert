@@ -38,7 +38,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('kegiatan_harian_id')->constrained('kegiatan_harian')->cascadeOnDelete();
             $table->foreignId('jenis_kegiatan_id')->constrained('jenis_kegiatan')->restrictOnDelete();
-            $table->unique(['kegiatan_harian_id', 'jenis_kegiatan_id']);
+            $table->unique(['kegiatan_harian_id', 'jenis_kegiatan_id'], 'kegiatan_harian_jenis_unik');
         });
 
         // Jejak siapa mengisi/mengubah catatan harian

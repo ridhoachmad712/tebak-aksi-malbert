@@ -1,0 +1,1 @@
+@include('errors.tata-letak', ['kode' => '500', 'judul' => 'Terjadi kesalahan di server', 'pesan' => 'Maaf, ada masalah saat memproses permintaan Anda. Data yang sudah tersimpan tetap aman. Coba lagi beberapa saat lagi; bila terus terjadi, beri tahu admin sekolah.'])

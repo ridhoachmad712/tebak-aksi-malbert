@@ -1,0 +1,1 @@
+@include('errors.tata-letak', ['kode' => '403', 'judul' => 'Halaman ini tidak tersedia untuk akun Anda', 'pesan' => 'Akun Anda tidak memiliki akses ke halaman ini. Bila seharusnya bisa, hubungi admin sekolah untuk memeriksa peran atau kelas yang ditugaskan.'])

@@ -1,0 +1,1 @@
+@include('errors.tata-letak', ['kode' => '503', 'judul' => 'Aplikasi sedang dalam perbaikan', 'pesan' => 'TEBAK AKSI sedang diperbarui dan akan kembali sebentar lagi. Silakan coba beberapa menit lagi.'])

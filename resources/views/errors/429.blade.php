@@ -1,0 +1,1 @@
+@include('errors.tata-letak', ['kode' => '429', 'judul' => 'Terlalu banyak permintaan', 'pesan' => 'Anda mengirim terlalu banyak permintaan dalam waktu singkat. Tunggu sekitar satu menit, lalu coba lagi.'])

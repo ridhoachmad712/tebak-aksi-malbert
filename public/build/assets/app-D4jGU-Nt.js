@@ -1,0 +1,2 @@
+var e=!1;document.addEventListener(`livewire:init`,()=>{window.Livewire.hook(`request`,({fail:t})=>{t(({status:t,preventDefault:n})=>{t===419&&(n(),!e&&(e=!0,window.confirm(`Sesi Anda sudah berakhir karena halaman terlalu lama terbuka.
+Muat ulang halaman sekarang? Centang yang belum tersimpan perlu diulang.`)&&window.location.reload()))})})});

@@ -1,0 +1,1 @@
+@include('errors.tata-letak', ['kode' => '404', 'judul' => 'Halaman tidak ditemukan', 'pesan' => 'Alamat yang dibuka tidak ada atau sudah dipindahkan. Periksa kembali alamatnya, atau kembali ke halaman utama.'])

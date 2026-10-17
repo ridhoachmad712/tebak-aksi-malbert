@@ -72,6 +72,7 @@ Aset tampilan (`public/build`) ikut tersimpan di repositori, jadi server **tidak
    APP_ENV=production
    APP_DEBUG=false
    APP_URL=https://domain-sekolah.sch.id
+   SESSION_SECURE_COOKIE=true
    DB_CONNECTION=mysql
    DB_HOST=localhost
    DB_DATABASE=...
@@ -89,6 +90,7 @@ Aset tampilan (`public/build`) ikut tersimpan di repositori, jadi server **tidak
    php artisan optimize
    ```
    Di mode produksi tidak ada data contoh yang dibuat. Setelah masuk pertama kali, segera ganti kata sandi admin.
+   Aktifkan juga SSL gratis di hPanel (*Security → SSL*). Bila `APP_URL` diawali `https://`, aplikasi otomatis memakai https untuk semua tautan.
 5. **Arahkan domain ke folder `public`**
    ```bash
    cd ~/domains/domain-sekolah.sch.id
@@ -109,7 +111,7 @@ php artisan migrate --force
 php artisan optimize
 ```
 
-**Cadangan data**: aktifkan cadangan otomatis di hPanel (*Files → Backups*). Database juga bisa diunduh dari *Databases → phpMyAdmin → Export*.
+**Cadangan data**: admin dapat mengunduh cadangan dari panel admin, menu *Pengaturan → Cadangan Data* (data dalam berkas .sql, foto dan berkas dalam .zip). Aktifkan juga cadangan otomatis di hPanel (*Files → Backups*).
 
 ## Format impor murid
 
