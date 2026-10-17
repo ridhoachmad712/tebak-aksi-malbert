@@ -64,7 +64,8 @@ class AuthController extends Controller
         return match ($request->user()->peran) {
             'guru' => redirect()->route('guru.beranda'),
             'kepsek' => redirect()->route('kepsek.dasbor'),
-            default => redirect('/admin'),
+            // Admin memilih sendiri halaman yang akan dibuka
+            default => redirect()->route('admin.pilih'),
         };
     }
 

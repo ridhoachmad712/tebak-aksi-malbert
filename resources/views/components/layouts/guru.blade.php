@@ -8,8 +8,10 @@
         ['route' => 'guru.rekap', 'aktif' => 'guru.rekap*', 'label' => 'Rekap', 'ikon' => 'heroicon-o-table-cells'],
     ];
     $monev = ['route' => 'monev', 'aktif' => 'monev*', 'label' => 'Monev', 'ikon' => 'heroicon-o-presentation-chart-line'];
-    if ($peran === 'admin') {
-        $menu[0] = $monev;
+    // Admin: di Monev cukup menu Monev, di halaman guru memakai menu guru; pindah lewat bilah "Pindah ke"
+    $diMonev = request()->routeIs('monev*');
+    if ($peran === 'admin' && $diMonev) {
+        $menu = [$monev];
     } elseif ($peran === 'kepsek') {
         // Urutan menu kepala sekolah: Dashboard, Rekap, Monev
         $menu = [
@@ -21,7 +23,7 @@
     $beranda = match ($peran) {
         'guru' => route('guru.beranda'),
         'kepsek' => route('kepsek.dasbor'),
-        default => route('monev'),
+        default => $diMonev ? route('monev') : route('guru.beranda'),
     };
 @endphp
 <!DOCTYPE html>
@@ -96,12 +98,16 @@
             </div>
         </div>
     </header>
+    @if ($peran === 'admin')
+        <x-pindah-halaman />
+    @endif
 
     <main class="mx-auto max-w-6xl px-4 py-6">
         {{ $slot }}
     </main>
 
-    {{-- Navigasi bawah untuk HP --}}
+    {{-- Navigasi bawah untuk HP (tidak perlu bila hanya satu menu) --}}
+    @if (count($menu) > 1)
     <nav class="fixed inset-x-0 bottom-0 z-30 border-t border-garis bg-white pb-[env(safe-area-inset-bottom)] md:hidden" aria-label="Menu utama">
         <div class="grid" style="grid-template-columns: repeat({{ count($menu) }}, minmax(0, 1fr))">
             @foreach ($menu as $m)
@@ -116,6 +122,7 @@
             @endforeach
         </div>
     </nav>
+    @endif
 
     @livewireScripts
 </body>

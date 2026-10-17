@@ -33,6 +33,7 @@ Route::controller(AuthController::class)->group(function () {
     });
     Route::middleware('auth')->group(function () {
         Route::get('/arah', 'arah')->name('masuk.arah');
+        Route::view('/pilih-halaman', 'pilih-halaman')->middleware('peran:admin')->name('admin.pilih');
         Route::post('/keluar', 'keluar')->name('keluar');
     });
 });

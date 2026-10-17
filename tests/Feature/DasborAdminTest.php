@@ -70,4 +70,23 @@ class DasborAdminTest extends TestCase
             ->assertSee('4/4 hari')
             ->assertSee('8 hari lalu');
     }
+
+    public function test_admin_memilih_halaman_dan_bisa_pindah(): void
+    {
+        $this->get('/arah')->assertRedirect(route('admin.pilih'));
+        $this->get('/pilih-halaman')->assertOk()
+            ->assertSee('Mau membuka halaman apa?')
+            ->assertSee('Halaman Admin')->assertSee('Halaman Monev')->assertSee('Halaman Guru');
+
+        // Di Monev dan halaman guru ada bilah pindah halaman, termasuk kembali ke Halaman Admin
+        foreach (['/monev', '/guru'] as $url) {
+            $this->get($url)->assertOk()->assertSee('Pindah ke:')->assertSee('href="'.url('/admin').'"', false);
+        }
+        $this->get('/admin')->assertSee('Halaman Monev')->assertSee('Halaman Guru');
+
+        // Guru dan kepala sekolah tidak melihat halaman pilihan maupun bilahnya
+        $guru = User::create(['name' => 'Guru Uji', 'email' => 'uji@tebakaksi.test', 'password' => 'password', 'peran' => 'guru', 'jenis_guru' => 'kelas', 'status' => 'aktif']);
+        $this->actingAs($guru)->get('/pilih-halaman')->assertForbidden();
+        $this->get('/guru')->assertDontSee('Pindah ke:');
+    }
 }
