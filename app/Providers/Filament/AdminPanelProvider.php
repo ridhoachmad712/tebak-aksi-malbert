@@ -9,7 +9,7 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationGroup;
-use Filament\Navigation\NavigationItem;
+use Filament\View\PanelsRenderHook;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -43,31 +43,14 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth('full')
             ->navigationGroups([
-                // Tautan yang keluar dari panel admin dikumpulkan terpisah dan dibuka di tab baru
-                NavigationGroup::make('Buka Aplikasi'),
                 NavigationGroup::make('Pengguna & Kelas'),
                 NavigationGroup::make('Catatan Guru'),
                 NavigationGroup::make('Data Master'),
                 NavigationGroup::make('Halaman Publik'),
                 NavigationGroup::make('Pengaturan'),
             ])
-            ->navigationItems([
-                NavigationItem::make('Monev')
-                    ->url(fn () => route('monev'), shouldOpenInNewTab: true)
-                    ->icon('heroicon-o-arrow-top-right-on-square')
-                    ->group('Buka Aplikasi')
-                    ->sort(1),
-                NavigationItem::make('Halaman Guru')
-                    ->url(fn () => route('guru.kegiatan'), shouldOpenInNewTab: true)
-                    ->icon('heroicon-o-arrow-top-right-on-square')
-                    ->group('Buka Aplikasi')
-                    ->sort(2),
-                NavigationItem::make('Halaman Publik')
-                    ->url(fn () => route('beranda'), shouldOpenInNewTab: true)
-                    ->icon('heroicon-o-arrow-top-right-on-square')
-                    ->group('Buka Aplikasi')
-                    ->sort(3),
-            ])
+            // Tautan keluar panel (Monev, Halaman Guru, Halaman Publik) di bilah atas, samping menu profil
+            ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, fn () => view('filament.tautan-aplikasi'))
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
