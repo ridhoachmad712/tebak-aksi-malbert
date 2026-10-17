@@ -115,7 +115,7 @@ php artisan optimize
 
 ## Format impor murid
 
-Berkas `.xlsx` atau `.csv` dengan baris pertama berisi judul kolom:
+Unduh templatnya dari jendela *Impor dari Excel* di panel admin (atau `public/templat/templat-impor-murid.xlsx`; buat ulang dengan `php artisan templat:impor-murid`). Murid yang NISN/NIS-nya sudah terdaftar tidak dibuat ganda. Berkas `.xlsx` atau `.csv` dengan baris pertama berisi judul kolom:
 
 | Nama | NIS | NISN | JK |
 |---|---|---|---|

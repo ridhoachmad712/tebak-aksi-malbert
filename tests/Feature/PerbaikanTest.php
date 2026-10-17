@@ -83,6 +83,31 @@ class PerbaikanTest extends TestCase
         $this->assertSame('1001', Murid::where('nama', 'Ani Lestari')->value('nis'));
     }
 
+    public function test_impor_ulang_tidak_membuat_murid_ganda_dan_templat_bisa_dipakai(): void
+    {
+        $kelas = Kelas::create(['tahun_ajaran_id' => $this->ta->id, 'tingkat' => 1, 'nama' => '1A']);
+        $this->actingAs(User::where('peran', 'admin')->first());
+        $isi = "Nama,NIS,NISN,JK\nAni Lestari,1001,0012345678,P\nBudi Santoso,1002,,Laki-laki\n";
+
+        foreach ([1, 2] as $_) {
+            Livewire::test(ManageMurid::class)
+                ->callAction(TestAction::make('impor'), data: ['kelas_id' => $kelas->id, 'berkas' => UploadedFile::fake()->createWithContent('murid.csv', $isi)])
+                ->assertHasNoActionErrors();
+        }
+
+        $this->assertSame(2, Murid::count());
+        $this->assertSame('0012345678', Murid::where('nama', 'Ani Lestari')->value('nisn'));
+        $this->assertSame('L', Murid::where('nama', 'Budi Santoso')->value('jenis_kelamin'));
+
+        // Templat resmi (masih kosong) dapat diunggah tanpa galat
+        $templat = public_path('templat/templat-impor-murid.xlsx');
+        $this->assertFileExists($templat);
+        Livewire::test(ManageMurid::class)
+            ->callAction(TestAction::make('impor'), data: ['kelas_id' => $kelas->id, 'berkas' => UploadedFile::fake()->createWithContent('templat-impor-murid.xlsx', file_get_contents($templat))])
+            ->assertHasNoActionErrors();
+        $this->assertSame(2, Murid::count());
+    }
+
     public function test_pengaduan_publik_tersimpan_dan_jebakan_bot_diabaikan(): void
     {
         $this->post('/pengaduan', ['kategori' => 'saran', 'isi' => 'Mohon tambah buku cerita bergambar untuk kelas satu.'])
