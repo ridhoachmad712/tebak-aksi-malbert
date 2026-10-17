@@ -2,12 +2,13 @@
 @use('App\Models\Pengaturan')
 
 @php
+    // Setiap baris: potongan teks dan penanda huruf pembentuk akronim (TE-BA-K A-K-SI)
     $akronim = [
-        ['TE', 'ras'],
-        ['BA', 'ca'],
-        ['K', 'elas'],
-        ['A', 'sah Karakter'],
-        ['dan litera', 'SI', true],
+        [['TE', true], ['ras', false]],
+        [['BA', true], ['ca', false]],
+        [['K', true], ['elas', false]],
+        [['A', true], ['sah ', false], ['K', true], ['arakter', false]],
+        [['dan litera', false], ['SI', true]],
     ];
     $angka = [
         [$statistik['membaca'], 'kali murid hadir membaca'],
@@ -53,11 +54,8 @@
                     <ul>
                         @foreach ($akronim as $baris)
                             <li class="text-[1.65rem] leading-[3rem] text-slate-700 sm:text-3xl sm:leading-[3rem]">
-                                @if ($baris[2] ?? false)
-                                    <span class="font-semibold">{{ $baris[0] }}</span><span class="font-extrabold text-brand-700">{{ $baris[1] }}</span>
-                                @else
-                                    <span class="font-extrabold text-brand-700">{{ $baris[0] }}</span><span class="font-semibold">{{ $baris[1] }}</span>
-                                @endif
+                                {{-- Ditulis dalam satu baris agar tidak ada spasi di antara potongan kata --}}
+                                @foreach ($baris as [$teks, $huruf])<span @class(['font-extrabold text-brand-700' => $huruf, 'font-semibold' => ! $huruf])>{{ $teks }}</span>@endforeach
                             </li>
                         @endforeach
                     </ul>

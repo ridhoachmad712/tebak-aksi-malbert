@@ -42,7 +42,7 @@ Tidak ada gradasi, bulatan blur, efek kaca, atau ubin ikon berwarna-warni.
 
 ## Motif identitas
 
-Huruf pembentuk akronim **TE**ras **BA**ca **K**elas **A**sah Karakter dan litera**SI** diberi warna aksen. Di halaman depan publik, akronim ini ditulis per baris di atas **kertas bergaris dengan garis margin** (kelas `halaman-jurnal`), meniru buku jurnal literasi yang diisi murid setiap hari. Garis kertas ini satu-satunya pola latar yang dipakai, dan hanya di kartu tersebut.
+Huruf pembentuk akronim **TE**ras **BA**ca **K**elas **A**sah **K**arakter dan litera**SI** diberi warna aksen. Di halaman depan publik, akronim ini ditulis per baris di atas **kertas bergaris dengan garis margin** (kelas `halaman-jurnal`), meniru buku jurnal literasi yang diisi murid setiap hari. Garis kertas ini satu-satunya pola latar yang dipakai, dan hanya di kartu tersebut.
 
 ## Ikon dan emoji
 

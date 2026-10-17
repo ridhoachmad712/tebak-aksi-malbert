@@ -16,7 +16,7 @@
     <span class="leading-tight">
         <span class="block font-extrabold tracking-tight text-slate-800 {{ $kecil ? 'text-base' : 'text-lg' }}">TEBAK AKSI</span>
         @unless ($kecil)
-            <span class="block text-xs font-semibold text-slate-600"><b class="text-brand-700">TE</b>ras <b class="text-brand-700">BA</b>ca <b class="text-brand-700">K</b>elas <b class="text-brand-700">A</b>sah Karakter dan litera<b class="text-brand-700">SI</b></span>
+            <span class="block text-xs font-semibold text-slate-600"><b class="text-brand-700">TE</b>ras <b class="text-brand-700">BA</b>ca <b class="text-brand-700">K</b>elas <b class="text-brand-700">A</b>sah <b class="text-brand-700">K</b>arakter dan litera<b class="text-brand-700">SI</b></span>
         @endunless
     </span>
 </span>
