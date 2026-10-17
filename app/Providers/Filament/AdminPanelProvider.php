@@ -43,6 +43,8 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth('full')
             ->navigationGroups([
+                // Tautan yang keluar dari panel admin dikumpulkan terpisah dan dibuka di tab baru
+                NavigationGroup::make('Buka Aplikasi'),
                 NavigationGroup::make('Pengguna & Kelas'),
                 NavigationGroup::make('Catatan Guru'),
                 NavigationGroup::make('Data Master'),
@@ -51,18 +53,20 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationItems([
                 NavigationItem::make('Monev')
-                    ->url(fn () => route('monev'))
-                    ->icon('heroicon-o-presentation-chart-line')
-                    ->sort(-2),
+                    ->url(fn () => route('monev'), shouldOpenInNewTab: true)
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->group('Buka Aplikasi')
+                    ->sort(1),
                 NavigationItem::make('Halaman Guru')
-                    ->url(fn () => route('guru.kegiatan'))
-                    ->icon('heroicon-o-check-circle')
-                    ->sort(-1),
-                NavigationItem::make('Lihat Halaman Publik')
+                    ->url(fn () => route('guru.kegiatan'), shouldOpenInNewTab: true)
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->group('Buka Aplikasi')
+                    ->sort(2),
+                NavigationItem::make('Halaman Publik')
                     ->url(fn () => route('beranda'), shouldOpenInNewTab: true)
-                    ->icon('heroicon-o-globe-alt')
-                    ->group('Halaman Publik')
-                    ->sort(99),
+                    ->icon('heroicon-o-arrow-top-right-on-square')
+                    ->group('Buka Aplikasi')
+                    ->sort(3),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
