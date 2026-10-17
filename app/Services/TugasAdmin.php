@@ -43,7 +43,7 @@ class TugasAdmin
             ['label' => 'Akun guru sudah dibuat dan disetujui', 'selesai' => User::guru()->where('status', 'aktif')->exists(), 'url' => PenggunaResource::getUrl('index')],
             ['label' => 'Murid sudah dimasukkan ke kelas', 'selesai' => Murid::where('aktif', true)->whereHas('kelas', fn ($q) => $q->aktif())->exists(), 'url' => MuridResource::getUrl('index')],
             ['label' => 'Identitas sekolah dan logo sudah diisi', 'selesai' => filled(Pengaturan::ambil('logo_sekolah')) && filled(Pengaturan::ambil('alamat_sekolah')), 'url' => TampilanSitus::getUrl()],
-            ['label' => 'Nama kepala sekolah untuk laporan cetak sudah diisi', 'selesai' => filled(Pengaturan::ambil('nama_kepala_sekolah')), 'url' => PengaturanTarget::getUrl()],
+            ['label' => 'Nama kepala sekolah untuk laporan cetak sudah diisi', 'selesai' => filled(Pengaturan::ambil('nama_kepala_sekolah')), 'url' => TampilanSitus::getUrl()],
             ['label' => 'Baseline pelanggaran semester ini sudah diisi', 'selesai' => $ta && BaselinePelanggaran::where('tahun_ajaran_id', $ta->id)->where('semester', Rekap::semesterDari(today()))->exists(), 'url' => PengaturanTarget::getUrl()],
             ['label' => 'Halaman "Tentang TEBAK AKSI" sudah dibuat', 'selesai' => Konten::terbit()->where('jenis', 'halaman')->exists(), 'url' => KontenResource::getUrl('index')],
             ['label' => 'Manual Book untuk guru sudah diunggah', 'selesai' => ManualBook::exists(), 'url' => ManualBookResource::getUrl('index')],

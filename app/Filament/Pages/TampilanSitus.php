@@ -49,7 +49,7 @@ class TampilanSitus extends Page
 
     /** Kunci pengaturan yang dikelola halaman ini. */
     public const KUNCI = [
-        'nama_sekolah', 'alamat_sekolah', 'kota_ttd', 'kontak_sekolah', 'logo_sekolah',
+        'nama_sekolah', 'alamat_sekolah', 'kota_ttd', 'kontak_sekolah', 'logo_sekolah', 'nama_kepala_sekolah', 'nip_kepala_sekolah',
         'medsos_instagram', 'medsos_facebook', 'medsos_youtube', 'medsos_whatsapp',
         'beranda_judul', 'beranda_paragraf', 'beranda_tombol1_teks', 'beranda_tombol1_tujuan',
         'beranda_tombol2_teks', 'beranda_tombol2_tujuan', 'beranda_foto_id',
@@ -92,10 +92,15 @@ class TampilanSitus extends Page
                     Section::make('Sekolah')->description('Dipakai di header, footer, halaman masuk, dan laporan cetak.')->columns(2)->schema([
                         TextInput::make('nama_sekolah')->required()->maxLength(150)->columnSpanFull(),
                         TextInput::make('alamat_sekolah')->label('Alamat')->maxLength(255),
-                        TextInput::make('kota_ttd')->label('Kota (tempat tanda tangan laporan)')->maxLength(60),
                         TextInput::make('kontak_sekolah')->label('Kontak (telepon/email)')->maxLength(150),
                         FileUpload::make('logo_sekolah')->label('Logo sekolah')->image()->disk('public')->directory('pengaturan')->maxSize(2048)
                             ->imageEditor()->helperText('Tampil di header, ikon tab browser, dan kop laporan. Sebaiknya berbentuk persegi.'),
+                    ]),
+                    Section::make('Tanda tangan laporan cetak')->description('Tampil di bagian bawah laporan baku dan ringkasan Monev yang dicetak.')->columns(2)->schema([
+                        TextInput::make('nama_kepala_sekolah')->label('Nama kepala sekolah')->maxLength(150)
+                            ->helperText('Lengkap dengan gelar. Bila kosong, laporan menampilkan garis titik-titik.'),
+                        TextInput::make('nip_kepala_sekolah')->label('NIP kepala sekolah')->maxLength(30)->helperText('Boleh dikosongkan.'),
+                        TextInput::make('kota_ttd')->label('Kota (tempat tanda tangan laporan)')->maxLength(60),
                     ]),
                     Section::make('Media sosial')->description('Tampil di footer. Kosongkan yang tidak dipakai.')->columns(2)->schema([
                         TextInput::make('medsos_instagram')->label('Instagram')->url()->placeholder('https://instagram.com/akun-sekolah'),
@@ -181,7 +186,7 @@ class TampilanSitus extends Page
     {
         $data = $this->form->getState();
 
-        foreach (['logo_sekolah', 'beranda_foto_id', 'beranda_tombol2_teks', 'beranda_tombol2_tujuan'] as $kunci) {
+        foreach (['logo_sekolah', 'beranda_foto_id', 'beranda_tombol2_teks', 'beranda_tombol2_tujuan', 'nama_kepala_sekolah', 'nip_kepala_sekolah'] as $kunci) {
             $data[$kunci] = $data[$kunci] ?? '';
         }
         $data['menu_publik'] = collect($data['menu_publik'] ?? [])

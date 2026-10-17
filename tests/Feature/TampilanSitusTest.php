@@ -105,4 +105,25 @@ class TampilanSitusTest extends TestCase
         $this->get('/admin/pengumuman')->assertOk();
         $this->get('/admin/pengaturan')->assertOk();
     }
+
+    public function test_nama_kepala_sekolah_diisi_di_identitas_dan_tampil_di_laporan(): void
+    {
+        $this->actingAs(User::where('peran', 'admin')->first());
+
+        // Langkah persiapan mengarah ke halaman yang memang punya isian nama kepala sekolah
+        $langkah = collect(\App\Services\TugasAdmin::persiapan())->firstWhere('label', 'Nama kepala sekolah untuk laporan cetak sudah diisi');
+        $this->assertSame(TampilanSitus::getUrl(), $langkah['url']);
+        $this->assertFalse($langkah['selesai']);
+
+        Livewire::test(TampilanSitus::class)
+            ->assertSee('Nama kepala sekolah')
+            ->set('data.nama_kepala_sekolah', 'Kepala Sekolah Uji, S.Pd.')
+            ->set('data.nip_kepala_sekolah', '197001011990031001')
+            ->call('simpan')
+            ->assertHasNoErrors();
+
+        $this->assertSame('Kepala Sekolah Uji, S.Pd.', Pengaturan::ambil('nama_kepala_sekolah'));
+        $this->assertTrue(collect(\App\Services\TugasAdmin::persiapan())->firstWhere('label', 'Nama kepala sekolah untuk laporan cetak sudah diisi')['selesai']);
+        $this->assertStringContainsString('Kepala Sekolah Uji, S.Pd.', view('cetak.monev', \App\Services\RingkasanMonev::susun(\App\Services\Rekap::periode('bulan', '2026-10', '1')) + ['label' => 'Oktober 2026', 'labelLalu' => null])->render());
+    }
 }
