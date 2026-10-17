@@ -43,6 +43,7 @@ class Pengaturan extends Model
         'kontak_sekolah' => '',
 
         // Tampilan situs (diatur admin di menu Tampilan Situs)
+        'tema_warna' => 'jingga',
         'medsos_instagram' => '',
         'medsos_facebook' => '',
         'medsos_youtube' => '',

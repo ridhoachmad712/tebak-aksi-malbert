@@ -8,9 +8,9 @@
         <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($logo) }}" alt="Logo {{ \App\Models\Pengaturan::ambil('nama_sekolah') }}" class="{{ $kecil ? 'h-9 w-9' : 'h-10 w-10' }} shrink-0 object-contain">
     @else
         <svg viewBox="0 0 40 40" class="{{ $kecil ? 'h-8 w-8' : 'h-9 w-9' }} shrink-0" aria-hidden="true">
-            <rect width="40" height="40" rx="9" fill="#c2410c" />
+            <rect width="40" height="40" rx="9" style="fill: var(--aksen-700)" />
             <path d="M8 12.5c3.8-1.3 8-1 12 1.4v16c-4-2.4-8.2-2.7-12-1.4z" fill="#fff" />
-            <path d="M32 12.5c-3.8-1.3-8-1-12 1.4v16c4-2.4 8.2-2.7 12-1.4z" fill="#ffedd5" />
+            <path d="M32 12.5c-3.8-1.3-8-1-12 1.4v16c4-2.4 8.2-2.7 12-1.4z" style="fill: var(--aksen-100)" />
         </svg>
     @endif
     <span class="leading-tight">

@@ -4,28 +4,48 @@
 @source '../../storage/framework/views/*.php';
 @source '../../app/**/*.php';
 
-/* Token mengikuti DESIGN.md */
+/* Token mengikuti DESIGN.md. Warna aksen dan pendamping berasal dari palet yang dipilih admin
+   (App\Support\PaletWarna); nilai di :root di bawah adalah palet bawaan Jingga. */
 @theme {
     --font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif;
-
-    --color-brand-50: #fff7ed;
-    --color-brand-100: #ffedd5;
-    --color-brand-200: #fed7aa;
-    --color-brand-300: #fdba74;
-    --color-brand-500: #f97316;
-    --color-brand-600: #ea580c;
-    --color-brand-700: #c2410c;
-    --color-brand-800: #9a3412;
-    --color-brand-900: #7c2d12;
-
-    --color-toska-50: #f0fdfa;
-    --color-toska-100: #ccfbf1;
-    --color-toska-600: #0d9488;
-    --color-toska-700: #0f766e;
-    --color-toska-800: #115e59;
-
     --color-krem: #fffaf3;
     --color-garis: #ece3d6;
+}
+
+@theme inline {
+    --color-brand-50: var(--aksen-50);
+    --color-brand-100: var(--aksen-100);
+    --color-brand-200: var(--aksen-200);
+    --color-brand-300: var(--aksen-300);
+    --color-brand-500: var(--aksen-500);
+    --color-brand-600: var(--aksen-600);
+    --color-brand-700: var(--aksen-700);
+    --color-brand-800: var(--aksen-800);
+    --color-brand-900: var(--aksen-900);
+
+    --color-toska-50: var(--kedua-50);
+    --color-toska-100: var(--kedua-100);
+    --color-toska-600: var(--kedua-600);
+    --color-toska-700: var(--kedua-700);
+    --color-toska-800: var(--kedua-800);
+}
+
+:root {
+    --aksen-50: #fff7ed;
+    --aksen-100: #ffedd5;
+    --aksen-200: #fed7aa;
+    --aksen-300: #fdba74;
+    --aksen-500: #f97316;
+    --aksen-600: #ea580c;
+    --aksen-700: #c2410c;
+    --aksen-800: #9a3412;
+    --aksen-900: #7c2d12;
+
+    --kedua-50: #f0fdfa;
+    --kedua-100: #ccfbf1;
+    --kedua-600: #0d9488;
+    --kedua-700: #0f766e;
+    --kedua-800: #115e59;
 }
 
 @layer base {
@@ -113,7 +133,7 @@
     .halaman-jurnal {
         background-color: #fffdf8;
         background-image:
-            linear-gradient(90deg, transparent 2.6rem, #f3b6a3 2.6rem, #f3b6a3 calc(2.6rem + 2px), transparent calc(2.6rem + 2px)),
+            linear-gradient(90deg, transparent 2.6rem, var(--aksen-300) 2.6rem, var(--aksen-300) calc(2.6rem + 2px), transparent calc(2.6rem + 2px)),
             repeating-linear-gradient(180deg, transparent 0, transparent calc(3rem - 1px), #e6dccb calc(3rem - 1px), #e6dccb 3rem);
         background-position: 0 0, 0 1.5rem;
     }
@@ -121,7 +141,7 @@
     @media (min-width: 640px) {
         .halaman-jurnal {
             background-image:
-                linear-gradient(90deg, transparent 3.1rem, #f3b6a3 3.1rem, #f3b6a3 calc(3.1rem + 2px), transparent calc(3.1rem + 2px)),
+                linear-gradient(90deg, transparent 3.1rem, var(--aksen-300) 3.1rem, var(--aksen-300) calc(3.1rem + 2px), transparent calc(3.1rem + 2px)),
                 repeating-linear-gradient(180deg, transparent 0, transparent calc(3rem - 1px), #e6dccb calc(3rem - 1px), #e6dccb 3rem);
         }
     }

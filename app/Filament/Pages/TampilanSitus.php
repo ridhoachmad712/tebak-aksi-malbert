@@ -4,9 +4,12 @@ namespace App\Filament\Pages;
 
 use App\Models\Foto;
 use App\Models\Pengaturan;
+use App\Support\PaletWarna;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -23,11 +26,12 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\HtmlString;
 use UnitEnum;
 
 /**
  * Pengaturan isi tampilan situs: identitas sekolah, teks halaman depan, alur sesi, dan menu publik.
- * Warna dan huruf sengaja tidak bisa diubah agar tampilan tetap konsisten dan mudah dibaca (DESIGN.md).
+ * Warna dipilih dari palet yang sudah diuji kontras; huruf tidak bisa diubah agar tampilan tetap konsisten (DESIGN.md).
  */
 class TampilanSitus extends Page
 {
@@ -50,7 +54,7 @@ class TampilanSitus extends Page
         'beranda_judul', 'beranda_paragraf', 'beranda_tombol1_teks', 'beranda_tombol1_tujuan',
         'beranda_tombol2_teks', 'beranda_tombol2_tujuan', 'beranda_foto_id',
         'beranda_tampil_angka', 'beranda_tampil_alur', 'beranda_tampil_galeri', 'beranda_tampil_jalan_pintas', 'beranda_tampil_berita',
-        'alur_judul', 'alur_langkah', 'menu_publik',
+        'alur_judul', 'alur_langkah', 'menu_publik', 'tema_warna',
     ];
 
     public ?array $data = [];
@@ -65,6 +69,16 @@ class TampilanSitus extends Page
                 default => Pengaturan::ambil($kunci) ?: null,
             };
         }
+
+        // Tujuan yang sudah tidak ada (misalnya halaman dihapus) dilepas agar formulir tetap bisa disimpan
+        $tujuanAda = array_keys(Pengaturan::pilihanTujuan());
+        foreach (['beranda_tombol1_tujuan', 'beranda_tombol2_tujuan'] as $kunci) {
+            if ($nilai[$kunci] && ! in_array($nilai[$kunci], $tujuanAda, true)) {
+                $nilai[$kunci] = null;
+            }
+        }
+        $nilai['menu_publik'] = array_values(array_filter($nilai['menu_publik'], fn ($m) => in_array($m['tujuan'] ?? null, $tujuanAda, true)));
+
         $this->form->fill($nilai);
     }
 
@@ -126,6 +140,15 @@ class TampilanSitus extends Page
                     ])->columns(2)->minItems(1)->maxItems(6)->reorderable()->addActionLabel('Tambah langkah')
                         ->itemLabel(fn (array $state) => $state['judul'] ?? null)->collapsible()
                         ->helperText('Urutan di sini sama dengan urutan nomor di halaman depan. Paling banyak 6 langkah.'),
+                ]),
+
+                Tab::make('Warna')->icon(Heroicon::OutlinedSwatch)->schema([
+                    Radio::make('tema_warna')->label('Palet warna')->required()->live()
+                        ->options(PaletWarna::opsi())
+                        ->descriptions(array_map(fn ($p) => $p['keterangan'], PaletWarna::DAFTAR))
+                        ->helperText('Setiap palet sudah diuji agar tulisan tetap mudah dibaca. Warna status (Sangat Baik, Baik, Cukup, Perlu Bimbingan) dan perkembangan pembinaan tidak ikut berubah.'),
+                    Placeholder::make('pratinjau_warna')->label('Pratinjau')
+                        ->content(fn ($get) => new HtmlString(view('filament.pratinjau-warna', ['palet' => PaletWarna::DAFTAR[$get('tema_warna')] ?? PaletWarna::DAFTAR['jingga']])->render())),
                 ]),
 
                 Tab::make('Menu')->icon(Heroicon::OutlinedBars3)->schema([

@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Models\Pengaturan;
+use App\Support\PaletWarna;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -32,9 +33,9 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->brandName('TEBAK AKSI · Admin')
             ->brandLogo(fn () => view('filament.brand'))
-            ->favicon(fn () => ($logo = Pengaturan::ambil('logo_sekolah')) ? Storage::disk('public')->url($logo) : asset('favicon.svg'))
-            ->colors([
-                'primary' => Color::Orange,
+            ->favicon(fn () => ($logo = Pengaturan::ambil('logo_sekolah')) ? Storage::disk('public')->url($logo) : PaletWarna::ikonDataUri())
+            ->colors(fn () => [
+                'primary' => constant(Color::class.'::'.PaletWarna::aktif()['filament']),
                 'info' => Color::Teal,
             ])
             ->font('Nunito')
