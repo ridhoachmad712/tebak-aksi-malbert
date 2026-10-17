@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
 class Pengaturan extends Model
@@ -33,6 +34,8 @@ class Pengaturan extends Model
         'batas_sangat_baik' => 86,
         'batas_baik' => 76,
         'batas_cukup' => 60,
+        // Guru boleh mengubah catatan mulai tanggal ini; bila kosong, 7 hari ke belakang (batas_ubah_hari lama)
+        'ubah_mulai_tanggal' => '',
         'batas_ubah_hari' => 7,
         'nama_sekolah' => 'UPT SPF SD Inpres Mallengkeri Bertingkat',
         'nama_kepala_sekolah' => '',
@@ -106,6 +109,19 @@ class Pengaturan extends Model
     public static function angka(string $kunci): float
     {
         return (float) self::ambil($kunci, 0);
+    }
+
+    /** Tanggal paling awal catatan yang masih boleh diubah guru (tidak melewati hari ini). */
+    public static function ubahMulai(): Carbon
+    {
+        $tanggal = self::ambil('ubah_mulai_tanggal');
+        try {
+            $mulai = filled($tanggal) ? Carbon::createFromFormat('!Y-m-d', substr((string) $tanggal, 0, 10)) : null;
+        } catch (\Throwable) {
+            $mulai = null;
+        }
+
+        return ($mulai ?? today()->subDays((int) self::angka('batas_ubah_hari')))->min(today());
     }
 
     public static function aktif(string $kunci): bool

@@ -142,7 +142,7 @@ class KegiatanHarianForm extends Component
         }
     }
 
-    /** Guru hanya boleh mengubah catatan dalam batas hari yang diatur admin; admin kapan saja. */
+    /** Guru hanya boleh mengubah catatan mulai tanggal yang diatur admin; admin kapan saja. */
     #[Computed]
     public function bolehUbah(): bool
     {
@@ -153,7 +153,7 @@ class KegiatanHarianForm extends Component
         }
 
         return auth()->user()->isAdmin()
-            || $tgl->gte(today()->subDays((int) Pengaturan::angka('batas_ubah_hari')));
+            || $tgl->gte(Pengaturan::ubahMulai());
     }
 
     protected function pastikanBolehUbah(): void

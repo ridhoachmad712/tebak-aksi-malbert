@@ -52,7 +52,7 @@
             @unless ($this->bolehUbah)
                 <div class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
                     <x-heroicon-o-lock-closed class="mt-0.5 h-5 w-5 shrink-0" />
-                    <p>Catatan ini hanya bisa dilihat. Guru dapat mengubah catatan paling lama {{ (int) \App\Models\Pengaturan::angka('batas_ubah_hari') }} hari ke belakang. Hubungi admin jika perlu koreksi.</p>
+                    <p>Catatan ini hanya bisa dilihat. Guru dapat mengubah catatan mulai {{ \App\Services\Rekap::tanggalPanjang(\App\Models\Pengaturan::ubahMulai()) }}. Hubungi admin jika perlu koreksi.</p>
                 </div>
             @endunless
 

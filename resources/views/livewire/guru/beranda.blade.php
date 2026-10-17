@@ -110,7 +110,7 @@
                                 </div>
                             </li>
                         @endif
-                        {{-- Hari yang belum dicatat diringkas menjadi satu butir, berapa pun batas ubah yang diatur admin --}}
+                        {{-- Hari yang belum dicatat diringkas menjadi satu butir, sejak tanggal mulai ubah yang diatur admin --}}
                         @if ($belumDicatat->isNotEmpty())
                             @php $terbaru = $belumDicatat->reverse()->values(); @endphp
                             <li class="px-4 py-3">

@@ -391,7 +391,7 @@ Seluruh usulan bawaan di bawah ini telah disetujui.
 | No | Pertanyaan | Keputusan |
 |---|---|---|
 | 1 | Murid yang **sakit/izin** pada hari kegiatan: apakah tetap dihitung tidak hadir? | Tetap dihitung tidak hadir (✓/tidak saja), agar sederhana |
-| 2 | Sampai kapan guru boleh **mengubah catatan hari sebelumnya**? | Guru: maksimal 7 hari ke belakang. Admin: kapan saja |
+| 2 | Sampai kapan guru boleh **mengubah catatan hari sebelumnya**? | Guru: mulai tanggal yang diatur admin di Pengaturan (bawaan 7 hari ke belakang). Admin: kapan saja |
 | 3 | **Guru aktif** dihitung dari kelas mana untuk guru mapel? | Dari semua hari ia tercatat mengisi Kegiatan Harian di kelas mana pun |
 | 4 | Apakah murid tampil **berurutan abjad** di tabel harian? | Ya, berurutan abjad |
 | 5 | **Kategori pengaduan** apa saja? | Saran, Pertanyaan, Keluhan, Lainnya |

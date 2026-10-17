@@ -7,6 +7,7 @@ use App\Models\Pengaturan;
 use App\Models\TahunAjaran;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -44,6 +45,8 @@ class PengaturanTarget extends Page
                 $nilai["baseline_$s"] = BaselinePelanggaran::where('tahun_ajaran_id', $ta->id)->where('semester', $s)->value('jumlah');
             }
         }
+        // Tanggal mulai ubah yang belum pernah diatur ditampilkan sesuai perhitungan yang sedang berlaku
+        $nilai['ubah_mulai_tanggal'] = Pengaturan::ubahMulai()->toDateString();
         $this->form->fill($nilai);
     }
 
@@ -67,7 +70,9 @@ class PengaturanTarget extends Page
                 $persen('batas_murid_aktif', 'Batas murid aktif', 'Kehadiran membaca minimal agar murid dihitung aktif.'),
                 $persen('batas_guru_aktif', 'Batas guru aktif', 'Persentase hari mengisi kegiatan harian agar guru dihitung aktif.'),
                 $persen('batas_centang_cetak', 'Batas ✓ saat dicetak', 'Pada laporan cetak, angka ≥ batas ini ditampilkan sebagai ✓.'),
-                TextInput::make('batas_ubah_hari')->label('Batas guru mengubah catatan')->numeric()->minValue(0)->maxValue(60)->suffix('hari ke belakang')->required(),
+                DatePicker::make('ubah_mulai_tanggal')->label('Guru boleh mengubah catatan mulai tanggal')
+                    ->native(false)->displayFormat('d F Y')->locale('id')->maxDate(today())->required()
+                    ->helperText('Catatan sejak tanggal ini sampai hari ini dapat diisi atau diubah guru. Majukan tanggalnya setelah catatan lama lengkap.'),
             ]),
             Section::make('Skala kategori')->description('Sangat Baik ≥ batas pertama; Baik ≥ batas kedua; Cukup ≥ batas ketiga; di bawahnya Perlu Bimbingan.')->columns(3)->schema([
                 $persen('batas_sangat_baik', 'Sangat Baik mulai'),

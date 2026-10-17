@@ -210,7 +210,7 @@ class AlurGuruTest extends TestCase
 
     public function test_hari_belum_dicatat_diringkas_menjadi_satu_butir(): void
     {
-        \App\Models\Pengaturan::updateOrCreate(['kunci' => 'batas_ubah_hari'], ['nilai' => '60']);
+        \App\Models\Pengaturan::updateOrCreate(['kunci' => 'ubah_mulai_tanggal'], ['nilai' => '2026-08-14']);
         $jumlah = Rekap::hariBelumDicatat($this->kelas)->count();
         $this->assertGreaterThan(20, $jumlah);
 
@@ -226,5 +226,23 @@ class AlurGuruTest extends TestCase
             ->assertSee('Catat Selasa, 13 Okt')
             ->call('keBelumDicatat')
             ->assertSet('tanggal', '2026-10-13');
+    }
+
+    public function test_batas_ubah_memakai_tanggal_mulai(): void
+    {
+        // Bawaan: 7 hari ke belakang
+        $this->assertSame('2026-10-07', \App\Models\Pengaturan::ubahMulai()->toDateString());
+
+        \App\Models\Pengaturan::simpan(['ubah_mulai_tanggal' => '2026-09-01']);
+        $this->assertSame('2026-09-01', \App\Models\Pengaturan::ubahMulai()->toDateString());
+
+        $komponen = Livewire::actingAs($this->guru)->test(KegiatanHarianForm::class, ['kelas' => $this->kelas->id]);
+        $komponen->set('tanggal', '2026-09-01')->assertSet('bolehUbah', true);
+        $komponen->set('tanggal', '2026-08-31')->assertSet('bolehUbah', false)
+            ->assertSee('Guru dapat mengubah catatan mulai Selasa, 1 September 2026');
+
+        // Tanggal di masa depan tidak membuka hari yang belum tiba
+        \App\Models\Pengaturan::simpan(['ubah_mulai_tanggal' => '2026-12-01']);
+        $this->assertSame('2026-10-14', \App\Models\Pengaturan::ubahMulai()->toDateString());
     }
 }

@@ -141,11 +141,10 @@ class Rekap
         return $tandaPersen ? $teks.'%' : $teks;
     }
 
-    /** Hari kegiatan sebelum hari ini, dalam batas ubah guru, yang belum dicatat untuk kelas ini (terlama dulu). */
+    /** Hari kegiatan sebelum hari ini, sejak tanggal mulai ubah yang diatur admin, yang belum dicatat untuk kelas ini (terlama dulu). */
     public static function hariBelumDicatat(Kelas $kelas): Collection
     {
-        $batas = (int) Pengaturan::angka('batas_ubah_hari');
-        $dari = today()->subDays($batas);
+        $dari = Pengaturan::ubahMulai();
         $tercatat = KegiatanHarian::where('kelas_id', $kelas->id)
             ->whereDate('tanggal', '>=', $dari->toDateString())
             ->pluck('tanggal')->map(fn ($t) => $t->toDateString());
