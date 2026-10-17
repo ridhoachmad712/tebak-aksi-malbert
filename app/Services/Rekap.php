@@ -31,7 +31,7 @@ class Rekap
     ];
 
     /** Simpanan hasil per permintaan (dibuang otomatis setiap permintaan baru). */
-    protected static function ingat(string $kunci, Closure $hitung): mixed
+    public static function ingat(string $kunci, Closure $hitung): mixed
     {
         $simpanan = app('rekap.simpanan');
 
