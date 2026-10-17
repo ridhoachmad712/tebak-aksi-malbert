@@ -1,0 +1,126 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../../app/**/*.php';
+
+@theme {
+    --font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Warna utama TEBAK AKSI: jingga ceria, toska, dan kuning matahari */
+    --color-brand-50: #fff7ed;
+    --color-brand-100: #ffedd5;
+    --color-brand-200: #fed7aa;
+    --color-brand-300: #fdba74;
+    --color-brand-400: #fb923c;
+    --color-brand-500: #f97316;
+    --color-brand-600: #ea580c;
+    --color-brand-700: #c2410c;
+    --color-brand-800: #9a3412;
+    --color-brand-900: #7c2d12;
+
+    --color-toska-50: #f0fdfa;
+    --color-toska-100: #ccfbf1;
+    --color-toska-200: #99f6e4;
+    --color-toska-500: #14b8a6;
+    --color-toska-600: #0d9488;
+    --color-toska-700: #0f766e;
+    --color-toska-800: #115e59;
+
+    --color-krem: #fffaf3;
+}
+
+@layer base {
+    html {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        @apply bg-krem text-slate-800 antialiased;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
+@utility tombol {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition
+        focus:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility tautan {
+    @apply font-bold text-brand-600 underline-offset-4 hover:underline;
+}
+
+@layer components {
+    .kartu {
+        @apply rounded-2xl border border-orange-100 bg-white shadow-sm shadow-orange-100/60;
+    }
+
+    .tombol-utama {
+        @apply tombol bg-brand-500 text-white shadow-sm shadow-brand-500/30 hover:bg-brand-600 focus-visible:ring-brand-200;
+    }
+
+    .tombol-kedua {
+        @apply tombol border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 focus-visible:ring-slate-200;
+    }
+
+    .tombol-toska {
+        @apply tombol bg-toska-600 text-white hover:bg-toska-700 focus-visible:ring-toska-200;
+    }
+
+    .tombol-bahaya {
+        @apply tombol bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-200;
+    }
+
+    .label {
+        @apply mb-1.5 block text-sm font-bold text-slate-700;
+    }
+
+    .isian {
+        @apply block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-base text-slate-800 shadow-xs
+            placeholder:text-slate-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-100 focus:outline-none sm:text-sm;
+    }
+
+    .galat {
+        @apply mt-1 text-sm font-semibold text-rose-600;
+    }
+
+    .lencana {
+        @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold;
+    }
+
+    .judul-halaman {
+        @apply text-2xl font-extrabold tracking-tight text-slate-800 sm:text-3xl;
+    }
+
+    .isi-konten p {
+        @apply mb-4 leading-relaxed;
+    }
+
+    .isi-konten h2 {
+        @apply mt-6 mb-3 text-xl font-extrabold;
+    }
+
+    .isi-konten h3 {
+        @apply mt-5 mb-2 text-lg font-bold;
+    }
+
+    .isi-konten ul {
+        @apply mb-4 list-disc pl-6;
+    }
+
+    .isi-konten ol {
+        @apply mb-4 list-decimal pl-6;
+    }
+
+    .isi-konten a {
+        @apply tautan;
+    }
+
+    .isi-konten img {
+        @apply my-4 rounded-xl;
+    }
+}
