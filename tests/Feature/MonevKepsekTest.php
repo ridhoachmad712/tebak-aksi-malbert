@@ -144,4 +144,24 @@ class MonevKepsekTest extends TestCase
 
         $komponen->set('laporan', 'pelanggaran')->assertSee('masih dibina');
     }
+
+    public function test_dashboard_kepsek_dan_urutan_menu(): void
+    {
+        $this->get('/arah')->assertRedirect(route('kepsek.dasbor'));
+
+        $halaman = $this->get('/dashboard')->assertOk()
+            ->assertSee('Capaian bulan ini')
+            ->assertSee('Perlu tindakan Bapak/Ibu')
+            ->assertSee('Pencatatan kelas minggu ini')
+            ->assertSee('Kelas yang paling butuh perhatian')
+            ->assertSee('Kabar baik')
+            ->assertSee('Cetak ringkasan Monev');
+
+        // Menu kepala sekolah berurutan: Dashboard, Rekap, Monev
+        $halaman->assertSeeInOrder(['href="'.route('kepsek.dasbor').'"', 'href="'.route('guru.rekap').'"', 'href="'.route('monev').'"'], false);
+        $this->assertStringNotContainsString('Kegiatan Harian', $halaman->getContent());
+
+        $this->actingAs(User::where('email', 'guru1@tebakaksi.test')->first());
+        $this->get('/dashboard')->assertForbidden();
+    }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\MonevCetakController;
 use App\Http\Controllers\PublikController;
 use App\Http\Controllers\RekapUnduhController;
+use App\Livewire\DasborKepsek;
 use App\Livewire\Guru;
 use App\Livewire\Monev;
 use App\Livewire\MonevKelas;
@@ -57,6 +58,7 @@ Route::middleware(['auth', 'peran:guru,admin,kepsek'])->group(function () {
 });
 
 Route::middleware(['auth', 'peran:admin,kepsek'])->group(function () {
+    Route::get('/dashboard', DasborKepsek::class)->name('kepsek.dasbor');
     Route::get('/monev', Monev::class)->name('monev');
     Route::get('/monev/cetak', MonevCetakController::class)->name('monev.cetak');
     Route::get('/monev/kelas/{kelas}', MonevKelas::class)->name('monev.kelas');

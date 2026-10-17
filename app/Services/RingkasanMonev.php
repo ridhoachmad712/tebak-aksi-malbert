@@ -143,6 +143,7 @@ class RingkasanMonev
         return [
             'indikator' => $indikator,
             'pilar' => $pilar,
+            'indikatorLalu' => $lalu,
             'kalimat' => self::kalimat($pilar, $indikator, ($kelas ? 'Kelas '.$kelas->nama.', ' : '').$periode['label'], $periode['sebelumnya']['label'] ?? null, $kelas?->nama),
             'hari' => Rekap::hariKegiatan($periode['dari'], $periode['sampai'])->count(),
         ];

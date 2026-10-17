@@ -7,13 +7,22 @@
         ['route' => 'guru.karya', 'aktif' => 'guru.karya*', 'label' => 'Karya Literasi', 'pendek' => 'Karya', 'ikon' => 'heroicon-o-document-text'],
         ['route' => 'guru.rekap', 'aktif' => 'guru.rekap*', 'label' => 'Rekap', 'ikon' => 'heroicon-o-table-cells'],
     ];
-    $monev = ['route' => 'monev', 'aktif' => 'monev', 'label' => 'Monev', 'ikon' => 'heroicon-o-presentation-chart-line'];
+    $monev = ['route' => 'monev', 'aktif' => 'monev*', 'label' => 'Monev', 'ikon' => 'heroicon-o-presentation-chart-line'];
     if ($peran === 'admin') {
         $menu[0] = $monev;
     } elseif ($peran === 'kepsek') {
-        $menu = [$monev, end($menu)];
+        // Urutan menu kepala sekolah: Dashboard, Rekap, Monev
+        $menu = [
+            ['route' => 'kepsek.dasbor', 'aktif' => 'kepsek.dasbor', 'label' => 'Dashboard', 'ikon' => 'heroicon-o-home'],
+            end($menu),
+            $monev,
+        ];
     }
-    $beranda = $peran === 'guru' ? route('guru.beranda') : route('monev');
+    $beranda = match ($peran) {
+        'guru' => route('guru.beranda'),
+        'kepsek' => route('kepsek.dasbor'),
+        default => route('monev'),
+    };
 @endphp
 <!DOCTYPE html>
 <html lang="id">

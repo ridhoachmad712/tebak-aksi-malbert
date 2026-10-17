@@ -110,11 +110,7 @@ class TugasAdmin
             ];
         }
 
-        $belumBerubah = KasusPembinaan::with('pemantauan', 'murid', 'kelas')
-            ->where(fn ($q) => $q->where('status_akhir', 'belum')->orWhereNull('status_akhir'))
-            ->whereHas('kelas', fn ($q) => $q->aktif())
-            ->get()
-            ->filter(fn ($k) => Rekap::statusTerkini($k) === 'belum' && ($k->status_akhir || $k->pemantauan->count() >= 4));
+        $belumBerubah = DasborKepsek::belumBerubah();
         if ($belumBerubah->isNotEmpty()) {
             $tugas[] = [
                 'judul' => $belumBerubah->count().' murid belum berubah setelah 4 minggu pembinaan',
