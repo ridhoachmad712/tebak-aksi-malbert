@@ -3,9 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\JenisKegiatanResource\Pages\ManageJenisKegiatan;
+use App\Filament\Support\HapusAman;
 use App\Models\JenisKegiatan;
 use BackedEnum;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -51,7 +51,7 @@ class JenisKegiatanResource extends Resource
                 TextColumn::make('nama')->searchable()->weight('bold'),
                 ToggleColumn::make('aktif'),
             ])
-            ->recordActions([EditAction::make(), DeleteAction::make()]);
+            ->recordActions([EditAction::make(), HapusAman::aksi()]);
     }
 
     public static function getPages(): array

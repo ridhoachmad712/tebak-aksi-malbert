@@ -3,11 +3,11 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PenggunaResource\Pages\ManagePengguna;
+use App\Filament\Support\HapusAman;
 use App\Models\Kelas;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -156,7 +156,7 @@ class PenggunaResource extends Resource
 
                     return $record;
                 }),
-                DeleteAction::make()->hidden(fn (User $u) => $u->id === auth()->id()),
+                HapusAman::aksi(),
             ]);
     }
 

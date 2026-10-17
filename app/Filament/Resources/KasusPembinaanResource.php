@@ -49,7 +49,7 @@ class KasusPembinaanResource extends Resource
                 TextColumn::make('tingkat')->badge()->formatStateUsing(fn ($state) => KasusPembinaan::TINGKAT[$state])
                     ->color(fn ($state) => match ($state) { 'berat' => 'danger', 'sedang' => 'warning', default => 'gray' }),
                 TextColumn::make('pemantauan_ringkas')->label('Minggu 1–4')
-                    ->state(fn (KasusPembinaan $k) => collect(range(1, 4))->map(fn ($m) => ($p = $k->pemantauan->firstWhere('minggu', $m)) ? KasusPembinaan::PERKEMBANGAN[$p->tingkat]['ikon'] : '·')->join(' ')),
+                    ->state(fn (KasusPembinaan $k) => collect(range(1, 4))->map(fn ($m) => ($p = $k->pemantauan->firstWhere('minggu', $m)) ? KasusPembinaan::PERKEMBANGAN[$p->tingkat]['singkat'] : '–')->join(' · ')),
                 TextColumn::make('status')->state(fn (KasusPembinaan $k) => $k->labelStatus()),
                 TextColumn::make('pencatat.name')->label('Dicatat oleh')->toggleable(isToggledHiddenByDefault: true),
             ])

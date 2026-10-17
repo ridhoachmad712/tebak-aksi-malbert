@@ -2,9 +2,9 @@
 
 <div class="mx-auto max-w-2xl space-y-5">
     <div>
-        <a href="{{ $kasus ? route('guru.pembinaan.detail', $kasus) : route('guru.pembinaan') }}" wire:navigate class="text-sm font-bold text-slate-500 hover:text-slate-700">← Kembali</a>
+        <a href="{{ $kasus ? route('guru.pembinaan.detail', $kasus) : route('guru.pembinaan') }}" wire:navigate class="inline-flex min-h-11 items-center gap-1 text-sm font-bold text-slate-600 hover:text-slate-900"><x-heroicon-m-chevron-left class="h-4 w-4" /> Kembali</a>
         <h1 class="judul-halaman">{{ $kasus ? 'Ubah Kasus Pembinaan' : 'Catat Pelanggaran' }}</h1>
-        <p class="text-sm text-slate-500">Setelah dicatat, aplikasi akan mengingatkan Anda untuk memantau murid setiap minggu selama 4 minggu.</p>
+        <p class="teks-bantu">Setelah dicatat, Beranda akan mengingatkan Anda untuk memantau murid ini setiap minggu selama 4 minggu.</p>
     </div>
 
     @if ($this->daftarKelas->isEmpty())
@@ -62,14 +62,14 @@
             </div>
 
             <div>
-                <span class="label">Tingkat pelanggaran</span>
+                <span class="label" id="label-tingkat">Tingkat pelanggaran</span>
                 <div class="grid gap-2 sm:grid-cols-3">
                     @foreach (KasusPembinaan::TINGKAT as $nilai => $label)
-                        <label class="flex cursor-pointer flex-col rounded-xl border-2 border-slate-200 p-3 has-checked:border-brand-400 has-checked:bg-brand-50">
+                        <label class="flex cursor-pointer flex-col rounded-lg border-2 border-garis p-3 has-checked:border-brand-700 has-checked:bg-brand-50">
                             <span class="flex items-center gap-2 font-extrabold">
-                                <input type="radio" wire:model="tingkat" value="{{ $nilai }}" class="accent-brand-500"> {{ $label }}
+                                <input type="radio" wire:model="tingkat" value="{{ $nilai }}" class="accent-brand-700"> {{ $label }}
                             </span>
-                            <span class="mt-1 text-xs text-slate-500">{{ KasusPembinaan::KETERANGAN_TINGKAT[$nilai] }}</span>
+                            <span class="mt-1 text-xs text-slate-600">{{ KasusPembinaan::KETERANGAN_TINGKAT[$nilai] }}</span>
                         </label>
                     @endforeach
                 </div>
@@ -93,13 +93,13 @@
             </div>
 
             <div>
-                <label for="komitmen" class="label">Komitmen murid <span class="font-normal text-slate-400">(opsional)</span></label>
+                <label for="komitmen" class="label">Komitmen murid <span class="font-normal text-slate-600">(opsional)</span></label>
                 <textarea id="komitmen" wire:model="komitmen" rows="2" placeholder="Contoh: Saya akan membaca dengan tertib dan tidak mengganggu teman" class="isian"></textarea>
             </div>
 
-            <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+            <div class="flex justify-end gap-2 border-t border-garis pt-4">
                 <a href="{{ $kasus ? route('guru.pembinaan.detail', $kasus) : route('guru.pembinaan') }}" wire:navigate class="tombol-kedua">Batal</a>
-                <button class="tombol-utama" wire:loading.attr="disabled">{{ $kasus ? 'Simpan Perubahan' : 'Simpan Kasus' }}</button>
+                <button class="tombol-utama" wire:loading.attr="disabled">{{ $kasus ? 'Simpan perubahan' : 'Simpan kasus' }}</button>
             </div>
         </form>
     @endif

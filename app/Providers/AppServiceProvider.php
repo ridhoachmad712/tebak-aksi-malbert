@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use ArrayObject;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -11,7 +12,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Simpanan hasil perhitungan Rekap, dibuang setiap permintaan baru
+        $this->app->scoped('rekap.simpanan', fn () => new ArrayObject);
     }
 
     /**

@@ -1,34 +1,36 @@
 @php
-    $kartu = [
-        'murid_aktif' => ['📚', 'Murid aktif memanfaatkan Teras Baca'],
-        'guru_aktif' => ['👩‍🏫', 'Guru aktif memanfaatkan Teras Baca'],
-        'keberhasilan_pembinaan' => ['🌱', 'Keberhasilan pembinaan'],
-        'penurunan_pelanggaran' => ['📉', 'Penurunan pelanggaran'],
-        'budaya_membaca' => ['📖', 'Rata-rata Budaya Membaca'],
-        'kemampuan_literasi' => ['💡', 'Rata-rata Kemampuan Literasi'],
+    $daftarIndikator = [
+        'murid_aktif' => 'Murid aktif memanfaatkan Teras Baca',
+        'guru_aktif' => 'Wali kelas aktif mengisi kegiatan harian',
+        'budaya_membaca' => 'Rata-rata Budaya Membaca',
+        'kemampuan_literasi' => 'Rata-rata Kemampuan Literasi',
+        'keberhasilan_pembinaan' => 'Keberhasilan pembinaan',
+        'penurunan_pelanggaran' => 'Penurunan pelanggaran per semester',
     ];
+    $perluPerhatian = $indikator['kelas_di_bawah_target']->isNotEmpty() || $indikator['tindak_lanjut']->isNotEmpty();
+    $hadirMaks = 100;
 @endphp
 
 <div class="space-y-6">
     <div class="flex flex-wrap items-end justify-between gap-3">
         <div>
             <h1 class="judul-halaman">Monev TEBAK AKSI</h1>
-            <p class="text-sm text-slate-500">Laporan pelaksanaan dan capaian program · {{ $label }} · {{ $hari }} hari kegiatan</p>
+            <p class="teks-bantu">{{ $label }} · {{ $hari }} hari kegiatan{{ $kelas ? '' : ' · seluruh kelas' }}</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <select wire:model.live="periode" class="isian w-auto py-2 pr-9 font-bold">
+            <select wire:model.live="periode" aria-label="Jenis periode" class="isian w-auto pr-9 font-bold">
                 <option value="bulan">Per bulan</option>
                 <option value="semester">Per semester</option>
             </select>
             @if ($periode === 'semester')
-                <select wire:model.live="semester" class="isian w-auto py-2 pr-9 font-bold">
+                <select wire:model.live="semester" aria-label="Semester" class="isian w-auto pr-9 font-bold">
                     <option value="1">Semester Ganjil</option>
                     <option value="2">Semester Genap</option>
                 </select>
             @else
-                <input type="month" wire:model.live="bulan" max="{{ today()->format('Y-m') }}" class="isian w-auto py-2 font-bold">
+                <input type="month" wire:model.live="bulan" max="{{ today()->format('Y-m') }}" aria-label="Bulan" class="isian w-auto font-bold">
             @endif
-            <select wire:model.live="kelas" class="isian w-auto py-2 pr-9 font-bold">
+            <select wire:model.live="kelas" aria-label="Kelas" class="isian w-auto pr-9 font-bold">
                 <option value="">Semua kelas</option>
                 @foreach ($daftarKelas as $k)
                     <option value="{{ $k->id }}">Kelas {{ $k->nama }}</option>
@@ -38,161 +40,197 @@
     </div>
 
     @unless ($ta)
-        <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4 font-semibold text-amber-900">Tahun ajaran aktif belum diatur. Admin dapat mengaturnya di Halaman Admin → Tahun Ajaran.</div>
+        <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 font-semibold text-amber-900">Tahun ajaran aktif belum diatur. Admin dapat mengaturnya di Halaman Admin, menu Tahun Ajaran.</div>
     @endunless
 
-    {{-- Indikator keberhasilan --}}
-    <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" wire:loading.class="opacity-60">
-        @foreach ($kartu as $kunci => [$ikon, $judul])
-            @php
-                $d = $indikator[$kunci];
-                $tercapai = $d['nilai'] !== null && $d['nilai'] >= $d['target'];
-                $lebar = $d['nilai'] === null ? 0 : max(0, min(100, $d['nilai']));
-            @endphp
-            <div class="kartu p-5">
-                <div class="flex items-start justify-between gap-2">
-                    <p class="text-sm font-bold text-slate-600">{{ $ikon }} {{ $judul }}</p>
-                    @if ($d['nilai'] !== null)
-                        <span @class(['lencana shrink-0', 'bg-emerald-100 text-emerald-800' => $tercapai, 'bg-amber-100 text-amber-800' => ! $tercapai])>
-                            {{ $tercapai ? 'Tercapai' : 'Belum tercapai' }}
-                        </span>
-                    @endif
-                </div>
-                <p class="mt-2 text-4xl font-extrabold tracking-tight">{{ $d['nilai'] !== null ? $d['nilai'].'%' : '–' }}</p>
-                <div class="relative mt-3 h-2.5 rounded-full bg-slate-100">
-                    <div @class(['h-2.5 rounded-full', 'bg-emerald-500' => $tercapai, 'bg-brand-400' => ! $tercapai]) style="width: {{ $lebar }}%"></div>
-                    <div class="absolute -top-1 h-4.5 w-0.5 bg-slate-700" style="left: {{ min(100, $d['target']) }}%" title="Target"></div>
-                </div>
-                <p class="mt-2 text-xs font-semibold text-slate-500">Target ≥ {{ (float) $d['target'] }}% · {{ $d['keterangan'] }}</p>
+    {{-- Titik fokus: yang perlu ditindaklanjuti kepala sekolah --}}
+    <section aria-labelledby="judul-perhatian" wire:loading.class="opacity-60">
+        <h2 id="judul-perhatian" class="mb-3 text-lg font-extrabold">Perlu perhatian</h2>
+        @if ($perluPerhatian)
+            <div class="grid gap-4 lg:grid-cols-2">
+                @if ($indikator['kelas_di_bawah_target']->isNotEmpty())
+                    <div class="kartu">
+                        <h3 class="border-b border-garis px-4 py-3 font-bold">Kelas dengan murid aktif di bawah target {{ (float) $indikator['murid_aktif']['target'] }}%</h3>
+                        <ul class="divide-y divide-garis text-sm">
+                            @foreach ($indikator['kelas_di_bawah_target'] as $r)
+                                <li class="flex items-center justify-between gap-3 px-4 py-2.5">
+                                    <a href="{{ route('guru.rekap', ['kelas' => $r['kelas']->id] + ($periode === 'semester' ? ['periode' => 'semester', 'semester' => $semester] : ['bulan' => $bulan])) }}" wire:navigate class="font-bold hover:underline">Kelas {{ $r['kelas']->nama }}</a>
+                                    <span class="text-slate-700">{{ $r['aktif'] }} dari {{ $r['jumlah'] }} murid aktif <x-lencana-kategori :persen="$r['persen']" class="ml-1" /></span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+                @if ($indikator['tindak_lanjut']->isNotEmpty())
+                    <div class="kartu">
+                        <h3 class="border-b border-garis px-4 py-3 font-bold">Murid belum berubah setelah 4 minggu pembinaan</h3>
+                        <ul class="divide-y divide-garis text-sm">
+                            @foreach ($indikator['tindak_lanjut'] as $k)
+                                <li class="px-4 py-2.5">
+                                    <p class="font-bold">{{ $k->murid->nama }} <span class="font-semibold text-slate-600">· Kelas {{ $k->kelas->nama }}</span></p>
+                                    <p class="text-slate-700">{{ $k->namaPelanggaran() }} · pembinaan: {{ $k->namaTindakan() }} · sejak {{ $k->tanggal->format('d/m/Y') }}</p>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
             </div>
-        @endforeach
+        @else
+            <div class="kartu p-5 text-sm text-slate-700">Pada periode ini semua kelas mencapai target murid aktif dan tidak ada murid yang belum berubah setelah 4 minggu pembinaan.</div>
+        @endif
     </section>
 
-    {{-- Capaian per kelas --}}
-    <section class="kartu overflow-hidden">
-        <div class="border-b border-orange-100 px-4 py-3">
-            <h2 class="font-extrabold">Capaian per kelas</h2>
-            <p class="text-xs text-slate-500">Murid aktif = kehadiran membaca ≥ {{ (int) \App\Models\Pengaturan::angka('batas_murid_aktif') }}%</p>
-        </div>
+    <section class="kartu overflow-hidden" aria-labelledby="judul-indikator" wire:loading.class="opacity-60">
+        <h2 id="judul-indikator" class="border-b border-garis px-4 py-3 font-extrabold">Capaian dibanding target</h2>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
-                <thead class="bg-orange-50/60 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                <thead class="tabel-kepala">
                     <tr>
-                        <th class="px-4 py-3">Kelas</th>
-                        <th class="px-3 py-3 text-center">Jumlah Murid</th>
-                        <th class="px-3 py-3 text-center">Aktif</th>
-                        <th class="px-3 py-3 text-center">Belum Aktif</th>
-                        <th class="px-3 py-3 text-center">% Aktif</th>
-                        <th class="px-3 py-3 text-center">Budaya Membaca</th>
-                        <th class="px-3 py-3 text-center">Kemampuan Literasi</th>
-                        <th class="px-3 py-3"></th>
+                        <th class="px-4 py-2.5">Indikator</th>
+                        <th class="px-3 py-2.5 text-right">Capaian</th>
+                        <th class="px-3 py-2.5 text-right">Target</th>
+                        <th class="px-3 py-2.5">Status</th>
+                        <th class="px-3 py-2.5">Dasar perhitungan</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-orange-50">
-                    @foreach ($indikator['per_kelas'] as $r)
+                <tbody class="divide-y divide-garis">
+                    @foreach ($daftarIndikator as $kunci => $judul)
+                        @php
+                            $d = $indikator[$kunci];
+                            $tercapai = $d['nilai'] !== null && $d['nilai'] >= $d['target'];
+                        @endphp
                         <tr>
-                            <td class="px-4 py-2 font-extrabold">Kelas {{ $r['kelas']->nama }}</td>
-                            <td class="px-3 py-2 text-center">{{ $r['jumlah'] }}</td>
-                            <td class="px-3 py-2 text-center font-bold text-emerald-700">{{ $r['aktif'] }}</td>
-                            <td class="px-3 py-2 text-center font-bold text-rose-700">{{ $r['belum'] }}</td>
-                            <td class="px-3 py-2 text-center"><x-lencana-kategori :persen="$r['persen']" /></td>
-                            <td class="px-3 py-2 text-center"><x-lencana-kategori :persen="$r['budaya']" /></td>
-                            <td class="px-3 py-2 text-center"><x-lencana-kategori :persen="$r['literasi']" /></td>
-                            <td class="px-3 py-2 text-right">
-                                <a href="{{ route('guru.rekap', ['kelas' => $r['kelas']->id, 'bulan' => $bulan]) }}" wire:navigate class="tautan text-xs">Rekap →</a>
+                            <td class="px-4 py-2.5 font-bold">{{ $judul }}</td>
+                            <td class="px-3 py-2.5 text-right text-base font-extrabold tabular-nums">{{ $d['nilai'] !== null ? $d['nilai'].'%' : '–' }}</td>
+                            <td class="px-3 py-2.5 text-right tabular-nums text-slate-700">≥ {{ (float) $d['target'] }}%</td>
+                            <td class="px-3 py-2.5">
+                                @if ($d['nilai'] === null)
+                                    <span class="text-slate-600">Belum ada data</span>
+                                @elseif ($tercapai)
+                                    <span class="lencana bg-emerald-50 text-emerald-800 ring-1 ring-inset ring-emerald-200">Tercapai</span>
+                                @else
+                                    <span class="lencana bg-amber-50 text-amber-900 ring-1 ring-inset ring-amber-200">Belum tercapai</span>
+                                @endif
                             </td>
+                            <td class="px-3 py-2.5 text-slate-700">{{ $d['keterangan'] }}</td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
+        <p class="border-t border-garis px-4 py-2 text-xs text-slate-600">Target dan batas perhitungan dapat diubah admin di menu Pengaturan Target &amp; Patokan.</p>
+    </section>
+
+    <section class="kartu overflow-hidden" aria-labelledby="judul-kelas">
+        <h2 id="judul-kelas" class="border-b border-garis px-4 py-3 font-extrabold">Capaian per kelas</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="tabel-kepala">
+                    <tr>
+                        <th class="px-4 py-2.5">Kelas</th>
+                        <th class="px-3 py-2.5 text-right">Murid</th>
+                        <th class="px-3 py-2.5 text-right">Aktif</th>
+                        <th class="px-3 py-2.5 text-right">Belum aktif</th>
+                        <th class="px-3 py-2.5 text-center">% aktif</th>
+                        <th class="px-3 py-2.5 text-center">Budaya Membaca</th>
+                        <th class="px-3 py-2.5 text-center">Kemampuan Literasi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-garis">
+                    @foreach ($indikator['per_kelas'] as $r)
+                        <tr>
+                            <td class="px-4 py-2.5 font-bold">
+                                <a href="{{ route('guru.rekap', ['kelas' => $r['kelas']->id] + ($periode === 'semester' ? ['periode' => 'semester', 'semester' => $semester] : ['bulan' => $bulan])) }}" wire:navigate class="hover:underline">Kelas {{ $r['kelas']->nama }}</a>
+                            </td>
+                            <td class="px-3 py-2.5 text-right tabular-nums">{{ $r['jumlah'] }}</td>
+                            <td class="px-3 py-2.5 text-right tabular-nums">{{ $r['aktif'] }}</td>
+                            <td class="px-3 py-2.5 text-right tabular-nums">{{ $r['belum'] }}</td>
+                            <td class="px-3 py-2.5 text-center"><x-lencana-kategori :persen="$r['persen']" /></td>
+                            <td class="px-3 py-2.5 text-center"><x-lencana-kategori :persen="$r['budaya']" /></td>
+                            <td class="px-3 py-2.5 text-center"><x-lencana-kategori :persen="$r['literasi']" /></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div class="border-t border-garis px-4 py-2"><x-keterangan-kategori /></div>
     </section>
 
     <div class="grid gap-6 lg:grid-cols-2">
-        {{-- Aspek karakter --}}
-        <section class="kartu overflow-hidden">
-            <div class="border-b border-orange-100 px-4 py-3">
-                <h2 class="font-extrabold">Aspek karakter yang perlu dibina</h2>
-                <p class="text-xs text-slate-500">Jumlah kasus pembinaan per aspek karakter</p>
+        <section class="kartu overflow-hidden" aria-labelledby="judul-aspek">
+            <div class="border-b border-garis px-4 py-3">
+                <h2 id="judul-aspek" class="font-extrabold">Jumlah kasus per aspek karakter</h2>
+                <p class="text-xs text-slate-600">Aspek diambil dari jenis pelanggaran yang dicatat guru.</p>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
-                    <thead class="bg-orange-50/60 text-xs font-bold uppercase tracking-wide text-slate-500">
+                    <thead class="tabel-kepala">
                         <tr>
-                            <th class="px-4 py-3 text-left">Kelas</th>
+                            <th class="px-4 py-2.5">Kelas</th>
                             @foreach ($indikator['aspek']['aspek'] as $a)
-                                <th class="px-2 py-3 text-center normal-case">{{ $a }}</th>
+                                <th class="px-2 py-2.5 text-center">{{ $a }}</th>
                             @endforeach
-                            <th class="px-3 py-3 text-left">Paling perlu</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-orange-50">
+                    <tbody class="divide-y divide-garis">
                         @foreach ($indikator['aspek']['kelas'] as $r)
                             <tr>
                                 <td class="px-4 py-2 font-bold">{{ $r['kelas']->nama }}</td>
                                 @foreach ($indikator['aspek']['aspek'] as $a)
                                     @php $j = $r['hitung'][$a] ?? 0; @endphp
-                                    <td class="px-2 py-2 text-center">
-                                        <span @class(['inline-grid h-7 min-w-7 place-items-center rounded-lg px-1 font-bold', 'bg-rose-100 text-rose-700' => $j >= 2, 'bg-amber-50 text-amber-700' => $j === 1, 'text-slate-300' => $j === 0])>{{ $j }}</span>
-                                    </td>
+                                    <td @class(['px-2 py-2 text-center tabular-nums', 'font-extrabold text-rose-800' => $j > 0 && $a === $r['tertinggi'], 'text-slate-500' => $j === 0])>{{ $j }}</td>
                                 @endforeach
-                                <td class="px-3 py-2 font-bold text-rose-700">{{ $r['tertinggi'] ?? '–' }}</td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
+            <p class="border-t border-garis px-4 py-2 text-xs text-slate-600">Angka merah tebal menandai aspek dengan kasus terbanyak di kelas tersebut.</p>
         </section>
 
-        {{-- Tren bulanan --}}
-        <section class="kartu p-5">
-            <h2 class="font-extrabold">Tren tahun ajaran ini</h2>
-            <p class="text-xs text-slate-500">Batang = rata-rata kehadiran membaca · angka merah = jumlah kasus baru</p>
-            <div class="mt-4 flex h-48 items-end gap-3">
-                @forelse ($tren as $t)
-                    <div class="flex flex-1 flex-col items-center gap-1">
-                        <span class="text-xs font-bold text-slate-600">{{ $t['hadir'] !== null ? round($t['hadir']).'%' : '–' }}</span>
-                        <div class="w-full max-w-12 rounded-t-lg bg-gradient-to-t from-brand-500 to-orange-300" style="height: {{ (int) (($t['hadir'] ?? 0) * 1.3) }}px"></div>
-                        <span class="text-xs font-bold text-rose-600">{{ $t['kasus'] }}</span>
-                        <span class="text-xs font-semibold text-slate-500">{{ $t['label'] }}</span>
-                    </div>
-                @empty
-                    <p class="text-sm text-slate-500">Belum ada data.</p>
-                @endforelse
-            </div>
+        <section class="kartu p-5" aria-labelledby="judul-tren">
+            <h2 id="judul-tren" class="font-extrabold">Rata-rata kehadiran membaca per bulan</h2>
+            <p class="text-xs text-slate-600">Tahun ajaran {{ $ta?->nama }}{{ $kelas ? ', kelas terpilih' : ', seluruh kelas' }}. Garis putus-putus = target murid aktif.</p>
+            @if ($tren)
+                <div class="relative mt-4 flex h-44 items-end gap-3 border-b border-slate-300">
+                    <div class="pointer-events-none absolute inset-x-0 border-t-2 border-dashed border-slate-400" style="bottom: {{ min(100, $indikator['murid_aktif']['target']) }}%"></div>
+                    @foreach ($tren as $t)
+                        <div class="flex h-full flex-1 flex-col items-center justify-end gap-1">
+                            <span class="text-xs font-bold tabular-nums text-slate-700">{{ $t['hadir'] !== null ? round($t['hadir']).'%' : '–' }}</span>
+                            <div class="w-full max-w-12 rounded-t-md bg-brand-700" style="height: {{ max(0, min(100, $t['hadir'] ?? 0)) }}%"></div>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="mt-1 flex gap-3">
+                    @foreach ($tren as $t)
+                        <span class="flex-1 text-center text-xs font-semibold text-slate-600">{{ $t['label'] }}</span>
+                    @endforeach
+                </div>
+                <table class="mt-4 w-full text-sm">
+                    <caption class="mb-1 text-left text-xs font-bold text-slate-600">Kasus pelanggaran baru per bulan</caption>
+                    <tr class="divide-x divide-garis border border-garis">
+                        @foreach ($tren as $t)
+                            <td class="px-2 py-1.5 text-center"><span class="block text-xs text-slate-600">{{ $t['label'] }}</span><span class="font-extrabold tabular-nums">{{ $t['kasus'] }}</span></td>
+                        @endforeach
+                    </tr>
+                </table>
+            @else
+                <p class="mt-3 text-sm text-slate-600">Belum ada data. Atur tahun ajaran aktif terlebih dahulu.</p>
+            @endif
         </section>
     </div>
 
-    {{-- Tindak lanjut --}}
-    <section class="kartu overflow-hidden">
-        <div class="border-b border-orange-100 px-4 py-3">
-            <h2 class="font-extrabold">🟥 Murid yang perlu tindak lanjut</h2>
-            <p class="text-xs text-slate-500">Masa pemantauan selesai, tetapi status masih "Belum berubah"</p>
-        </div>
-        <ul class="divide-y divide-orange-50">
-            @forelse ($indikator['tindak_lanjut'] as $k)
-                <li class="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
-                    <span><b>{{ $k->murid->nama }}</b> · Kelas {{ $k->kelas->nama }} · {{ $k->namaPelanggaran() }}</span>
-                    <span class="text-slate-500">Dicatat {{ $k->tanggal->format('d/m/Y') }} · {{ $k->namaTindakan() }}</span>
-                </li>
-            @empty
-                <li class="px-4 py-6 text-center text-sm text-slate-500">Tidak ada murid yang perlu tindak lanjut. 🌈</li>
-            @endforelse
-        </ul>
-    </section>
-
-    {{-- Unduh laporan baku --}}
-    <section class="kartu p-5">
-        <h2 class="font-extrabold">Unduh laporan baku {{ $periode === 'bulan' ? $label : '(per bulan)' }}</h2>
-        <p class="text-sm text-slate-500">Seluruh kelas{{ $kelas ? ' (atau kelas terpilih)' : '' }}, siap dicetak sebagai acuan formulir evaluasi tim monev.</p>
-        <div class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+    <section class="kartu p-5" aria-labelledby="judul-unduh">
+        <h2 id="judul-unduh" class="font-extrabold">Unduh laporan baku, {{ $label }}</h2>
+        <p class="teks-bantu">{{ $kelas ? 'Kelas terpilih' : 'Seluruh kelas' }}, sesuai format sekolah. Dapat dipakai sebagai acuan formulir evaluasi tim monev.</p>
+        <div class="mt-3 divide-y divide-garis rounded-lg border border-garis">
             @foreach (\App\Livewire\Guru\RekapKelas::LAPORAN as $kunci => $judulLap)
-                <div class="rounded-xl border border-slate-200 p-3">
-                    <p class="font-bold">{{ $judulLap }}</p>
-                    <div class="mt-2 flex gap-2">
-                        <a href="{{ route('rekap.unduh', ['kelas' => $kelas ?: null, 'bulan' => $bulan, 'laporan' => $kunci, 'format' => 'pdf']) }}" target="_blank" class="tombol-kedua px-3 py-1.5 text-xs">PDF</a>
-                        <a href="{{ route('rekap.unduh', ['kelas' => $kelas ?: null, 'bulan' => $bulan, 'laporan' => $kunci, 'format' => 'xlsx']) }}" class="tombol-kedua px-3 py-1.5 text-xs">Excel</a>
-                    </div>
+                <div class="flex flex-wrap items-center justify-between gap-2 px-4 py-2">
+                    <span class="font-bold">{{ $judulLap }}</span>
+                    <span class="flex gap-2">
+                        <a href="{{ route('rekap.unduh', ['laporan' => $kunci, 'format' => 'pdf'] + $unduh) }}" target="_blank" class="tombol-kedua">PDF</a>
+                        <a href="{{ route('rekap.unduh', ['laporan' => $kunci, 'format' => 'xlsx'] + $unduh) }}" class="tombol-kedua">Excel</a>
+                    </span>
                 </div>
             @endforeach
         </div>

@@ -67,6 +67,7 @@ class KaryaForm extends Component
 
     public function simpan()
     {
+        abort_unless($this->kelas, 403);
         $idMurid = $this->kelas?->murid()->pluck('murid.id')->map(fn ($id) => (string) $id)->all() ?? [];
 
         $this->validate([
@@ -107,7 +108,7 @@ class KaryaForm extends Component
             $karya->foto()->create(['path' => SimpanFoto::simpan($file, 'karya'), 'user_id' => auth()->id()]);
         }
 
-        session()->flash('sukses', $this->karya ? 'Karya diperbarui' : 'Karya literasi disimpan 🎉');
+        session()->flash('sukses', $this->karya ? 'Karya diperbarui' : 'Karya literasi disimpan');
 
         return $this->redirectRoute('guru.karya', navigate: true);
     }

@@ -32,10 +32,10 @@ class KasusPembinaan extends Model
 
     /** Skala perkembangan untuk pemantauan mingguan dan status akhir. */
     public const PERKEMBANGAN = [
-        'belum' => ['label' => 'Belum berubah', 'ikon' => '🟥'],
-        'mulai' => ['label' => 'Mulai berubah', 'ikon' => '🟨'],
-        'positif' => ['label' => 'Berubah positif', 'ikon' => '🟩'],
-        'konsisten' => ['label' => 'Konsisten positif', 'ikon' => '⭐'],
+        'belum' => ['label' => 'Belum berubah', 'singkat' => 'Belum'],
+        'mulai' => ['label' => 'Mulai berubah', 'singkat' => 'Mulai'],
+        'positif' => ['label' => 'Berubah positif', 'singkat' => 'Positif'],
+        'konsisten' => ['label' => 'Konsisten positif', 'singkat' => 'Konsisten'],
     ];
 
     protected function casts(): array
@@ -91,12 +91,15 @@ class KasusPembinaan extends Model
     public function labelStatus(): string
     {
         if (! $this->status_akhir) {
-            return 'Dalam Pembinaan';
+            return 'Dalam pembinaan';
         }
 
-        $p = self::PERKEMBANGAN[$this->status_akhir];
+        return self::PERKEMBANGAN[$this->status_akhir]['label'];
+    }
 
-        return $p['ikon'].' '.$p['label'];
+    public function mulaiMinggu(int $minggu): Carbon
+    {
+        return $this->tanggal->copy()->addDays(7 * ($minggu - 1) + 1);
     }
 
     /** Jumlah minggu pemantauan yang sudah dimulai (0-4). Minggu 1 dimulai sehari setelah kasus dicatat. */

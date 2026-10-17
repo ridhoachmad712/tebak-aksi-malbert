@@ -3,10 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TahunAjaranResource\Pages\ManageTahunAjaran;
+use App\Filament\Support\HapusAman;
 use App\Models\TahunAjaran;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
@@ -61,7 +61,7 @@ class TahunAjaranResource extends Resource
                     ->visible(fn (TahunAjaran $r) => ! $r->aktif)->requiresConfirmation()
                     ->action(fn (TahunAjaran $r) => $r->update(['aktif' => true])),
                 EditAction::make(),
-                DeleteAction::make(),
+                HapusAman::aksi(),
             ]);
     }
 

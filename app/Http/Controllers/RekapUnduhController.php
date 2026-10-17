@@ -20,7 +20,8 @@ class RekapUnduhController extends Controller
     {
         $data = $request->validate([
             'kelas' => ['nullable', 'integer'],
-            'bulan' => ['required', 'date_format:Y-m'],
+            'bulan' => ['required_without:semester', 'nullable', 'date_format:Y-m'],
+            'semester' => ['nullable', 'in:1,2'],
             'laporan' => ['required', 'in:budaya,literasi,pelanggaran,ekosistem'],
             'format' => ['required', 'in:pdf,xlsx'],
             'angka' => ['nullable', 'boolean'],
@@ -35,10 +36,17 @@ class RekapUnduhController extends Controller
             $kelasList = Kelas::aktif()->orderBy('tingkat')->orderBy('nama')->get();
         }
 
-        $tgl = Carbon::createFromFormat('Y-m-d', $data['bulan'].'-01');
-        [$dari, $sampai] = Rekap::periodeBulan($tgl->year, $tgl->month);
+        if (! empty($data['semester'])) {
+            $ta = Rekap::tahunAjaranAktif();
+            abort_unless($ta, 422, 'Tahun ajaran aktif belum diatur.');
+            [$dari, $sampai] = Rekap::periodeSemester($ta, (int) $data['semester']);
+            $labelBulan = Rekap::labelSemester((int) $data['semester'], $ta);
+        } else {
+            $tgl = Carbon::createFromFormat('Y-m-d', $data['bulan'].'-01');
+            [$dari, $sampai] = Rekap::periodeBulan($tgl->year, $tgl->month);
+            $labelBulan = 'Bulan '.Rekap::labelBulan($tgl);
+        }
         $laporan = LaporanBaku::susun($data['laporan'], $kelasList, $dari, $sampai);
-        $labelBulan = Rekap::labelBulan($tgl);
         $labelKelas = $kelasList->count() === 1 ? 'Kelas '.$kelasList->first()->nama : 'Semua Kelas';
         $namaFile = Str::slug($laporan['judul'].' '.$labelKelas.' '.$labelBulan);
 

@@ -3,13 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\MuridResource\Pages\ManageMurid;
+use App\Filament\Support\HapusAman;
 use App\Models\Kelas;
 use App\Models\Murid;
 use BackedEnum;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -104,7 +103,7 @@ class MuridResource extends Resource
 
                     return $record;
                 }),
-                DeleteAction::make()->modalDescription('Seluruh catatan murid ini juga akan terhapus. Untuk murid pindah/lulus, sebaiknya nonaktifkan saja.'),
+                HapusAman::aksi(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -117,7 +116,7 @@ class MuridResource extends Resource
                     BulkAction::make('nonaktifkan')->label('Nonaktifkan')->icon(Heroicon::OutlinedNoSymbol)->requiresConfirmation()
                         ->action(fn (Collection $records) => $records->each->update(['aktif' => false]))
                         ->deselectRecordsAfterCompletion(),
-                    DeleteBulkAction::make(),
+                    HapusAman::aksiMassal(),
                 ]),
             ]);
     }

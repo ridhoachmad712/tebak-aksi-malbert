@@ -3,9 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\JenisKaryaResource\Pages\ManageJenisKarya;
+use App\Filament\Support\HapusAman;
 use App\Models\JenisKarya;
 use BackedEnum;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -56,7 +56,7 @@ class JenisKaryaResource extends Resource
                 ToggleColumn::make('aktif'),
             ])
             ->filters([SelectFilter::make('jenjang')->options(JenisKarya::JENJANG)])
-            ->recordActions([EditAction::make(), DeleteAction::make()]);
+            ->recordActions([EditAction::make(), HapusAman::aksi()]);
     }
 
     public static function getPages(): array

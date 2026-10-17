@@ -3,11 +3,11 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\KelasResource\Pages\ManageKelas;
+use App\Filament\Support\HapusAman;
 use App\Models\Kelas;
 use App\Models\TahunAjaran;
 use App\Models\User;
 use BackedEnum;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -44,7 +44,10 @@ class KelasResource extends Resource
                 ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule, $get) => $rule->where('tahun_ajaran_id', $get('tahun_ajaran_id'))),
             Select::make('wali_kelas_id')->label('Wali kelas (guru kelas)')
                 ->options(fn () => User::guru()->where('status', 'aktif')->where('jenis_guru', 'kelas')->orderBy('name')->pluck('name', 'id'))
-                ->searchable(),
+                ->searchable()
+                ->helperText('Satu guru kelas hanya memegang satu kelas di setiap tahun ajaran.')
+                ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule, $get) => $rule->where('tahun_ajaran_id', $get('tahun_ajaran_id')))
+                ->validationMessages(['unique' => 'Guru ini sudah menjadi wali kelas lain di tahun ajaran yang sama.']),
             Select::make('guruMapel')->label('Guru mata pelajaran yang ditugaskan')
                 ->relationship('guruMapel', 'name', fn ($query) => $query->where('peran', 'guru')->where('jenis_guru', 'mapel')->orderBy('name'))
                 ->multiple()->preload()->columnSpanFull(),
@@ -67,7 +70,7 @@ class KelasResource extends Resource
                 SelectFilter::make('tahun_ajaran_id')->label('Tahun ajaran')->relationship('tahunAjaran', 'nama')
                     ->default(fn () => TahunAjaran::aktif()?->id),
             ])
-            ->recordActions([EditAction::make(), DeleteAction::make()]);
+            ->recordActions([EditAction::make(), HapusAman::aksi()]);
     }
 
     public static function getPages(): array

@@ -26,6 +26,7 @@ class Beranda extends Component
     public function render()
     {
         $kelas = $this->kelas;
+        $user = auth()->user();
         $data = ['kelas' => $kelas];
 
         if ($kelas) {
@@ -36,15 +37,17 @@ class Beranda extends Component
             $data['jumlahMurid'] = $kelas->muridAktif()->count();
             $data['hariTerakhir'] = Rekap::hariKegiatan($hariIni->copy()->subDays(14), $hariIni->copy()->subDay())->last();
 
-            // Hari kegiatan dalam batas ubah yang belum dicatat
-            $batas = (int) Pengaturan::angka('batas_ubah_hari');
-            $tercatat = KegiatanHarian::where('kelas_id', $kelas->id)
-                ->whereDate('tanggal', '>=', $hariIni->copy()->subDays($batas))
-                ->pluck('tanggal')->map(fn ($t) => $t->toDateString());
-            $data['belumDicatat'] = Rekap::hariKegiatan($hariIni->copy()->subDays($batas), $hariIni->copy()->subDay())
-                ->reject(fn ($t) => $tercatat->contains($t->toDateString()))->values();
+            // Pengingat hari kosong hanya untuk wali kelas (atau admin); guru mapel tidak bertanggung jawab atas catatan harian kelas
+            $data['belumDicatat'] = collect();
+            if ($user->isAdmin() || $kelas->wali_kelas_id === $user->id) {
+                $batas = (int) Pengaturan::angka('batas_ubah_hari');
+                $tercatat = KegiatanHarian::where('kelas_id', $kelas->id)
+                    ->whereDate('tanggal', '>=', $hariIni->copy()->subDays($batas))
+                    ->pluck('tanggal')->map(fn ($t) => $t->toDateString());
+                $data['belumDicatat'] = Rekap::hariKegiatan($hariIni->copy()->subDays($batas), $hariIni->copy()->subDay())
+                    ->reject(fn ($t) => $tercatat->contains($t->toDateString()))->values();
+            }
 
-            // Kasus yang perlu dipantau dari semua kelas yang menjadi akses guru
             $kasus = KasusPembinaan::with(['murid', 'kelas', 'pemantauan', 'jenisPelanggaran'])
                 ->dalamPembinaan()->whereIn('kelas_id', $this->daftarKelas->pluck('id'))->get();
             $data['perluDipantau'] = $kasus->filter->perluDipantau()->values();
@@ -58,7 +61,7 @@ class Beranda extends Component
                 'hadir' => Rekap::rerata($rekap['murid']->pluck('hadir_persen')->all()),
                 'literasi' => Rekap::rerata($rekap['murid']->pluck('literasi_persen')->all()),
                 'kasus' => $kasus->where('kelas_id', $kelas->id)->count(),
-                'karya' => KaryaLiterasi::where('kelas_id', $kelas->id)->whereBetween('tanggal', [$dari, $sampai])->count(),
+                'karya' => KaryaLiterasi::where('kelas_id', $kelas->id)->whereBetween('tanggal', [$dari->toDateString(), $sampai->toDateString()])->count(),
             ];
         }
 

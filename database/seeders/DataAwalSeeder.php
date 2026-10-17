@@ -9,17 +9,23 @@ use App\Models\JenisPelanggaran;
 use App\Models\TindakanPembinaan;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use RuntimeException;
 
 /** Data awal yang dibutuhkan aplikasi: akun admin dan daftar baku (dapat diubah admin). */
 class DataAwalSeeder extends Seeder
 {
     public function run(): void
     {
+        $sandi = env('ADMIN_PASSWORD');
+        if (app()->isProduction() && (blank($sandi) || strlen($sandi) < 10 || in_array($sandi, ['password', 'ganti-dengan-kata-sandi-kuat'], true))) {
+            throw new RuntimeException('Isi ADMIN_PASSWORD di .env dengan kata sandi kuat (minimal 10 karakter) sebelum menjalankan seeder di server.');
+        }
+
         User::firstOrCreate(
             ['email' => env('ADMIN_EMAIL', 'admin@tebakaksi.test')],
             [
                 'name' => 'Admin TEBAK AKSI',
-                'password' => env('ADMIN_PASSWORD', 'password'),
+                'password' => $sandi ?: 'password',
                 'peran' => 'admin',
                 'status' => 'aktif',
             ],

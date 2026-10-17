@@ -69,7 +69,7 @@ class LaporanBaku
                 [
                     $k->namaPelanggaran().' ('.KasusPembinaan::TINGKAT[$k->tingkat].')',
                     $k->namaTindakan(),
-                    $k->status_akhir ? $label($k->status_akhir) : 'Dalam Pembinaan',
+                    $k->status_akhir ? $label($k->status_akhir) : 'Dalam pembinaan',
                 ],
             );
         })->all();

@@ -4,16 +4,14 @@
 @source '../../storage/framework/views/*.php';
 @source '../../app/**/*.php';
 
+/* Token mengikuti DESIGN.md */
 @theme {
-    --font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Nunito', ui-sans-serif, system-ui, sans-serif;
 
-    /* Warna utama TEBAK AKSI: jingga ceria, toska, dan kuning matahari */
     --color-brand-50: #fff7ed;
     --color-brand-100: #ffedd5;
     --color-brand-200: #fed7aa;
     --color-brand-300: #fdba74;
-    --color-brand-400: #fb923c;
     --color-brand-500: #f97316;
     --color-brand-600: #ea580c;
     --color-brand-700: #c2410c;
@@ -22,13 +20,12 @@
 
     --color-toska-50: #f0fdfa;
     --color-toska-100: #ccfbf1;
-    --color-toska-200: #99f6e4;
-    --color-toska-500: #14b8a6;
     --color-toska-600: #0d9488;
     --color-toska-700: #0f766e;
     --color-toska-800: #115e59;
 
     --color-krem: #fffaf3;
+    --color-garis: #ece3d6;
 }
 
 @layer base {
@@ -40,39 +37,39 @@
         @apply bg-krem text-slate-800 antialiased;
     }
 
+    :focus-visible {
+        @apply outline-2 outline-offset-2 outline-brand-700;
+    }
+
     [x-cloak] {
         display: none !important;
     }
 }
 
 @utility tombol {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition
-        focus:outline-none focus-visible:ring-4 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition-colors
+        disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 @utility tautan {
-    @apply font-bold text-brand-600 underline-offset-4 hover:underline;
+    @apply font-bold text-brand-700 underline-offset-4 hover:underline;
 }
 
 @layer components {
     .kartu {
-        @apply rounded-2xl border border-orange-100 bg-white shadow-sm shadow-orange-100/60;
+        @apply rounded-xl border border-garis bg-white;
     }
 
     .tombol-utama {
-        @apply tombol bg-brand-500 text-white shadow-sm shadow-brand-500/30 hover:bg-brand-600 focus-visible:ring-brand-200;
+        @apply tombol bg-brand-700 text-white hover:bg-brand-800;
     }
 
     .tombol-kedua {
-        @apply tombol border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 focus-visible:ring-slate-200;
-    }
-
-    .tombol-toska {
-        @apply tombol bg-toska-600 text-white hover:bg-toska-700 focus-visible:ring-toska-200;
+        @apply tombol border border-garis bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50;
     }
 
     .tombol-bahaya {
-        @apply tombol bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-200;
+        @apply tombol border border-rose-200 bg-white text-rose-700 hover:bg-rose-50;
     }
 
     .label {
@@ -80,20 +77,40 @@
     }
 
     .isian {
-        @apply block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-base text-slate-800 shadow-xs
-            placeholder:text-slate-400 focus:border-brand-400 focus:ring-4 focus:ring-brand-100 focus:outline-none sm:text-sm;
+        @apply block min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base text-slate-800
+            placeholder:text-slate-500 focus:border-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-200 sm:text-sm;
     }
 
     .galat {
-        @apply mt-1 text-sm font-semibold text-rose-600;
+        @apply mt-1 text-sm font-semibold text-rose-700;
     }
 
     .lencana {
-        @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold;
+        @apply inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold;
     }
 
     .judul-halaman {
         @apply text-2xl font-extrabold tracking-tight text-slate-800 sm:text-3xl;
+    }
+
+    .teks-bantu {
+        @apply text-sm text-slate-600;
+    }
+
+    .tab {
+        @apply min-h-11 rounded-lg px-3.5 py-2 text-sm font-bold transition-colors;
+    }
+
+    .tab-aktif {
+        @apply bg-slate-800 text-white;
+    }
+
+    .tab-pasif {
+        @apply border border-garis bg-white text-slate-700 hover:bg-slate-50;
+    }
+
+    .tabel-kepala {
+        @apply border-b border-garis bg-krem text-left text-xs font-bold text-slate-600;
     }
 
     .isi-konten p {

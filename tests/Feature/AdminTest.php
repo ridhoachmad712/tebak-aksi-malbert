@@ -3,14 +3,19 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\PengaturanTarget;
+use App\Filament\Resources\KelasResource\Pages\ManageKelas;
+use App\Filament\Support\HapusAman;
 use App\Filament\Resources\PenggunaResource\Pages\ManagePengguna;
 use App\Models\BaselinePelanggaran;
+use App\Models\KegiatanHarian;
 use App\Models\Kelas;
+use App\Models\Murid;
 use App\Models\Pengaturan;
 use App\Models\TahunAjaran;
 use App\Models\User;
 use Database\Seeders\DataAwalSeeder;
 use Filament\Actions\Testing\TestAction;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -42,6 +47,28 @@ class AdminTest extends TestCase
         $this->assertSame('aktif', $pendaftar->fresh()->status);
         $this->assertSame($pendaftar->id, $kelas->fresh()->wali_kelas_id);
         $this->assertTrue($pendaftar->fresh()->bolehAksesKelas($kelas));
+    }
+
+    public function test_data_yang_punya_catatan_tidak_bisa_dihapus(): void
+    {
+        $ta = TahunAjaran::create(['nama' => '2026/2027', 'mulai' => '2026-07-13', 'selesai' => '2027-06-30', 'aktif' => true]);
+        $kelas = Kelas::create(['tahun_ajaran_id' => $ta->id, 'tingkat' => 1, 'nama' => '1A']);
+        $murid = Murid::create(['nama' => 'Ani']);
+        $kelas->murid()->attach($murid->id);
+        $kegiatan = KegiatanHarian::create(['kelas_id' => $kelas->id, 'tanggal' => '2026-10-14']);
+        $kegiatan->catatanMurid()->create(['murid_id' => $murid->id, 'hadir' => true]);
+
+        $this->assertNotNull(HapusAman::alasan($kelas));
+        $this->assertNotNull(HapusAman::alasan($murid));
+        $this->assertNotNull(HapusAman::alasan($ta));
+        $this->assertNotNull(HapusAman::alasan($this->admin));
+
+        Livewire::test(ManageKelas::class)->callAction(TestAction::make('delete')->table($kelas));
+        $this->assertModelExists($kelas);
+
+        // Lapisan database juga menolak penghapusan berantai
+        $this->expectException(QueryException::class);
+        $kelas->delete();
     }
 
     public function test_admin_menyimpan_target_dan_baseline(): void

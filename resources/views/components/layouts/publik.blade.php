@@ -17,7 +17,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#f97316">
+    <meta name="theme-color" content="#fffaf3">
     <meta name="description" content="TEBAK AKSI: Teras Baca Kelas Asah Karakter dan Literasi, program inovasi literasi {{ \App\Models\Pengaturan::ambil('nama_sekolah') }}.">
     <title>{{ isset($judul) ? $judul.' · ' : '' }}TEBAK AKSI</title>
     @fonts
@@ -27,33 +27,36 @@
 <body class="flex min-h-screen flex-col">
     <x-notifikasi />
 
-    <header x-data="{ buka: false }" class="sticky top-0 z-30 border-b border-orange-100 bg-white/90 backdrop-blur">
+    <header x-data="{ buka: false }" class="sticky top-0 z-30 border-b border-garis bg-white">
         <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
             <a href="{{ route('beranda') }}"><x-logo /></a>
 
-            <nav class="hidden items-center gap-1 xl:flex">
+            <nav class="hidden h-full items-stretch gap-1 xl:flex" aria-label="Menu utama">
                 @foreach ($menu as $m)
-                    <a href="{{ $m['url'] }}"
-                       @class(['rounded-xl px-3 py-2 text-sm font-bold transition',
-                           'bg-brand-100 text-brand-700' => $m['aktif'],
-                           'text-slate-600 hover:bg-orange-50' => ! $m['aktif']])>{{ $m['label'] }}</a>
+                    <a href="{{ $m['url'] }}" @if ($m['aktif']) aria-current="page" @endif
+                       @class(['flex items-center border-b-2 px-3 text-sm font-bold',
+                           'border-brand-700 text-brand-800' => $m['aktif'],
+                           'border-transparent text-slate-600 hover:text-slate-900' => ! $m['aktif']])>{{ $m['label'] }}</a>
                 @endforeach
-                <a href="{{ auth()->check() ? route('masuk.arah') : route('login') }}" class="tombol-utama ml-2">
-                    {{ auth()->check() ? 'Buka Aplikasi' : 'Masuk Guru' }}
-                </a>
+                <span class="ml-2 flex items-center">
+                    <a href="{{ auth()->check() ? route('masuk.arah') : route('login') }}" class="tombol-utama">
+                        {{ auth()->check() ? 'Buka aplikasi' : 'Masuk guru' }}
+                    </a>
+                </span>
             </nav>
 
-            <button x-on:click="buka = !buka" class="rounded-xl p-2 hover:bg-orange-50 xl:hidden" aria-label="Menu">
-                <x-heroicon-o-bars-3 class="h-7 w-7" x-show="!buka" />
-                <x-heroicon-o-x-mark class="h-7 w-7" x-show="buka" x-cloak />
+            <button x-on:click="buka = !buka" :aria-expanded="buka" class="flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-bold text-slate-700 hover:bg-slate-50 xl:hidden">
+                <x-heroicon-o-bars-3 class="h-6 w-6" x-show="!buka" />
+                <x-heroicon-o-x-mark class="h-6 w-6" x-show="buka" x-cloak />
+                Menu
             </button>
         </div>
-        <nav x-cloak x-show="buka" x-transition class="border-t border-orange-100 bg-white px-4 py-3 xl:hidden">
+        <nav x-cloak x-show="buka" class="border-t border-garis bg-white px-4 py-3 xl:hidden" aria-label="Menu utama">
             @foreach ($menu as $m)
-                <a href="{{ $m['url'] }}" @class(['block rounded-xl px-3 py-2.5 font-bold', 'bg-brand-100 text-brand-700' => $m['aktif'], 'text-slate-700' => ! $m['aktif']])>{{ $m['label'] }}</a>
+                <a href="{{ $m['url'] }}" @class(['flex min-h-11 items-center rounded-lg px-3 font-bold', 'bg-brand-50 text-brand-800' => $m['aktif'], 'text-slate-700' => ! $m['aktif']])>{{ $m['label'] }}</a>
             @endforeach
             <a href="{{ auth()->check() ? route('masuk.arah') : route('login') }}" class="tombol-utama mt-2 w-full">
-                {{ auth()->check() ? 'Buka Aplikasi' : 'Masuk Guru' }}
+                {{ auth()->check() ? 'Buka aplikasi' : 'Masuk guru' }}
             </a>
         </nav>
     </header>
@@ -62,21 +65,20 @@
         {{ $slot }}
     </main>
 
-    <footer class="mt-16 border-t border-orange-100 bg-white">
-        <div class="mx-auto grid max-w-6xl gap-6 px-4 py-10 sm:grid-cols-2">
+    <footer class="mt-16 border-t border-garis bg-white">
+        <div class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 text-sm text-slate-600 sm:flex-row sm:items-start sm:justify-between">
             <div>
-                <x-logo />
-                <p class="mt-3 max-w-sm text-sm text-slate-500">Program inovasi literasi {{ \App\Models\Pengaturan::ambil('nama_sekolah') }}.</p>
-            </div>
-            <div class="text-sm text-slate-600 sm:text-right">
+                <p class="font-extrabold text-slate-800">{{ \App\Models\Pengaturan::ambil('nama_sekolah') }}</p>
                 @if ($alamat = \App\Models\Pengaturan::ambil('alamat_sekolah'))
-                    <p>{{ $alamat }}</p>
+                    <p class="mt-1">{{ $alamat }}</p>
                 @endif
                 @if ($kontak = \App\Models\Pengaturan::ambil('kontak_sekolah'))
                     <p class="mt-1">{{ $kontak }}</p>
                 @endif
-                <p class="mt-3"><a href="{{ route('pengaduan') }}" class="tautan">Kirim saran atau pengaduan</a></p>
-                <p class="mt-3 text-xs text-slate-400">© {{ date('Y') }} {{ \App\Models\Pengaturan::ambil('nama_sekolah') }}</p>
+            </div>
+            <div class="sm:text-right">
+                <a href="{{ route('pengaduan') }}" class="tautan">Kirim saran atau pengaduan</a>
+                <p class="mt-2">© {{ date('Y') }} Program TEBAK AKSI</p>
             </div>
         </div>
     </footer>

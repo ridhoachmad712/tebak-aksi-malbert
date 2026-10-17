@@ -22,6 +22,8 @@ class User extends Authenticatable implements FilamentUser
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    protected ?Collection $kelasAksesTersimpan = null;
+
     public const PERAN = [
         'admin' => 'Admin',
         'kepsek' => 'Kepala Sekolah',
@@ -94,16 +96,13 @@ class User extends Authenticatable implements FilamentUser
      */
     public function kelasAkses(): Collection
     {
-        $query = Kelas::query()->aktif()->orderBy('tingkat')->orderBy('nama');
-
-        if (! $this->isGuru()) {
-            return $query->get();
-        }
-
-        return $query->where(function (Builder $q) {
-            $q->where('wali_kelas_id', $this->id)
-                ->orWhereHas('guruMapel', fn (Builder $g) => $g->where('users.id', $this->id));
-        })->get();
+        // Disimpan selama permintaan berjalan karena dipanggil berulang kali di satu halaman
+        return $this->kelasAksesTersimpan ??= Kelas::query()->aktif()->orderBy('tingkat')->orderBy('nama')
+            ->when($this->isGuru(), fn (Builder $query) => $query->where(function (Builder $q) {
+                $q->where('wali_kelas_id', $this->id)
+                    ->orWhereHas('guruMapel', fn (Builder $g) => $g->where('users.id', $this->id));
+            }))
+            ->get();
     }
 
     public function bolehAksesKelas(Kelas|int $kelas): bool

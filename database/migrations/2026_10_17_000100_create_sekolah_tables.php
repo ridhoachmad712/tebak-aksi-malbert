@@ -19,7 +19,7 @@ return new class extends Migration
 
         Schema::create('kelas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('tahun_ajaran_id')->constrained('tahun_ajaran')->cascadeOnDelete();
+            $table->foreignId('tahun_ajaran_id')->constrained('tahun_ajaran')->restrictOnDelete();
             $table->unsignedTinyInteger('tingkat'); // 1-6
             $table->string('nama', 20); // contoh: 4A
             $table->foreignId('wali_kelas_id')->nullable()->constrained('users')->nullOnDelete();

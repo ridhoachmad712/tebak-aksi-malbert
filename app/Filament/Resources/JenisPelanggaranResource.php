@@ -3,9 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\JenisPelanggaranResource\Pages\ManageJenisPelanggaran;
+use App\Filament\Support\HapusAman;
 use App\Models\JenisPelanggaran;
 use BackedEnum;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -58,7 +58,7 @@ class JenisPelanggaranResource extends Resource
                 ToggleColumn::make('aktif'),
             ])
             ->filters([SelectFilter::make('aspek_karakter_id')->label('Aspek karakter')->relationship('aspekKarakter', 'nama')])
-            ->recordActions([EditAction::make(), DeleteAction::make()]);
+            ->recordActions([EditAction::make(), HapusAman::aksi()]);
     }
 
     public static function getPages(): array

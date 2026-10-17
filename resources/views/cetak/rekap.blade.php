@@ -35,7 +35,7 @@
     </div>
 
     <h1>{{ $laporan['judul'] }}</h1>
-    <div class="sub">{{ $labelKelas }} · Bulan {{ $labelBulan }}{{ $laporan['n'] !== null ? ' · '.$laporan['n'].' hari kegiatan' : '' }}</div>
+    <div class="sub">{{ $labelKelas }} · {{ $labelBulan }}{{ $laporan['n'] !== null ? ' · '.$laporan['n'].' hari kegiatan' : '' }}</div>
 
     <table>
         <thead>

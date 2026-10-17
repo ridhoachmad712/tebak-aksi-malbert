@@ -2,19 +2,19 @@
 
 <div class="mx-auto max-w-2xl space-y-5">
     <div>
-        <a href="{{ route('guru.karya') }}" wire:navigate class="text-sm font-bold text-slate-500 hover:text-slate-700">← Karya Literasi</a>
-        <h1 class="judul-halaman">{{ $karya ? 'Ubah Karya' : 'Tambah Karya Literasi' }}</h1>
+        <a href="{{ route('guru.karya') }}" wire:navigate class="inline-flex min-h-11 items-center gap-1 text-sm font-bold text-slate-600 hover:text-slate-900"><x-heroicon-m-chevron-left class="h-4 w-4" /> Karya Literasi</a>
+        <h1 class="judul-halaman">{{ $karya ? 'Ubah karya' : 'Tambah karya literasi' }}</h1>
     </div>
 
     <form wire:submit="simpan" class="kartu space-y-5 p-5 sm:p-6">
         <div>
             <span class="label">Pemilik karya</span>
             <div class="grid grid-cols-2 gap-2">
-                <label class="flex cursor-pointer items-center gap-2 rounded-xl border-2 border-slate-200 p-3 font-bold has-checked:border-brand-400 has-checked:bg-brand-50">
-                    <input type="radio" wire:model.live="pemilik" value="murid" class="accent-brand-500"> 🧒 Murid
+                <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border-2 border-garis p-3 font-bold has-checked:border-brand-700 has-checked:bg-brand-50">
+                    <input type="radio" wire:model.live="pemilik" value="murid" class="accent-brand-700"> Murid
                 </label>
-                <label class="flex cursor-pointer items-center gap-2 rounded-xl border-2 border-slate-200 p-3 font-bold has-checked:border-brand-400 has-checked:bg-brand-50">
-                    <input type="radio" wire:model.live="pemilik" value="guru" class="accent-brand-500"> 👩‍🏫 Saya sendiri
+                <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border-2 border-garis p-3 font-bold has-checked:border-brand-700 has-checked:bg-brand-50">
+                    <input type="radio" wire:model.live="pemilik" value="guru" class="accent-brand-700"> Saya sendiri (guru)
                 </label>
             </div>
         </div>
@@ -32,16 +32,16 @@
 
         @if ($pemilik === 'murid')
             <div x-data="{ cari: '' }">
-                <span class="label">Murid pemilik karya <span class="font-normal text-slate-400">(pilih lebih dari satu untuk karya kelompok)</span></span>
-                <input x-model="cari" type="search" placeholder="Cari nama murid…" class="isian mb-2">
-                <div class="grid max-h-64 gap-1 overflow-y-auto rounded-xl border border-slate-200 p-2 sm:grid-cols-2">
+                <span class="label">Murid pemilik karya <span class="font-normal text-slate-600">(pilih lebih dari satu untuk karya kelompok)</span></span>
+                <input x-model="cari" type="search" placeholder="Cari nama murid" aria-label="Cari nama murid" class="isian mb-2">
+                <div class="grid max-h-72 gap-1 overflow-y-auto rounded-lg border border-garis p-2 sm:grid-cols-2">
                     @forelse ($daftarMurid as $m)
                         <label x-show="@js(mb_strtolower($m->nama)).includes(cari.toLowerCase())" wire:key="m-{{ $m->id }}"
-                            class="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-semibold hover:bg-orange-50 has-checked:bg-brand-50 has-checked:text-brand-800">
-                            <input type="checkbox" wire:model="muridDipilih" value="{{ $m->id }}" class="h-4 w-4 accent-brand-500"> {{ $m->nama }}
+                            class="flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-2 text-sm font-semibold hover:bg-krem has-checked:bg-brand-50 has-checked:text-brand-900">
+                            <input type="checkbox" wire:model="muridDipilih" value="{{ $m->id }}" class="h-4 w-4 accent-brand-700"> {{ $m->nama }}
                         </label>
                     @empty
-                        <p class="p-2 text-sm text-slate-500">Belum ada murid di kelas ini.</p>
+                        <p class="p-2 text-sm text-slate-600">Belum ada murid di kelas ini. Admin perlu menambahkan data murid.</p>
                     @endforelse
                 </div>
                 @error('muridDipilih') <p class="galat">{{ $message }}</p> @enderror
@@ -78,42 +78,42 @@
         </div>
 
         <div>
-            <label for="buku" class="label">Judul buku sumber <span class="font-normal text-slate-400">(opsional)</span></label>
+            <label for="buku" class="label">Judul buku sumber <span class="font-normal text-slate-600">(opsional)</span></label>
             <input id="buku" wire:model="bukuSumber" class="isian">
         </div>
 
         <div>
-            <span class="label">Foto karya <span class="font-normal text-slate-400">(opsional)</span></span>
+            <span class="label">Foto karya <span class="font-normal text-slate-600">(opsional)</span></span>
             <div class="grid grid-cols-3 gap-2 sm:grid-cols-4">
                 @foreach ($karya?->foto ?? [] as $f)
-                    <div wire:key="f-{{ $f->id }}" class="relative aspect-square overflow-hidden rounded-xl bg-slate-100">
+                    <div wire:key="f-{{ $f->id }}" class="relative aspect-square overflow-hidden rounded-lg bg-slate-100">
                         <img src="{{ $f->url() }}" alt="Foto karya" class="h-full w-full object-cover">
-                        <button type="button" wire:click="hapusFoto({{ $f->id }})" wire:confirm="Hapus foto ini?" class="absolute right-1 top-1 rounded-lg bg-white/90 p-1 text-rose-600 shadow" aria-label="Hapus foto"><x-heroicon-o-trash class="h-4 w-4" /></button>
+                        <button type="button" wire:click="hapusFoto({{ $f->id }})" wire:confirm="Hapus foto ini?" class="absolute right-1 top-1 grid h-9 w-9 place-items-center rounded-md bg-white text-rose-700 shadow" aria-label="Hapus foto"><x-heroicon-o-trash class="h-4 w-4" /></button>
                     </div>
                 @endforeach
                 @foreach ($fotoBaru as $i => $f)
                     @if (method_exists($f, 'isPreviewable') && $f->isPreviewable())
-                        <img wire:key="baru-{{ $i }}" src="{{ $f->temporaryUrl() }}" alt="Foto baru" class="aspect-square rounded-xl object-cover ring-2 ring-brand-300">
+                        <img wire:key="baru-{{ $i }}" src="{{ $f->temporaryUrl() }}" alt="Foto baru" class="aspect-square rounded-lg object-cover ring-2 ring-brand-300">
                     @endif
                 @endforeach
-                <label class="grid aspect-square cursor-pointer place-items-center rounded-xl border-2 border-dashed border-slate-300 text-center text-xs font-bold text-slate-500 hover:border-brand-400">
+                <label class="grid aspect-square cursor-pointer place-items-center rounded-lg border-2 border-dashed border-slate-300 text-center text-xs font-bold text-slate-600 hover:border-slate-500">
                     <span wire:loading.remove wire:target="fotoBaru"><x-heroicon-o-camera class="mx-auto h-7 w-7" />Pilih foto</span>
                     <span wire:loading wire:target="fotoBaru">Mengunggah…</span>
-                    <input type="file" wire:model="fotoBaru" accept="image/*" multiple class="hidden">
+                    <input type="file" wire:model="fotoBaru" accept="image/*" multiple class="sr-only">
                 </label>
             </div>
             @error('fotoBaru.*') <p class="galat">{{ $message }}</p> @enderror
         </div>
 
-        <div class="flex flex-wrap justify-between gap-2 border-t border-slate-100 pt-4">
+        <div class="flex flex-wrap justify-between gap-2 border-t border-garis pt-4">
             <div>
                 @if ($karya)
-                    <button type="button" wire:click="hapus" wire:confirm="Hapus karya ini?" class="tombol-kedua text-rose-600"><x-heroicon-o-trash class="h-4 w-4" /> Hapus</button>
+                    <button type="button" wire:click="hapus" wire:confirm="Hapus karya ini?" class="tombol-bahaya"><x-heroicon-o-trash class="h-4 w-4" /> Hapus</button>
                 @endif
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('guru.karya') }}" wire:navigate class="tombol-kedua">Batal</a>
-                <button class="tombol-utama" wire:loading.attr="disabled">Simpan Karya</button>
+                <button class="tombol-utama" wire:loading.attr="disabled">Simpan karya</button>
             </div>
         </div>
     </form>

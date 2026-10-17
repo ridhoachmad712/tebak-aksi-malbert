@@ -2,7 +2,7 @@
 
 **TEras Baca Kelas Asah Karakter dan literaSI**: aplikasi pencatatan program inovasi literasi UPT SPF SD Inpres Mallengkeri Bertingkat.
 
-Kebutuhan lengkap aplikasi ada di [KEBUTUHAN-APLIKASI.md](KEBUTUHAN-APLIKASI.md).
+Kebutuhan lengkap aplikasi ada di [KEBUTUHAN-APLIKASI.md](KEBUTUHAN-APLIKASI.md), dan pedoman tampilan di [DESIGN.md](DESIGN.md).
 
 ## Isi aplikasi
 
@@ -96,6 +96,8 @@ Aset tampilan (`public/build`) ikut tersimpan di repositori, jadi server **tidak
    ln -s ~/tebak-aksi/public public_html
    ```
 6. **Isi data awal lewat panel admin** (`/admin`): Tahun Ajaran (aktifkan) → Kelas → Guru & Pengguna → Murid (bisa impor Excel) → Pengaturan Target & Patokan (nama kepala sekolah, baseline pelanggaran).
+
+**Tahun ajaran baru**: di panel admin, menu Tahun Ajaran, tekan *Mulai tahun ajaran baru*. Kelas disalin, murid naik ke tingkat berikutnya, dan murid kelas VI dinonaktifkan. Catatan tahun lama tetap tersimpan.
 
 **Memperbarui aplikasi** di kemudian hari:
 

@@ -1,5 +1,5 @@
 <div class="mx-auto max-w-md space-y-5">
-    <h1 class="judul-halaman">Ubah Kata Sandi</h1>
+    <h1 class="judul-halaman">Ubah kata sandi</h1>
     <form wire:submit="simpan" class="kartu space-y-4 p-6">
         <div>
             <label for="lama" class="label">Kata sandi lama</label>
