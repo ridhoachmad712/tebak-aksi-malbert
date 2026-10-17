@@ -26,7 +26,7 @@
         <dl class="grid gap-4 p-5 sm:grid-cols-2">
             <div>
                 <dt class="text-sm font-bold text-slate-600">Kondisi awal</dt>
-                <dd class="mt-0.5">{{ $kasus->kondisi_awal }}</dd>
+                <dd class="mt-0.5">{{ $kasus->kondisi_awal ?: 'Tidak dicatat' }}</dd>
             </div>
             <div>
                 <dt class="text-sm font-bold text-slate-600">Jenis pelanggaran</dt>
@@ -63,7 +63,7 @@
                 @endphp
                 <button type="button" wire:click="pilihMinggu({{ $m }})" @disabled(! $sudahMulai) aria-pressed="{{ $minggu === $m ? 'true' : 'false' }}"
                     @class(['rounded-lg border-2 p-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60',
-                        'border-brand-700 bg-brand-50' => $minggu === $m,
+                        'border-slate-800 bg-slate-50' => $minggu === $m,
                         'border-amber-300 bg-amber-50' => $minggu !== $m && $sudahMulai && ! $p,
                         'border-garis bg-white hover:border-slate-400' => $minggu !== $m && ($p || ! $sudahMulai)])>
                     <span class="block text-sm font-extrabold">Minggu {{ $m }}</span>
@@ -82,24 +82,23 @@
         </div>
 
         @if ($minggu)
-            <form wire:submit="simpanPemantauan" class="mt-5 rounded-lg border border-garis bg-krem p-4">
-                <fieldset>
-                    <legend class="font-extrabold">Perkembangan {{ str($kasus->murid->nama)->before(' ') }} pada minggu ke-{{ $minggu }}</legend>
-                    <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                        @foreach (KasusPembinaan::PERKEMBANGAN as $nilai => $info)
-                            <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border-2 border-garis bg-white px-3 py-2 text-sm font-bold has-checked:border-brand-700 has-checked:bg-brand-50">
-                                <input type="radio" wire:model="tingkat" value="{{ $nilai }}" class="accent-brand-700"> {{ $info['label'] }}
-                            </label>
-                        @endforeach
-                    </div>
-                </fieldset>
-                @error('tingkat') <p class="galat">{{ $message }}</p> @enderror
+            {{-- Sekali ketuk langsung tersimpan --}}
+            <div class="mt-5 rounded-lg border border-garis bg-krem p-4">
+                <p class="font-extrabold">Perkembangan {{ str($kasus->murid->nama)->before(' ') }} pada minggu ke-{{ $minggu }}</p>
+                <p class="text-xs text-slate-600">Ketuk salah satu, langsung tersimpan. Bila ingin menambah catatan, tulis dulu sebelum mengetuk.</p>
                 <label for="catatan-pantau" class="label mt-3">Catatan <span class="font-normal text-slate-600">(opsional)</span></label>
-                <textarea id="catatan-pantau" wire:model="catatan" rows="2" class="isian"></textarea>
-                <div class="mt-3 flex justify-end">
-                    <button class="tombol-utama">Simpan pemantauan</button>
+                <textarea id="catatan-pantau" wire:model="catatan" rows="2" class="isian bg-white"></textarea>
+                <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    @foreach (KasusPembinaan::PERKEMBANGAN as $nilai => $info)
+                        <button type="button" wire:click="pantau('{{ $nilai }}')" wire:loading.attr="disabled" aria-pressed="{{ $tingkat === $nilai ? 'true' : 'false' }}"
+                            @class(['min-h-12 rounded-lg border-2 px-3 py-2 text-sm font-bold transition-colors',
+                                'border-slate-800 bg-slate-800 text-white' => $tingkat === $nilai,
+                                'border-garis bg-white text-slate-800 hover:border-slate-500' => $tingkat !== $nilai])>
+                            {{ $info['label'] }}
+                        </button>
+                    @endforeach
                 </div>
-            </form>
+            </div>
         @endif
 
         @if ($kasus->pemantauan->whereNotNull('catatan')->isNotEmpty())

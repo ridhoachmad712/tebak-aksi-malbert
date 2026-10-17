@@ -10,11 +10,11 @@
         <div>
             <span class="label">Pemilik karya</span>
             <div class="grid grid-cols-2 gap-2">
-                <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border-2 border-garis p-3 font-bold has-checked:border-brand-700 has-checked:bg-brand-50">
-                    <input type="radio" wire:model.live="pemilik" value="murid" class="accent-brand-700"> Murid
+                <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border-2 border-garis p-3 font-bold has-checked:border-slate-800 has-checked:bg-slate-50">
+                    <input type="radio" wire:model.live="pemilik" value="murid" class="accent-slate-800"> Murid
                 </label>
-                <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border-2 border-garis p-3 font-bold has-checked:border-brand-700 has-checked:bg-brand-50">
-                    <input type="radio" wire:model.live="pemilik" value="guru" class="accent-brand-700"> Saya sendiri (guru)
+                <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border-2 border-garis p-3 font-bold has-checked:border-slate-800 has-checked:bg-slate-50">
+                    <input type="radio" wire:model.live="pemilik" value="guru" class="accent-slate-800"> Saya sendiri (guru)
                 </label>
             </div>
         </div>
@@ -37,8 +37,8 @@
                 <div class="grid max-h-72 gap-1 overflow-y-auto rounded-lg border border-garis p-2 sm:grid-cols-2">
                     @forelse ($daftarMurid as $m)
                         <label x-show="@js(mb_strtolower($m->nama)).includes(cari.toLowerCase())" wire:key="m-{{ $m->id }}"
-                            class="flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-2 text-sm font-semibold hover:bg-krem has-checked:bg-brand-50 has-checked:text-brand-900">
-                            <input type="checkbox" wire:model="muridDipilih" value="{{ $m->id }}" class="h-4 w-4 accent-brand-700"> {{ $m->nama }}
+                            class="flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-2 text-sm font-semibold hover:bg-krem has-checked:bg-slate-100 has-checked:text-slate-900">
+                            <input type="checkbox" wire:model="muridDipilih" value="{{ $m->id }}" class="h-4 w-4 accent-slate-800"> {{ $m->nama }}
                         </label>
                     @empty
                         <p class="p-2 text-sm text-slate-600">Belum ada murid di kelas ini. Admin perlu menambahkan data murid.</p>
@@ -48,27 +48,31 @@
             </div>
         @endif
 
-        <div class="grid gap-4 sm:grid-cols-2">
-            <div>
-                <label for="jenis" class="label">Jenis karya</label>
-                <select id="jenis" wire:model.live="jenis" class="isian">
-                    <option value="">— Pilih jenis karya —</option>
-                    @foreach ($daftarJenis as $j)
-                        <option value="{{ $j->id }}">{{ $j->nama }}{{ $j->jenjang !== 'semua' && $j->jenjang !== $jenjang ? ' ('.($j->jenjang === 'rendah' ? 'kelas rendah' : 'kelas tinggi').')' : '' }}</option>
-                    @endforeach
-                    <option value="lain">Lainnya (tulis sendiri)</option>
-                </select>
-                @error('jenis') <p class="galat">{{ $message }}</p> @enderror
-                @if ($jenis === 'lain')
-                    <input wire:model="jenisLain" placeholder="Tuliskan jenis karya" class="isian mt-2">
-                    @error('jenisLain') <p class="galat">{{ $message }}</p> @enderror
-                @endif
+        {{-- Jenis karya berupa pilihan yang tinggal diketuk; jenis untuk jenjang kelas ini tampil lebih dulu --}}
+        <fieldset>
+            <legend class="label">Jenis karya</legend>
+            <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                @foreach ($daftarJenis as $j)
+                    <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border-2 border-garis bg-white px-3 py-2 text-sm font-bold has-checked:border-slate-800 has-checked:bg-slate-50">
+                        <input type="radio" wire:model.live="jenis" value="{{ $j->id }}" class="accent-slate-800">
+                        <span>{{ $j->nama }}@if ($j->jenjang !== 'semua' && $j->jenjang !== $jenjang)<span class="block text-xs font-semibold text-slate-500">{{ $j->jenjang === 'rendah' ? 'kelas rendah' : 'kelas tinggi' }}</span>@endif</span>
+                    </label>
+                @endforeach
+                <label class="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border-2 border-garis bg-white px-3 py-2 text-sm font-bold has-checked:border-slate-800 has-checked:bg-slate-50">
+                    <input type="radio" wire:model.live="jenis" value="lain" class="accent-slate-800"> Lainnya
+                </label>
             </div>
-            <div>
-                <label for="tanggal" class="label">Tanggal</label>
-                <input id="tanggal" type="date" wire:model="tanggal" max="{{ today()->toDateString() }}" class="isian">
-                @error('tanggal') <p class="galat">{{ $message }}</p> @enderror
-            </div>
+            @error('jenis') <p class="galat">{{ $message }}</p> @enderror
+            @if ($jenis === 'lain')
+                <input wire:model="jenisLain" placeholder="Tuliskan jenis karya" aria-label="Jenis karya lainnya" class="isian mt-2">
+                @error('jenisLain') <p class="galat">{{ $message }}</p> @enderror
+            @endif
+        </fieldset>
+
+        <div class="sm:w-1/2">
+            <label for="tanggal" class="label">Tanggal</label>
+            <input id="tanggal" type="date" wire:model="tanggal" max="{{ today()->toDateString() }}" class="isian">
+            @error('tanggal') <p class="galat">{{ $message }}</p> @enderror
         </div>
 
         <div>

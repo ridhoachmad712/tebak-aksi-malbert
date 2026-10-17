@@ -26,7 +26,7 @@
                         {{ $k->murid->nama }}
                     @endif
                 </td>
-                <td class="min-w-40 px-3 py-2">{{ $k->kondisi_awal }}</td>
+                <td class="min-w-40 px-3 py-2">{{ $k->kondisi_awal ?: '–' }}</td>
                 @foreach (range(1, 4) as $m)
                     <td class="px-2 py-2 text-center"><x-perkembangan :tingkat="$p[$m]->tingkat ?? null" ringkas /></td>
                 @endforeach

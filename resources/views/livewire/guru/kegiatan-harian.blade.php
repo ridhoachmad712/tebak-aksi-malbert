@@ -1,7 +1,9 @@
 @use('App\Services\Rekap')
 
 @php
-    $warnaCentang = fn (string $k) => in_array($k, ['hadir', 'konsisten', 'jurnal']) ? 'bg-brand-700 border-brand-700' : 'bg-toska-700 border-toska-700';
+    // Satu warna netral untuk centang; jingga disimpan untuk tombol utama
+    $warnaCentang = fn (string $k) => 'bg-slate-800 border-slate-800';
+    $labelPendek = fn (string $k, array $info) => $k === 'menyampaikan' ? 'Menyampaikan' : $info['label'];
 @endphp
 
 <div class="space-y-5">
@@ -79,6 +81,8 @@
                         }
                     },
                     jumlah(k) { return Object.values(this.c).filter(r => r[k]).length },
+                    sisa(k) { return this.layak(k).filter(id => ! this.c[id][k]).length },
+                    aktif: 'hadir',
                     antre(id) {
                         this.antrean[id] = { ...this.c[id] };
                         this.status = 'menunggu';
@@ -109,14 +113,15 @@
                 </div>
 
                 {{-- Tampilan laptop: tabel --}}
-                <div class="hidden overflow-x-auto md:block">
+                <div class="hidden overflow-x-auto md:block lg:overflow-visible">
                     <table class="w-full text-sm">
-                        <thead class="tabel-kepala">
+                        {{-- Judul kolom menempel di bawah bilah atas saat daftar digulir --}}
+                        <thead class="tabel-kepala lg:sticky lg:top-16 lg:z-10 lg:shadow-[0_1px_0_var(--color-garis)]">
                             <tr>
                                 <th class="px-4 pt-3" rowspan="2">No</th>
                                 <th class="px-2 pt-3" rowspan="2">Nama murid</th>
-                                <th colspan="3" class="border-l border-garis px-2 pt-3 text-center text-brand-800">Budaya Membaca</th>
-                                <th colspan="3" class="border-l border-garis px-2 pt-3 text-center text-toska-800">Kemampuan Literasi</th>
+                                <th colspan="3" class="border-l border-garis px-2 pt-3 text-center uppercase tracking-wide text-slate-700">Budaya Membaca</th>
+                                <th colspan="3" class="border-l border-garis px-2 pt-3 text-center uppercase tracking-wide text-slate-700">Kemampuan Literasi</th>
                             </tr>
                             <tr>
                                 @foreach ($indikator as $k => $info)
@@ -131,6 +136,7 @@
                                                 class="min-h-8 rounded-md border border-garis bg-white px-2 text-[11px] font-bold text-slate-700 hover:border-slate-400"
                                                 x-text="semuaTercentang('{{ $k }}') ? 'Kosongkan' : 'Centang semua'"></button>
                                             <span class="text-[11px] font-bold tabular-nums text-slate-600"><span x-text="jumlah('{{ $k }}')"></span>/{{ $this->murid->count() }}</span>
+                                            <span x-show="boleh && sisa('{{ $k }}')" class="text-[11px] font-bold text-amber-800"><span x-text="sisa('{{ $k }}')"></span> belum</span>
                                         </div>
                                     </th>
                                 @endforeach
@@ -159,38 +165,55 @@
                     </table>
                 </div>
 
-                {{-- Tampilan HP: kartu per murid --}}
+                {{-- Tampilan HP: satu kolom sekaligus agar daftar tetap pendek (absen dulu, lalu kolom berikutnya) --}}
                 <div class="md:hidden">
-                    <div x-show="boleh" class="border-b border-garis px-4 py-3">
-                        <p class="mb-2 text-xs font-bold text-slate-600">Centang semua murid sekaligus:</p>
-                        <div class="grid grid-cols-3 gap-2">
+                    <div class="sticky top-16 z-10 border-b border-garis bg-white px-3 py-3">
+                        <p class="mb-2 text-xs font-bold text-slate-600">Pilih yang sedang dicentang:</p>
+                        <div class="grid grid-cols-3 gap-2" role="tablist">
                             @foreach ($indikator as $k => $info)
-                                <button type="button" x-on:click="semua('{{ $k }}')"
-                                    :class="semuaTercentang('{{ $k }}') ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-700 border-garis'"
-                                    class="min-h-11 rounded-lg border px-1 text-xs font-bold leading-tight">{{ $k === 'menyampaikan' ? 'Menyampaikan' : $info['label'] }}</button>
+                                <button type="button" role="tab" x-on:click="aktif = '{{ $k }}'" :aria-selected="aktif === '{{ $k }}'"
+                                    :class="aktif === '{{ $k }}' ? 'border-slate-800 bg-slate-800 text-white' : 'border-garis bg-white text-slate-700'"
+                                    class="flex min-h-12 flex-col items-center justify-center rounded-lg border px-1 text-xs font-bold leading-tight">
+                                    {{ $labelPendek($k, $info) }}
+                                    <span class="mt-0.5 text-[11px] font-semibold tabular-nums opacity-80"><span x-text="jumlah('{{ $k }}')"></span>/{{ $this->murid->count() }}</span>
+                                </button>
                             @endforeach
                         </div>
                     </div>
-                    <ul class="divide-y divide-garis">
-                        @foreach ($this->murid as $i => $m)
-                            <li class="px-4 py-3">
-                                <p class="mb-2 font-extrabold"><span class="mr-1 tabular-nums text-slate-600">{{ $i + 1 }}.</span> {{ $m->nama }}</p>
-                                <div class="grid grid-cols-3 gap-2">
-                                    @foreach ($indikator as $k => $info)
+
+                    @foreach ($indikator as $k => $info)
+                        <div x-show="aktif === '{{ $k }}'" @if (! $loop->first) x-cloak @endif>
+                            <div class="flex items-center justify-between gap-2 border-b border-garis bg-krem px-4 py-2">
+                                <p class="text-xs text-slate-700">Dicentang bila murid {{ lcfirst($info['arti']) }}.</p>
+                                <button type="button" x-show="boleh" x-on:click="semua('{{ $k }}')" class="tombol-kedua min-h-10 shrink-0 px-3 text-xs"
+                                    x-text="semuaTercentang('{{ $k }}') ? 'Kosongkan' : 'Centang semua'"></button>
+                            </div>
+                            <ul class="divide-y divide-garis">
+                                @foreach ($this->murid as $i => $m)
+                                    <li>
                                         <button type="button" x-on:click="ubah({{ $m->id }}, '{{ $k }}')"
                                             :disabled="! bisa({{ $m->id }}, '{{ $k }}')"
                                             :aria-pressed="c[{{ $m->id }}].{{ $k }}"
                                             aria-label="{{ $info['label'] }}: {{ $m->nama }}"
-                                            :class="c[{{ $m->id }}].{{ $k }} ? '{{ $warnaCentang($k) }} text-white' : 'bg-white border-slate-300 text-slate-700'"
-                                            class="flex min-h-11 items-center justify-center gap-0.5 rounded-lg border-2 px-0.5 text-[11px] font-bold leading-tight transition-colors disabled:opacity-30 min-[400px]:text-xs">
-                                            <x-heroicon-s-check x-show="c[{{ $m->id }}].{{ $k }}" class="h-3.5 w-3.5 shrink-0" />
-                                            {{ $k === 'menyampaikan' ? 'Menyampaikan' : $info['label'] }}
+                                            class="flex min-h-14 w-full items-center gap-3 px-4 py-2 text-left disabled:cursor-not-allowed">
+                                            <span class="w-6 shrink-0 text-sm tabular-nums text-slate-500">{{ $i + 1 }}</span>
+                                            <span class="min-w-0 flex-1">
+                                                <span class="block font-bold" :class="bisa({{ $m->id }}, '{{ $k }}') || ! boleh ? 'text-slate-900' : 'text-slate-400'">{{ $m->nama }}</span>
+                                                @if ($k !== 'hadir')
+                                                    <span x-show="! c[{{ $m->id }}].hadir" class="block text-xs text-slate-500">Belum dicentang Hadir</span>
+                                                @endif
+                                            </span>
+                                            <span :class="c[{{ $m->id }}].{{ $k }} ? 'bg-slate-800 border-slate-800 text-white' : 'bg-white border-slate-300 text-transparent'"
+                                                :style="bisa({{ $m->id }}, '{{ $k }}') || c[{{ $m->id }}].{{ $k }} ? '' : 'opacity:.3'"
+                                                class="grid h-10 w-10 shrink-0 place-items-center rounded-lg border-2 transition-colors">
+                                                <x-heroicon-s-check class="h-6 w-6" />
+                                            </span>
                                         </button>
-                                    @endforeach
-                                </div>
-                            </li>
-                        @endforeach
-                    </ul>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endforeach
                 </div>
 
                 {{-- Status simpan menempel di bawah layar agar terlihat di mana pun guru mengetuk --}}

@@ -44,7 +44,7 @@ class PembinaanForm extends Component
             $this->fill([
                 'muridId' => (string) $kasus->murid_id,
                 'tanggal' => $kasus->tanggal->toDateString(),
-                'kondisiAwal' => $kasus->kondisi_awal,
+                'kondisiAwal' => (string) $kasus->kondisi_awal,
                 'pelanggaran' => $kasus->jenis_pelanggaran_id ? (string) $kasus->jenis_pelanggaran_id : 'lain',
                 'pelanggaranLain' => (string) $kasus->jenis_pelanggaran_lain,
                 'tingkat' => $kasus->tingkat,
@@ -73,7 +73,7 @@ class PembinaanForm extends Component
         $this->validate([
             'muridId' => ['required', Rule::in($this->kelas->murid()->pluck('murid.id')->map(fn ($id) => (string) $id))],
             'tanggal' => ['required', 'date', 'before_or_equal:today'],
-            'kondisiAwal' => ['required', 'string', 'max:1000'],
+            'kondisiAwal' => ['nullable', 'string', 'max:1000'],
             'pelanggaran' => ['required'],
             'pelanggaranLain' => ['required_if:pelanggaran,lain', 'nullable', 'string', 'max:255'],
             'tingkat' => ['required', Rule::in(array_keys(KasusPembinaan::TINGKAT))],
@@ -91,7 +91,7 @@ class PembinaanForm extends Component
             'murid_id' => (int) $this->muridId,
             'kelas_id' => $this->kelasId,
             'tanggal' => $this->tanggal,
-            'kondisi_awal' => $this->kondisiAwal,
+            'kondisi_awal' => trim($this->kondisiAwal) ?: null,
             'jenis_pelanggaran_id' => $this->pelanggaran === 'lain' ? null : JenisPelanggaran::findOrFail($this->pelanggaran)->id,
             'jenis_pelanggaran_lain' => $this->pelanggaran === 'lain' ? $this->pelanggaranLain : null,
             'tingkat' => $this->tingkat,
@@ -114,9 +114,13 @@ class PembinaanForm extends Component
 
     public function render()
     {
+        $daftarPelanggaran = JenisPelanggaran::with('aspekKarakter')->aktif()->urut()->get();
+
         return view('livewire.guru.pembinaan-form', [
             'daftarMurid' => $this->kelas?->muridAktif()->get() ?? collect(),
-            'daftarPelanggaran' => JenisPelanggaran::with('aspekKarakter')->aktif()->urut()->get(),
+            'daftarPelanggaran' => $daftarPelanggaran,
+            // Saran kondisi awal dari jenis pelanggaran; hanya terisi bila guru mengetuknya
+            'saranKondisi' => $daftarPelanggaran->firstWhere('id', (int) $this->pelanggaran)?->nama,
             'daftarTindakan' => TindakanPembinaan::aktif()->urut()->get(),
         ])->title($this->kasus ? 'Ubah Kasus' : 'Catat Pelanggaran');
     }

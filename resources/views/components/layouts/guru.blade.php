@@ -70,6 +70,11 @@
                         <p class="truncate text-sm font-extrabold">{{ auth()->user()->name }}</p>
                         <p class="text-xs text-slate-600">{{ auth()->user()->isGuru() ? (\App\Models\User::JENIS_GURU[auth()->user()->jenis_guru] ?? 'Guru') : \App\Models\User::PERAN[auth()->user()->peran] }}</p>
                     </div>
+                    @if (auth()->user()->isGuru())
+                        <a href="{{ route('guru.beranda', ['panduan' => 1]) }}" wire:navigate class="flex min-h-11 items-center gap-2 px-4 text-sm font-semibold hover:bg-slate-50">
+                            <x-heroicon-o-light-bulb class="h-5 w-5 text-slate-500" /> Cara memakai TEBAK AKSI
+                        </a>
+                    @endif
                     <a href="{{ route('guru.panduan') }}" class="flex min-h-11 items-center gap-2 px-4 text-sm font-semibold hover:bg-slate-50">
                         <x-heroicon-o-book-open class="h-5 w-5 text-slate-500" /> Panduan penggunaan
                     </a>

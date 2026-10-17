@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Guru\Beranda;
 use App\Livewire\Guru\KegiatanHarianForm;
 use App\Livewire\Guru\PembinaanDetail;
 use App\Livewire\Guru\PembinaanForm;
@@ -141,14 +142,15 @@ class AlurGuruTest extends TestCase
 
         Livewire::actingAs($this->guru)->test(PembinaanDetail::class, ['kasus' => $kasus])
             ->assertSet('minggu', 1)
-            ->set('tingkat', 'mulai')
-            ->call('simpanPemantauan')
+            ->set('catatan', 'Mulai tertib saat membaca')
+            ->call('pantau', 'mulai')
             ->assertSet('minggu', 2)
             ->call('tetapkanStatus', 'positif');
 
         $kasus->refresh();
         $this->assertSame('positif', $kasus->status_akhir);
         $this->assertSame('mulai', $kasus->pemantauan()->where('minggu', 1)->value('tingkat'));
+        $this->assertSame('Mulai tertib saat membaca', $kasus->pemantauan()->where('minggu', 1)->value('catatan'));
     }
 
     public function test_guru_tidak_bisa_mencatat_kasus_untuk_murid_kelas_lain(): void
@@ -167,5 +169,42 @@ class AlurGuruTest extends TestCase
             ->assertHasErrors('muridId');
 
         $this->assertSame(0, KasusPembinaan::count());
+    }
+
+    public function test_kondisi_awal_opsional_dan_pemantauan_cepat_dari_beranda(): void
+    {
+        $ani = $this->murid('Ani');
+        $jenis = JenisPelanggaran::first();
+
+        $form = Livewire::actingAs($this->guru)->test(PembinaanForm::class)
+            ->set('muridId', (string) $ani->id)
+            ->set('pelanggaran', (string) $jenis->id)
+            ->assertSee('Pakai: "'.$jenis->nama.'"', false)
+            // Saran tidak mengisi sendiri; kondisi awal tetap kosong bila tidak diketuk
+            ->assertSet('kondisiAwal', '')
+            ->set('tingkat', 'ringan')
+            ->set('tindakan', (string) TindakanPembinaan::first()->id)
+            ->call('simpan')
+            ->assertHasNoErrors();
+        $kasus = KasusPembinaan::firstOrFail();
+        $this->assertNull($kasus->kondisi_awal);
+
+        Carbon::setTestNow('2026-10-16 08:00:00');
+        Livewire::actingAs($this->guru)->test(Beranda::class)
+            ->assertSee('Perkembangan minggu ke-1')
+            ->call('pantau', $kasus->id, 'mulai')
+            ->assertDontSee('Perkembangan minggu ke-1');
+        $this->assertSame('mulai', $kasus->pemantauan()->where('minggu', 1)->value('tingkat'));
+
+        // Guru lain tidak bisa memantau kasus kelas ini
+        $lain = User::create(['name' => 'Guru Lain', 'email' => 'lain@tebakaksi.test', 'password' => 'password', 'peran' => 'guru', 'jenis_guru' => 'kelas', 'status' => 'aktif']);
+        Livewire::actingAs($lain)->test(Beranda::class)->call('pantau', $kasus->id, 'positif')->assertForbidden();
+    }
+
+    public function test_kegiatan_harian_menampilkan_mode_satu_kolom(): void
+    {
+        $this->actingAs($this->guru)->get('/guru/kegiatan')->assertOk()
+            ->assertSee('Pilih yang sedang dicentang')
+            ->assertSee('Belum dicentang Hadir');
     }
 }

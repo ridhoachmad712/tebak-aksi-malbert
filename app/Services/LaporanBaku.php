@@ -64,7 +64,7 @@ class LaporanBaku
             $p = $k->pemantauan->keyBy('minggu');
 
             return array_merge(
-                [$k->murid->nama, $k->kelas->nama, $k->kondisi_awal],
+                [$k->murid->nama, $k->kelas->nama, $k->kondisi_awal ?? '-'],
                 array_map(fn ($m) => $label($p[$m]->tingkat ?? null), range(1, 4)),
                 [
                     $k->namaPelanggaran().' ('.KasusPembinaan::TINGKAT[$k->tingkat].')',

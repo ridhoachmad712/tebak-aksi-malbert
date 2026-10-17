@@ -3,7 +3,6 @@
 namespace App\Livewire\Guru;
 
 use App\Models\KasusPembinaan;
-use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -25,7 +24,10 @@ class PembinaanDetail extends Component
     {
         abort_unless(auth()->user()->bolehAksesKelas($kasus->kelas_id), 403);
         $this->kasus = $kasus;
-        $this->minggu = $kasus->mingguBelumDipantau()[0] ?? null;
+        // Langsung buka minggu yang belum diisi
+        if ($minggu = $kasus->mingguBelumDipantau()[0] ?? null) {
+            $this->pilihMinggu($minggu);
+        }
     }
 
     public function pilihMinggu(int $minggu): void
@@ -37,23 +39,19 @@ class PembinaanDetail extends Component
         $this->catatan = $p->catatan ?? '';
     }
 
-    public function simpanPemantauan(): void
+    /** Sekali ketuk: perkembangan (beserta catatan bila diisi) langsung tersimpan, lalu pindah ke minggu berikutnya yang belum diisi. */
+    public function pantau(string $tingkat): void
     {
-        abort_unless($this->minggu && $this->minggu <= $this->kasus->mingguDimulai(), 422);
-        $this->validate([
-            'tingkat' => ['required', Rule::in(array_keys(KasusPembinaan::PERKEMBANGAN))],
-            'catatan' => ['nullable', 'string', 'max:1000'],
-        ], ['tingkat.required' => 'Pilih salah satu tingkat perkembangan.']);
+        abort_unless($this->minggu, 422);
+        $this->validate(['catatan' => ['nullable', 'string', 'max:1000']]);
+        $this->kasus->catatPemantauan($this->minggu, $tingkat, $this->catatan);
+        $this->dispatch('notifikasi', pesan: "Minggu ke-{$this->minggu}: ".KasusPembinaan::PERKEMBANGAN[$tingkat]['label']);
 
-        $this->kasus->pemantauan()->updateOrCreate(
-            ['minggu' => $this->minggu],
-            ['tingkat' => $this->tingkat, 'catatan' => $this->catatan ?: null, 'user_id' => auth()->id()],
-        );
-
-        $this->kasus->load('pemantauan');
-        $this->dispatch('notifikasi', pesan: "Pemantauan minggu ke-{$this->minggu} disimpan");
-        $this->reset('tingkat', 'catatan');
-        $this->minggu = $this->kasus->mingguBelumDipantau()[0] ?? null;
+        if ($berikut = $this->kasus->mingguBelumDipantau()[0] ?? null) {
+            $this->pilihMinggu($berikut);
+        } else {
+            $this->tingkat = $tingkat;
+        }
     }
 
     public function tetapkanStatus(string $status): void

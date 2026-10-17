@@ -8,6 +8,7 @@ use App\Models\KasusPembinaan;
 use App\Models\KegiatanHarian;
 use App\Models\Pengaturan;
 use App\Services\Rekap;
+use App\Services\RingkasanMonev;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -21,6 +22,18 @@ class Beranda extends Component
     public function mount(): void
     {
         $this->inisialisasiKelas();
+    }
+
+    /** Pemantauan cepat dari Beranda: mengisi minggu paling awal yang belum dipantau. */
+    public function pantau(int $kasusId, string $tingkat): void
+    {
+        $kasus = KasusPembinaan::with('pemantauan', 'murid')->dalamPembinaan()->findOrFail($kasusId);
+        abort_unless(auth()->user()->bolehAksesKelas($kasus->kelas_id), 403);
+        $minggu = $kasus->mingguBelumDipantau()[0] ?? null;
+        abort_unless($minggu, 422);
+
+        $kasus->catatPemantauan($minggu, $tingkat);
+        $this->dispatch('notifikasi', pesan: $kasus->murid->nama.', minggu ke-'.$minggu.': '.KasusPembinaan::PERKEMBANGAN[$tingkat]['label']);
     }
 
     public function render()
@@ -63,6 +76,7 @@ class Beranda extends Component
                 'kasus' => $kasus->where('kelas_id', $kelas->id)->count(),
                 'karya' => KaryaLiterasi::where('kelas_id', $kelas->id)->whereBetween('tanggal', [$dari->toDateString(), $sampai->toDateString()])->count(),
             ];
+            $data['muridPerhatian'] = RingkasanMonev::muridPerluPerhatian($rekap);
         }
 
         return view('livewire.guru.beranda', $data);

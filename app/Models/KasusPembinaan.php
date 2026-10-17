@@ -127,6 +127,20 @@ class KasusPembinaan extends Model
         return $this->mingguBelumDipantau($hari) !== [];
     }
 
+    /** Simpan perkembangan satu minggu pemantauan; catatan lama tetap dipakai bila tidak diberikan. */
+    public function catatPemantauan(int $minggu, string $tingkat, ?string $catatan = null): void
+    {
+        abort_unless($minggu >= 1 && $minggu <= $this->mingguDimulai(), 422);
+        abort_unless(array_key_exists($tingkat, self::PERKEMBANGAN), 422);
+
+        $data = ['tingkat' => $tingkat, 'user_id' => auth()->id()];
+        if ($catatan !== null) {
+            $data['catatan'] = trim($catatan) ?: null;
+        }
+        $this->pemantauan()->updateOrCreate(['minggu' => $minggu], $data);
+        $this->load('pemantauan');
+    }
+
     /** Semua minggu sudah dipantau tetapi status akhir belum ditetapkan. */
     public function siapDitutup(): bool
     {
