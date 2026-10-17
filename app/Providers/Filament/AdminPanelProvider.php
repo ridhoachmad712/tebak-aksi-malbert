@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Models\Pengaturan;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -17,6 +18,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -30,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->brandName('TEBAK AKSI · Admin')
             ->brandLogo(fn () => view('filament.brand'))
+            ->favicon(fn () => ($logo = Pengaturan::ambil('logo_sekolah')) ? Storage::disk('public')->url($logo) : asset('favicon.svg'))
             ->colors([
                 'primary' => Color::Orange,
                 'info' => Color::Teal,

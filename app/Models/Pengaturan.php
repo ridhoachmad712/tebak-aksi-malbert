@@ -41,6 +41,51 @@ class Pengaturan extends Model
         'kota_ttd' => 'Makassar',
         'logo_sekolah' => '',
         'kontak_sekolah' => '',
+
+        // Tampilan situs (diatur admin di menu Tampilan Situs)
+        'medsos_instagram' => '',
+        'medsos_facebook' => '',
+        'medsos_youtube' => '',
+        'medsos_whatsapp' => '',
+        'beranda_judul' => 'Lima belas menit membaca, setiap hari, di teras kelas.',
+        'beranda_paragraf' => 'TEBAK AKSI mengajak murid membaca, merangkum, dan menceritakan kembali bacaannya, sementara guru membina karakter mereka. Semuanya dicatat setiap hari, sehingga kemajuan setiap kelas terlihat jelas.',
+        'beranda_tombol1_teks' => 'Lihat kegiatan murid',
+        'beranda_tombol1_tujuan' => 'galeri',
+        'beranda_tombol2_teks' => 'Tentang TEBAK AKSI',
+        'beranda_tombol2_tujuan' => 'halaman:tentang-tebak-aksi',
+        'beranda_foto_id' => '',
+        'beranda_tampil_angka' => true,
+        'beranda_tampil_alur' => true,
+        'beranda_tampil_galeri' => true,
+        'beranda_tampil_jalan_pintas' => true,
+        'beranda_tampil_berita' => true,
+        'alur_judul' => 'Yang terjadi di setiap sesi Teras Baca',
+        'alur_langkah' => [
+            ['judul' => 'Membaca 15 menit', 'keterangan' => 'Murid memilih buku sendiri dan membaca dengan tenang, lalu mencatatnya di jurnal literasi.'],
+            ['judul' => 'Memahami dan merangkum', 'keterangan' => 'Murid menemukan ide pokok bacaan dan menuliskannya dengan bahasa sendiri.'],
+            ['judul' => 'Menyampaikan', 'keterangan' => 'Murid menceritakan kembali isi bacaan kepada teman atau guru.'],
+            ['judul' => 'Membina karakter', 'keterangan' => 'Bila ada pelanggaran, guru membina murid dan memantau perubahannya setiap minggu selama empat minggu.'],
+        ],
+        'menu_publik' => [
+            ['tujuan' => 'beranda', 'label' => 'Beranda', 'tampil' => true],
+            ['tujuan' => 'halaman:tentang-tebak-aksi', 'label' => 'Tentang', 'tampil' => true],
+            ['tujuan' => 'berita', 'label' => 'Berita', 'tampil' => true],
+            ['tujuan' => 'galeri', 'label' => 'Galeri', 'tampil' => true],
+            ['tujuan' => 'diseminasi', 'label' => 'Diseminasi', 'tampil' => true],
+            ['tujuan' => 'manual', 'label' => 'Manual Book', 'tampil' => true],
+            ['tujuan' => 'pengaduan', 'label' => 'Pengaduan', 'tampil' => true],
+        ],
+    ];
+
+    /** Halaman tetap yang bisa dipakai sebagai tujuan menu dan tombol. */
+    public const TUJUAN_TETAP = [
+        'beranda' => 'Beranda',
+        'berita' => 'Berita',
+        'galeri' => 'Galeri',
+        'diseminasi' => 'Diseminasi',
+        'manual' => 'Manual Book',
+        'pengaduan' => 'Layanan Pengaduan',
+        'masuk' => 'Masuk / aplikasi guru',
     ];
 
     public static function semua(): array
@@ -61,9 +106,61 @@ class Pengaturan extends Model
         return (float) self::ambil($kunci, 0);
     }
 
+    public static function aktif(string $kunci): bool
+    {
+        return filter_var(self::ambil($kunci, false), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /** Pengaturan berbentuk daftar (disimpan sebagai JSON). */
+    public static function daftar(string $kunci): array
+    {
+        $nilai = self::ambil($kunci, []);
+
+        return is_array($nilai) ? $nilai : (json_decode((string) $nilai, true) ?: []);
+    }
+
+    /** Pilihan tujuan tombol/menu: halaman tetap dan halaman konten yang terbit. */
+    public static function pilihanTujuan(): array
+    {
+        $halaman = Konten::terbit()->where('jenis', 'halaman')->orderBy('urutan')->pluck('judul', 'slug')
+            ->mapWithKeys(fn ($judul, $slug) => ['halaman:'.$slug => 'Halaman: '.$judul])->all();
+
+        return self::TUJUAN_TETAP + $halaman;
+    }
+
+    /** Alamat dari kode tujuan; null bila tujuan sudah tidak ada (misalnya halaman dihapus). */
+    public static function urlTujuan(?string $tujuan): ?string
+    {
+        if (! $tujuan) {
+            return null;
+        }
+
+        if (str_starts_with($tujuan, 'halaman:')) {
+            $slug = substr($tujuan, 8);
+
+            return Konten::terbit()->where('slug', $slug)->exists() ? route('halaman', $slug) : null;
+        }
+
+        return match ($tujuan) {
+            'beranda' => route('beranda'),
+            'berita' => route('berita'),
+            'galeri' => route('galeri'),
+            'diseminasi' => route('diseminasi'),
+            'manual' => route('manual'),
+            'pengaduan' => route('pengaduan'),
+            'masuk' => route('login'),
+            default => null,
+        };
+    }
+
     public static function simpan(array $data): void
     {
         foreach ($data as $kunci => $nilai) {
+            $nilai = match (true) {
+                is_array($nilai) => json_encode(array_values($nilai)),
+                is_bool($nilai) => $nilai ? '1' : '0',
+                default => $nilai,
+            };
             static::updateOrCreate(['kunci' => $kunci], ['nilai' => $nilai]);
         }
 

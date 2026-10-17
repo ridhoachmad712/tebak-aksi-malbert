@@ -10,6 +10,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -58,11 +59,11 @@ class KontenResource extends Resource
             Textarea::make('ringkasan')->rows(2)->maxLength(500),
             FileUpload::make('gambar')->label('Gambar utama')->image()->disk('public')->directory('konten')->maxSize(4096),
             RichEditor::make('isi')->toolbarButtons([['bold', 'italic', 'underline', 'link'], ['h2', 'h3', 'blockquote', 'bulletList', 'orderedList'], ['undo', 'redo']]),
-            Grid::make(3)->schema([
+            Grid::make(1)->schema([
                 Toggle::make('terbit')->label('Terbitkan')->default(true),
-                Toggle::make('tampil_menu')->label('Tampil di menu atas')->visible(fn (Get $get) => $get('jenis') === 'halaman'),
-                TextInput::make('urutan')->numeric()->default(0)->visible(fn (Get $get) => $get('jenis') === 'halaman'),
             ]),
+            Placeholder::make('info_menu')->hiddenLabel()->visible(fn (Get $get) => $get('jenis') === 'halaman')
+                ->content('Untuk menampilkan halaman ini di menu atas, tambahkan di Tampilan Situs, tab Menu.'),
         ]);
     }
 
@@ -75,7 +76,6 @@ class KontenResource extends Resource
                 TextColumn::make('jenis')->badge()->formatStateUsing(fn ($state) => Konten::JENIS[$state]),
                 TextColumn::make('terbit_pada')->label('Terbit')->date('d/m/Y')->sortable(),
                 ToggleColumn::make('terbit'),
-                ToggleColumn::make('tampil_menu')->label('Di menu'),
             ])
             ->filters([SelectFilter::make('jenis')->options(Konten::JENIS)])
             ->recordActions([

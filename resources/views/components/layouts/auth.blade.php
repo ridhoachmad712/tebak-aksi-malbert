@@ -7,6 +7,7 @@
     <title>{{ $judul ?? 'Masuk' }} · TEBAK AKSI</title>
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <x-ikon-situs />
 </head>
 <body class="min-h-screen">
     <x-notifikasi />

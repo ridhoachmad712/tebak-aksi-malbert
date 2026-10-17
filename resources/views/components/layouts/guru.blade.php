@@ -24,10 +24,12 @@
     <title>{{ isset($judul) ? $judul.' · ' : '' }}TEBAK AKSI</title>
     @fonts
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <x-ikon-situs />
     @livewireStyles
 </head>
 <body class="min-h-screen pb-24 md:pb-10">
     <x-notifikasi />
+    <x-pengumuman sasaran="guru" />
 
     <header class="sticky top-0 z-30 border-b border-garis bg-white">
         <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">

@@ -11,6 +11,7 @@ use App\Models\Konten;
 use App\Models\ManualBook;
 use App\Models\Murid;
 use App\Models\Pengaduan;
+use App\Models\Pengaturan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -31,9 +32,11 @@ class PublikController extends Controller
             'murid' => Murid::where('aktif', true)->count(),
         ];
 
+        $idFoto = Pengaturan::ambil('beranda_foto_id');
+
         return view('publik.beranda', [
             'statistik' => $statistik,
-            'tentang' => Konten::terbit()->where('jenis', 'halaman')->where('tampil_menu', true)->orderBy('urutan')->first(),
+            'fotoPembuka' => $idFoto ? Foto::where('tampil_galeri', true)->find($idFoto) : null,
             'berita' => Konten::terbit()->where('jenis', 'berita')->latest('terbit_pada')->limit(3)->get(),
             'galeri' => Foto::where('tampil_galeri', true)->latest()->limit(8)->get(),
         ]);

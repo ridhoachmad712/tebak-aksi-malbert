@@ -7,7 +7,6 @@ use App\Models\Pengaturan;
 use App\Models\TahunAjaran;
 use BackedEnum;
 use Filament\Actions\Action;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -45,7 +44,6 @@ class PengaturanTarget extends Page
                 $nilai["baseline_$s"] = BaselinePelanggaran::where('tahun_ajaran_id', $ta->id)->where('semester', $s)->value('jumlah');
             }
         }
-        $nilai['logo_sekolah'] = $nilai['logo_sekolah'] ?: null;
         $this->form->fill($nilai);
     }
 
@@ -82,15 +80,6 @@ class PengaturanTarget extends Page
                     TextInput::make('baseline_1')->label('Semester Ganjil')->numeric()->minValue(0)->suffix('kasus'),
                     TextInput::make('baseline_2')->label('Semester Genap')->numeric()->minValue(0)->suffix('kasus'),
                 ]),
-            Section::make('Identitas sekolah (untuk laporan cetak dan halaman publik)')->columns(2)->schema([
-                TextInput::make('nama_sekolah')->required()->columnSpanFull(),
-                TextInput::make('nama_kepala_sekolah')->label('Nama kepala sekolah'),
-                TextInput::make('nip_kepala_sekolah')->label('NIP kepala sekolah'),
-                TextInput::make('alamat_sekolah')->label('Alamat sekolah'),
-                TextInput::make('kota_ttd')->label('Kota (tempat tanda tangan)'),
-                TextInput::make('kontak_sekolah')->label('Kontak sekolah (telepon/email)'),
-                FileUpload::make('logo_sekolah')->label('Logo sekolah')->image()->disk('public')->directory('pengaturan')->maxSize(2048),
-            ]),
         ]);
     }
 
@@ -119,7 +108,6 @@ class PengaturanTarget extends Page
             }
         }
 
-        $data['logo_sekolah'] = $data['logo_sekolah'] ?? '';
         Pengaturan::simpan(array_intersect_key($data, Pengaturan::BAWAAN));
 
         Notification::make()->success()->title('Pengaturan disimpan')->send();
