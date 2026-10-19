@@ -17,13 +17,15 @@
     @else
         <div class="kartu flex items-center justify-between gap-2 p-2">
             <button wire:click="pindahHari(-1)" class="tombol-kedua px-3" aria-label="Hari kegiatan sebelumnya"><x-heroicon-m-chevron-left class="h-5 w-5" /></button>
-            <div x-data class="flex flex-1 flex-col items-center text-center">
+            <div class="flex flex-1 flex-col items-center text-center">
                 <span class="text-lg font-extrabold">{{ Rekap::tanggalPanjang($tgl) }}</span>
-                <button type="button" x-on:click="try { $refs.tgl.showPicker() } catch (e) { $refs.tgl.focus(); $refs.tgl.click() }"
-                    class="mt-0.5 inline-flex min-h-8 items-center gap-1 text-sm font-bold text-brand-700 hover:underline">
+                {{-- Kotak tanggal bawaan browser diletakkan transparan di atas tulisan, sehingga yang diklik langsung pemilih tanggal (andal di Chrome, Safari, dan HP) --}}
+                <label class="relative mt-0.5 inline-flex min-h-8 cursor-pointer items-center gap-1 rounded-md px-2 text-sm font-bold text-brand-700 focus-within:ring-2 focus-within:ring-brand-700 hover:underline">
                     <x-heroicon-o-calendar class="h-4 w-4" /> Ganti tanggal
-                </button>
-                <input x-ref="tgl" type="date" wire:model.live="tanggal" max="{{ today()->toDateString() }}" class="sr-only" tabindex="-1" aria-label="Tanggal kegiatan">
+                    <input type="date" wire:model.live="tanggal" max="{{ today()->toDateString() }}" aria-label="Ganti tanggal kegiatan"
+                        x-data x-on:click="try { $el.showPicker() } catch (e) {}"
+                        class="pemilih-tanggal absolute inset-0 h-full w-full cursor-pointer opacity-0">
+                </label>
             </div>
             <button wire:click="pindahHari(1)" @disabled($tgl->isToday()) class="tombol-kedua px-3" aria-label="Hari kegiatan berikutnya"><x-heroicon-m-chevron-right class="h-5 w-5" /></button>
         </div>
