@@ -146,7 +146,7 @@ Dicatat **hanya saat ada pelanggaran**.
 |---|---|:-:|
 | Murid | Pilih dari daftar | ✓ |
 | Tanggal kejadian | Tanggal (bawaan: hari ini) | ✓ |
-| Kondisi Awal | Teks singkat | ✓ |
+| Kondisi Awal | Teks singkat (bisa memakai saran dari jenis pelanggaran yang dipilih) | – |
 | Jenis Pelanggaran | Pilih dari daftar admin, atau tulis sendiri | ✓ |
 | Tingkat | Ringan / Sedang / Berat | ✓ |
 | Tindakan Pembinaan | Pilih dari daftar admin, atau tulis sendiri | ✓ |
@@ -378,7 +378,7 @@ Alasan: Laravel berjalan baik di hosting Hostinger biasa tanpa server khusus, me
   - Karakter (6 aspek)
   - Observasi konsistensi membaca dan pemanfaatan Teras Baca
 - Perbandingan sebelum–sesudah dari hasil asesmen
-- Jurnal Pembinaan lengkap (alur Observation–Thought–Feeling–Desire)
+- Jurnal Pembinaan lengkap (alur Observation–Thought–Feeling–Desire), **dimajukan ke Catatan Perbaikan 19 Oktober 2026 (bagian 14, nomor 1)**
 
 Rancangan data Tahap 1 sudah menyiapkan tahun pelajaran, semester, murid, dan aspek karakter agar Tahap 2 dapat ditambahkan tanpa membongkar yang sudah ada.
 
@@ -396,3 +396,21 @@ Seluruh usulan bawaan di bawah ini telah disetujui.
 | 4 | Apakah murid tampil **berurutan abjad** di tabel harian? | Ya, berurutan abjad |
 | 5 | **Kategori pengaduan** apa saja? | Saran, Pertanyaan, Keluhan, Lainnya |
 | 6 | Apakah **identitas sekolah** (logo, nama kepala sekolah) dicetak di laporan? | Ya, diatur admin |
+
+---
+
+## 14. Catatan Perbaikan (19 Oktober 2026)
+
+Masukan setelah uji coba. **Status: belum dikerjakan, kecuali yang ditandai Selesai.** Kolom "Rincian rencana" adalah tafsiran awal dan perlu dikonfirmasi pemilik sebelum dikerjakan; hal yang masih perlu dijawab ditandai **Perlu dipastikan**.
+
+| No | Catatan | Rincian rencana | Bagian terkait |
+|---|---|---|---|
+| 1 | Pelanggaran memakai pendekatan **OTFD** | Pembinaan pelanggaran memakai alur **Observation–Thought–Feeling–Desire** (sebelumnya direncanakan untuk Tahap 2). Saat mencatat atau memantau kasus, guru mengisi: **Observation** (apa yang terlihat), **Thought** (apa yang dipikirkan murid), **Feeling** (apa yang dirasakan murid), **Desire** (apa yang ingin murid lakukan atau perbaiki). **Perlu dipastikan:** diisi sekali saat kasus dicatat, atau setiap pemantauan mingguan; wajib atau opsional; isian berupa teks bebas atau pilihan. | 5.3 Kasus Pembinaan, laporan Pelanggaran |
+| 2 | Pratinjau foto yang diunggah di halaman Karya Literasi (di rekap karya) | Foto karya tampil sebagai gambar kecil yang bisa diperbesar, baik di daftar Karya Literasi maupun di rekap (laporan Ekosistem Literat). | 5.4 Karya Literasi, 5.5 Rekap |
+| 3 | Warna tombol **Simpan catatan** diubah agar terlihat | Tombol *Simpan catatan* di Kegiatan Harian (isian catatan singkat) saat ini bergaya tombol kedua (putih); diubah menjadi tombol yang lebih menonjol agar guru tidak lupa menekannya. **Selesai:** tombol kini memakai warna aksen (jingga) seperti tombol utama. | 5.2 Kegiatan Harian |
+| 4 | Foto dokumentasi bisa diunggah lebih dari satu | Guru dapat memilih beberapa foto sekaligus dan menambah foto lagi tanpa menghapus yang sudah ada. Catatan teknis: kotak unggah sudah mengizinkan banyak berkas; **perlu dipastikan** di HP guru apakah yang terjadi hanya satu foto terpilih atau foto lama tertimpa. | 5.2 Kegiatan Harian (foto dokumentasi) |
+| 5 | Bentuk pembinaan berupa karya | Tindakan pembinaan dapat berupa **tugas membuat karya** (misalnya menulis refleksi atau poster). Karya hasil pembinaan dicatat dan dihubungkan dengan kasusnya, sehingga terlihat di rincian kasus. **Perlu dipastikan:** apakah karya pembinaan ikut dihitung di Karya Literasi dan laporan Ekosistem Literat, atau dipisahkan. | 5.3 Kasus Pembinaan, 5.4 Karya Literasi |
+| 6 | Pratinjau karya | Halaman pratinjau satu karya: foto (bisa diperbesar), judul, jenis, pemilik, kelas, tanggal, dan buku sumber, tanpa harus membuka formulir ubah. | 5.4 Karya Literasi |
+| 7 | Karya murid ditampilkan di halaman depan, terpisah dari dokumentasi kegiatan | Bagian baru **Karya Murid** di halaman publik, terpisah dari Galeri dokumentasi kegiatan, menampilkan foto karya, judul, jenis karya, nama murid, dan kelas. Hanya karya yang dipilih admin yang tampil. Karena menampilkan **nama murid**, ini menjadi pengecualian dari aturan bagian 11; **perlu dipastikan**: nama lengkap atau nama panggilan/inisial, dan apakah perlu persetujuan orang tua. | 9. Halaman Publik, 8.7 Konten Publik, 11. Keamanan dan Privasi |
+| 8 | Hilangkan tanggal di riwayat pengisian | Riwayat pengisian di Kegiatan Harian cukup menampilkan siapa yang mengisi atau mengubah (misalnya *Diisi oleh Ibu Sari*), tanpa tanggal dan jam. **Perlu dipastikan:** hanya tanggal yang dihilangkan dan jam tetap ditampilkan, atau keduanya. | 5.2 Kegiatan Harian |
+

@@ -258,7 +258,7 @@
                     <label for="catatan" class="label mt-5">Catatan singkat <span class="font-normal text-slate-600">(opsional)</span></label>
                     <textarea id="catatan" wire:model="catatan" rows="2" @disabled(! $this->bolehUbah) placeholder="Contoh: Membaca buku cerita rakyat bersama" class="isian"></textarea>
                     @if ($this->bolehUbah)
-                        <button wire:click="simpanCatatan" class="tombol-kedua mt-2">Simpan catatan</button>
+                        <button wire:click="simpanCatatan" wire:loading.attr="disabled" class="tombol-utama mt-2">Simpan catatan</button>
                     @endif
                 </div>
 
