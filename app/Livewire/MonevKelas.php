@@ -36,6 +36,7 @@ class MonevKelas extends Component
             'ringkasKelas' => $data['indikator']['per_kelas'][0],
             'muridPerhatian' => RingkasanMonev::muridPerluPerhatian(Rekap::rekapKelas($this->kelas, $periode['dari'], $periode['sampai'])),
             'kasusAktif' => KasusPembinaan::dalamPembinaan()->where('kelas_id', $this->kelas->id)
+                ->whereBetween('tanggal', [$periode['dari']->toDateString(), $periode['sampai']->toDateString()])
                 ->with(['murid', 'kelas', 'jenisPelanggaran', 'tindakanPembinaan'])->orderBy('tanggal')->get(),
         ])->title('Monev Kelas '.$this->kelas->nama);
     }

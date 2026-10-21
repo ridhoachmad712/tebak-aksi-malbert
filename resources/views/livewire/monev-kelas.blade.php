@@ -42,7 +42,8 @@
             </div>
             <div>
                 <h3 class="px-4 pt-3 text-sm font-bold text-slate-700">Kasus dalam pembinaan ({{ $kasusAktif->count() }})</h3>
-                @include('monev.daftar-tindak-lanjut', ['kasus' => $kasusAktif, 'tampilKelas' => false, 'kosong' => 'Tidak ada murid kelas ini yang sedang dibina.'])
+                <p class="px-4 py-2 text-xs text-slate-600">Kasus terjadi dalam periode terpilih dan masih terbuka saat ini.</p>
+                @include('monev.daftar-tindak-lanjut', ['kasus' => $kasusAktif, 'tampilKelas' => false, 'kosong' => 'Tidak ada kasus dalam periode terpilih yang masih dibina. Pilih periode lain untuk melihat kasus lainnya.'])
             </div>
         </div>
     </section>

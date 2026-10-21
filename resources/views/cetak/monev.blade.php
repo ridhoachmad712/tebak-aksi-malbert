@@ -7,6 +7,10 @@
         'rose' => 'background:#ffe4e6;color:#9f1239;font-weight:bold',
         default => '',
     };
+    $rataRataKelas = [];
+    foreach (['jumlah', 'persen', 'budaya', 'literasi', 'kasus_total', 'kasus_aktif', 'kasus_selesai'] as $kolomRataRata) {
+        $rataRataKelas[$kolomRataRata] = Rekap::rerata(collect($indikator['per_kelas'])->pluck($kolomRataRata)->all());
+    }
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -49,7 +53,7 @@
     </div>
 
     <h1>Ringkasan Monitoring dan Evaluasi</h1>
-    <div class="sub">Seluruh sekolah · {{ $label }} · {{ $hari }} hari kegiatan</div>
+    <div class="sub">Seluruh sekolah Â· {{ $label }} Â· {{ $hari }} hari kegiatan</div>
 
     <div class="ringkasan">
         @foreach ($kalimat as $k)
@@ -72,9 +76,9 @@
                 <tr>
                     <td>{{ $b['judul'] }}</td>
                     <td class="angka" style="{{ $b['status'] === 'kurang' ? $warna($b['nilai'], $b['target']) : '' }}">{{ Rekap::persenTeks($b['nilai']) }}</td>
-                    <td class="angka">≥ {{ Rekap::persenTeks((float) $b['target']) }}</td>
+                    <td class="angka">â‰¥ {{ Rekap::persenTeks((float) $b['target']) }}</td>
                     <td>{{ match ($b['status']) { 'tercapai' => 'Tercapai', 'kurang' => 'kurang '.Rekap::persenTeks($b['selisih'], false).' poin', 'belum_cukup' => 'Data belum cukup', default => 'Belum ada data' } }}</td>
-                    <td>{{ $b['tren'] === null ? '–' : (abs($b['tren']) < 0.1 ? 'tetap' : ($b['tren'] > 0 ? 'naik ' : 'turun ').Rekap::persenTeks(abs($b['tren']), false).' poin') }}</td>
+                    <td>{{ $b['tren'] === null ? 'â€“' : (abs($b['tren']) < 0.1 ? 'tetap' : ($b['tren'] > 0 ? 'naik ' : 'turun ').Rekap::persenTeks(abs($b['tren']), false).' poin') }}</td>
                 </tr>
             @endforeach
         @endforeach
@@ -86,26 +90,52 @@
             <th>Kelas</th>
             <th>Wali kelas</th>
             <th class="angka">Murid</th>
-            <th class="angka">Murid aktif (≥ {{ Rekap::persenTeks((float) $indikator['murid_aktif']['target']) }})</th>
-            <th class="angka">Budaya Membaca (≥ {{ Rekap::persenTeks((float) $indikator['budaya_membaca']['target']) }})</th>
-            <th class="angka">Kemampuan Literasi (≥ {{ Rekap::persenTeks((float) $indikator['kemampuan_literasi']['target']) }})</th>
-            <th class="angka">Kasus dibina</th>
+            <th class="angka">Murid aktif (â‰¥ {{ Rekap::persenTeks((float) $indikator['murid_aktif']['target']) }})</th>
+            <th class="angka">Budaya Membaca (â‰¥ {{ Rekap::persenTeks((float) $indikator['budaya_membaca']['target']) }})</th>
+            <th class="angka">Kemampuan Literasi (â‰¥ {{ Rekap::persenTeks((float) $indikator['kemampuan_literasi']['target']) }})</th>
+            <th class="angka">Total kasus</th>
+                <th class="angka">Masih dibina</th>
+                <th class="angka">Selesai</th>
         </tr>
         @forelse ($indikator['per_kelas'] as $r)
             <tr>
                 <td>{{ $r['kelas']->nama }}</td>
-                <td>{{ $r['kelas']->waliKelas?->name ?? '–' }}</td>
+                <td>{{ $r['kelas']->waliKelas?->name ?? 'â€“' }}</td>
                 <td class="angka">{{ $r['jumlah'] }}</td>
                 <td class="angka" style="{{ $warna($r['persen'], $indikator['murid_aktif']['target']) }}">{{ Rekap::persenTeks($r['persen']) }}</td>
                 <td class="angka" style="{{ $warna($r['budaya'], $indikator['budaya_membaca']['target']) }}">{{ Rekap::persenTeks($r['budaya']) }}</td>
                 <td class="angka" style="{{ $warna($r['literasi'], $indikator['kemampuan_literasi']['target']) }}">{{ Rekap::persenTeks($r['literasi']) }}</td>
+                <td class="angka">{{ $r['kasus_total'] }}</td>
                 <td class="angka">{{ $r['kasus_aktif'] }}</td>
+                <td class="angka">{{ $r['kasus_selesai'] }}</td>
             </tr>
         @empty
-            <tr><td colspan="7">Belum ada kelas pada tahun ajaran aktif.</td></tr>
+            <tr><td colspan="9">Belum ada kelas pada tahun ajaran aktif.</td></tr>
         @endforelse
+        @if (count($indikator['per_kelas']))
+            <tfoot>
+                <tr>
+                    <th scope="row" colspan="2">Total</th>
+                    <td class="angka">{{ collect($indikator['per_kelas'])->sum('jumlah') }}</td>
+                    <td colspan="3" class="angka">-</td>
+                    <td class="angka">{{ collect($indikator['per_kelas'])->sum('kasus_total') }}</td>
+                    <td class="angka">{{ collect($indikator['per_kelas'])->sum('kasus_aktif') }}</td>
+                    <td class="angka">{{ collect($indikator['per_kelas'])->sum('kasus_selesai') }}</td>
+                </tr>
+                <tr style="background:#f1f5f9;font-weight:bold">
+                    <th scope="row" colspan="2">Rata-rata per kelas</th>
+                    <td class="angka">{{ Rekap::persenTeks($rataRataKelas['jumlah'], false) }}</td>
+                    <td class="angka" style="{{ $warna($rataRataKelas['persen'], $indikator['murid_aktif']['target']) }}">{{ Rekap::persenTeks($rataRataKelas['persen']) }}</td>
+                    <td class="angka" style="{{ $warna($rataRataKelas['budaya'], $indikator['budaya_membaca']['target']) }}">{{ Rekap::persenTeks($rataRataKelas['budaya']) }}</td>
+                    <td class="angka" style="{{ $warna($rataRataKelas['literasi'], $indikator['kemampuan_literasi']['target']) }}">{{ Rekap::persenTeks($rataRataKelas['literasi']) }}</td>
+                    <td class="angka">{{ Rekap::persenTeks($rataRataKelas['kasus_total'], false) }}</td>
+                    <td class="angka">{{ Rekap::persenTeks($rataRataKelas['kasus_aktif'], false) }}</td>
+                    <td class="angka">{{ Rekap::persenTeks($rataRataKelas['kasus_selesai'], false) }}</td>
+                </tr>
+            </tfoot>
+        @endif
     </table>
-    <p class="catatan">Warna hanya pada capaian di bawah target: kuning bila kurang paling banyak {{ RingkasanMonev::SELISIH_RINGAN }} poin, merah bila lebih jauh.</p>
+    <p class="catatan">Warna hanya pada capaian di bawah target: kuning bila kurang paling banyak {{ RingkasanMonev::SELISIH_RINGAN }} poin, merah bila lebih jauh. Kasus dihitung berdasarkan tanggal kejadian dalam periode terpilih. Masih dibina dan Selesai menunjukkan status terkini, bukan status pada akhir periode. Rata-rata dihitung antar kelas; persentase yang belum tersedia tidak ikut dihitung.</p>
 
     @if ($indikator['tindak_lanjut']->isNotEmpty())
         <h2>Murid belum berubah setelah 4 minggu pembinaan</h2>

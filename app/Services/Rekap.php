@@ -378,8 +378,10 @@ class Rekap
         $kelasList = $kelasFilter ? collect([$kelasFilter->loadMissing('waliKelas')]) : Kelas::aktif()->with('waliKelas')->orderBy('tingkat')->orderBy('nama')->get();
         $rekap = self::rekapBanyakKelas($kelasList, $dari, $sampai);
 
-        $kasusAktif = KasusPembinaan::dalamPembinaan()->whereIn('kelas_id', $kelasList->pluck('id'))
-            ->selectRaw('kelas_id, COUNT(*) as jml')->groupBy('kelas_id')->pluck('jml', 'kelas_id');
+        // Kasus terjadi dalam periode terpilih; status mengikuti keadaan terkini.
+        $kasus = self::kasus($dari, $sampai, $kelasFilter)
+            ->whereIn('kelas_id', $kelasList->pluck('id'))->values();
+        $kasusPerKelas = $kasus->groupBy('kelas_id');
 
         $semuaMurid = collect();
         $perKelas = [];
@@ -387,6 +389,8 @@ class Rekap
             $murid = $rekap[$kelas->id]['murid'];
             $semuaMurid = $semuaMurid->concat($murid);
             $aktif = $murid->where('aktif', true)->count();
+            $kasusKelas = $kasusPerKelas->get($kelas->id, collect());
+            $kasusAktif = $kasusKelas->whereNull('status_akhir')->count();
             $perKelas[] = [
                 'kelas' => $kelas,
                 'jumlah' => $murid->count(),
@@ -395,14 +399,15 @@ class Rekap
                 'persen' => self::persen($aktif, $murid->count()),
                 'budaya' => self::rerata($murid->pluck('budaya_persen')->all()),
                 'literasi' => self::rerata($murid->pluck('literasi_persen')->all()),
-                'kasus_aktif' => (int) ($kasusAktif[$kelas->id] ?? 0),
+                'kasus_total' => $kasusKelas->count(),
+                'kasus_aktif' => $kasusAktif,
+                'kasus_selesai' => $kasusKelas->count() - $kasusAktif,
             ];
         }
 
         $wali = self::rekapGuru($dari, $sampai, $kelasFilter)['guru']->where('wali', true);
 
         // Keberhasilan pembinaan: per murid binaan, dari kasus terakhirnya dalam periode
-        $kasus = self::kasus($dari, $sampai, $kelasFilter);
         $statusMurid = $kasus->groupBy('murid_id')->map(fn ($k) => self::statusTerkini($k->sortBy('tanggal')->last()));
         $berhasil = $statusMurid->filter(fn ($s) => in_array($s, ['positif', 'konsisten'], true))->count();
 

@@ -17,6 +17,29 @@ class MonevKepsekTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_kasus_peta_dan_rincian_mengikuti_periode_dengan_status_terkini(): void
+    {
+        $contoh = \App\Models\KasusPembinaan::firstOrFail();
+        \App\Models\KasusPembinaan::query()->update(['tanggal' => '2026-08-15']);
+        $kelas = $contoh->kelas;
+        foreach ([['2026-09-01', null], ['2026-09-30', 'positif'], ['2026-08-31', null], ['2026-10-01', null]] as [$tanggal, $status]) {
+            $kasus = $contoh->replicate();
+            $kasus->tanggal = $tanggal;
+            $kasus->status_akhir = $status;
+            $kasus->save();
+        }
+        [$dari, $sampai] = Rekap::periodeBulan(2026, 9);
+        $semua = Rekap::indikator($dari, $sampai);
+        $this->assertSame(2, collect($semua['per_kelas'])->sum('kasus_total'));
+        $this->assertSame(1, collect($semua['per_kelas'])->sum('kasus_aktif'));
+        $this->assertSame(1, collect($semua['per_kelas'])->sum('kasus_selesai'));
+        $r = Rekap::indikator($dari, $sampai, $kelas)['per_kelas'][0];
+        $this->assertSame($r['kasus_total'], $r['kasus_aktif'] + $r['kasus_selesai']);
+        Livewire::withQueryParams(['bulan' => '2026-09'])->test(\App\Livewire\MonevKelas::class, ['kelas' => $kelas])
+            ->assertViewHas('kasusAktif', fn ($kasus) => $kasus->count() === 1 && $kasus->first()->tanggal->toDateString() === '2026-09-01');
+        $this->get('/monev?bulan=2026-09')->assertOk()->assertSee('Total kasus')->assertSee('Masih dibina')->assertSee('Selesai');
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
