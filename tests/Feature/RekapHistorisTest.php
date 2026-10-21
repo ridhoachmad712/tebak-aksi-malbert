@@ -67,7 +67,7 @@ class RekapHistorisTest extends TestCase
 
         $kepsek = User::create(['name' => 'Kepala Uji', 'email' => 'kepala-historis@tebakaksi.test', 'password' => 'password', 'peran' => 'kepsek', 'status' => 'aktif']);
         $this->actingAs($kepsek)->get('/dashboard?bulan=2026-09')->assertOk()
-            ->assertSee('Sumber: rekap historis sekolah')
+            ->assertDontSee('rekap historis sekolah')
             ->assertSee('400 karya dilaporkan')
             ->assertSee('Kepemilikan karya per murid masih perlu dilengkapi');
     }

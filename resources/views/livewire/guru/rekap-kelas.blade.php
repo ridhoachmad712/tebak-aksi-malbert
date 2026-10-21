@@ -12,7 +12,6 @@
         </div>
     </div>
 
-    <x-pita-rekonstruksi :dari="$this->dataPeriode()['dari']" :sampai="$this->dataPeriode()['sampai']" />
 
     @if (! $this->kelas)
         <x-belum-ada-kelas />

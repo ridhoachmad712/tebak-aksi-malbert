@@ -30,24 +30,15 @@ class KeteranganRekonstruksiTest extends TestCase
         $this->kelas = Kelas::create(['tahun_ajaran_id' => $this->ta->id, 'tingkat' => 3, 'nama' => '3A']);
     }
 
-    public function test_pita_hanya_muncul_saat_periode_mencakup_bulan_rekonstruksi(): void
+    public function test_keterangan_rekonstruksi_tidak_ditampilkan(): void
     {
         Pengaturan::simpan(['data_awal_rekonstruksi_bulan' => '2026-09', 'data_awal_rekonstruksi_catatan' => 'Catatan uji pita.']);
         $this->actingAs(User::where('peran', 'admin')->first());
 
-        $this->get('/monev?bulan=2026-09')->assertOk()->assertSee('Data awal rekonstruksi September 2026')->assertSee('Catatan uji pita.');
-        $this->get('/monev?periode=semester&semester=1')->assertOk()->assertSee('Data awal rekonstruksi September 2026');
-        $this->get('/monev?bulan=2026-10')->assertOk()->assertDontSee('Data awal rekonstruksi');
-        $this->get('/guru/rekap?kelas='.$this->kelas->id.'&bulan=2026-09')->assertOk()->assertSee('Data awal rekonstruksi September 2026');
-        $this->get('/guru/rekap?kelas='.$this->kelas->id.'&bulan=2026-10')->assertOk()->assertDontSee('Data awal rekonstruksi');
-        $this->get('/guru/kegiatan/'.$this->kelas->id.'?tanggal=2026-09-15')->assertOk()->assertSee('Data awal rekonstruksi September 2026');
-        $this->get('/guru/kegiatan/'.$this->kelas->id.'?tanggal=2026-10-15')->assertOk()->assertDontSee('Data awal rekonstruksi');
-    }
-
-    public function test_pita_tidak_muncul_tanpa_pengaturan(): void
-    {
-        $this->actingAs(User::where('peran', 'admin')->first());
-        $this->get('/monev?bulan=2026-09')->assertOk()->assertDontSee('Data awal rekonstruksi');
+        $this->get('/monev?bulan=2026-09')->assertOk()->assertDontSee('Data awal rekonstruksi')->assertDontSee('Catatan uji pita.');
+        $this->get('/guru/rekap?kelas='.$this->kelas->id.'&bulan=2026-09')->assertOk()->assertDontSee('Data awal rekonstruksi');
+        $this->get('/guru/kegiatan/'.$this->kelas->id.'?tanggal=2026-09-15')->assertOk()->assertDontSee('Data awal rekonstruksi');
+        $this->get('/')->assertOk()->assertDontSee('Data awal rekonstruksi');
     }
 
     public function test_hapus_aman_mengenali_tabel_rekonsiliasi_dan_rekap_historis(): void

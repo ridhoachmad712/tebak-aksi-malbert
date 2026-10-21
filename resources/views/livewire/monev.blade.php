@@ -17,7 +17,6 @@
         <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 font-semibold text-amber-900">Tahun ajaran aktif belum diatur. Admin dapat mengaturnya di Halaman Admin, menu Tahun Ajaran.</div>
     @endunless
 
-    <x-pita-rekonstruksi :dari="$this->dataPeriode()['dari']" :sampai="$this->dataPeriode()['sampai']" />
 
     @include('monev.ringkasan')
 

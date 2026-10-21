@@ -30,7 +30,6 @@
             <button wire:click="pindahHari(1)" @disabled($tgl->isToday()) class="tombol-kedua px-3" aria-label="Hari kegiatan berikutnya"><x-heroicon-m-chevron-right class="h-5 w-5" /></button>
         </div>
 
-        <x-pita-rekonstruksi :dari="$tanggal" />
 
         @if ($this->belumDicatat->isNotEmpty())
             @php $berikut = $this->belumDicatat->first(); @endphp

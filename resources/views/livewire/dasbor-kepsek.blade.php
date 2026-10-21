@@ -29,16 +29,6 @@
             <div class="min-w-0">
                 <h2 id="judul-status" class="text-xs font-extrabold uppercase tracking-wide text-slate-600">Capaian 5 aspek inovasi</h2>
                 <p class="mt-1 text-base font-bold text-slate-900">{{ $labelBulanAspek }}: {{ $bagianRingkas ? implode(', ', $bagianRingkas) : 'belum ada catatan yang cukup untuk dinilai' }}.</p>
-                @if (isset($aspekInovasi['sumber_historis']))
-                    {{-- Sumber rekap historis tetap disebut; keterangannya bisa dibuka --}}
-                    <details class="mt-0.5 text-xs text-slate-600">
-                        <summary class="cursor-pointer">Sumber: rekap historis sekolah</summary>
-                        <p class="mt-1">{{ $aspekInovasi['sumber_historis'] }}, {{ $aspekInovasi['jumlah_murid'] }} murid.</p>
-                        @if ($aspekInovasi['catatan_historis'])
-                            <p class="mt-1">{{ $aspekInovasi['catatan_historis'] }}</p>
-                        @endif
-                    </details>
-                @endif
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <select wire:model.live="bulan" aria-label="Bulan" class="isian w-auto pr-9 font-bold">
