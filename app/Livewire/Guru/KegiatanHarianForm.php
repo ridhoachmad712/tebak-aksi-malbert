@@ -104,7 +104,7 @@ class KegiatanHarianForm extends Component
     public function kegiatan(): ?KegiatanHarian
     {
         return $this->kelasId
-            ? KegiatanHarian::with(['catatanMurid', 'jenisKegiatan', 'foto', 'riwayat.user'])
+            ? KegiatanHarian::with(['catatanMurid', 'jenisKegiatan', 'foto'])
                 ->where('kelas_id', $this->kelasId)->whereDate('tanggal', $this->tanggal)->first()
             : null;
     }

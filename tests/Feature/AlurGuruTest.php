@@ -68,6 +68,11 @@ class AlurGuruTest extends TestCase
         $this->assertFalse((bool) $kegiatan->catatanMurid()->where('murid_id', $budi->id)->value('konsisten'));
         $this->assertSame('membuat', $kegiatan->riwayat()->value('aksi'));
         $this->assertSame($this->guru->id, $kegiatan->dibuat_oleh);
+
+        // Jejak pengisian tetap dicatat untuk Monev, tetapi tidak ditampilkan di halaman guru
+        Livewire::actingAs($this->guru)->test(KegiatanHarianForm::class, ['kelas' => $this->kelas->id])
+            ->assertDontSee('Riwayat pengisian')
+            ->assertDontSee('Diisi oleh');
     }
 
     public function test_satu_catatan_bersama_per_kelas_per_hari_dan_jejak_guru_mapel(): void

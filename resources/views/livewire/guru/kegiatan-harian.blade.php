@@ -288,17 +288,6 @@
                     <p class="mt-2 text-xs text-slate-600">Admin dapat memilih foto untuk Galeri publik. Hindari foto yang menampilkan nama atau data pribadi murid.</p>
                 </div>
             </section>
-
-            @if ($this->kegiatan?->riwayat->isNotEmpty())
-                <section class="kartu p-5">
-                    <h2 class="font-extrabold">Riwayat pengisian</h2>
-                    <ul class="mt-2 space-y-1 text-sm text-slate-700">
-                        @foreach ($this->kegiatan->riwayat->take(10) as $r)
-                            <li>{{ $r->aksi === 'membuat' ? 'Diisi' : 'Diubah' }} oleh <b>{{ $r->user?->name ?? '-' }}</b>, {{ $r->created_at->format('d/m/Y H.i') }}</li>
-                        @endforeach
-                    </ul>
-                </section>
-            @endif
         @endif
     @endif
 </div>
