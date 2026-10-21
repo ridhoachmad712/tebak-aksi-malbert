@@ -56,7 +56,7 @@
                 @include('dasbor.kartu-aspek', ['a' => $a, 'akhir' => $loop->last])
             @endforeach
         </div>
-        <p class="border-t border-garis px-5 py-2 text-xs text-slate-600">Garis tegak pada batang menandai target. Batang dan angka berwarna hanya bila di bawah target. Target diatur admin di menu Target &amp; Patokan.</p>
+        <p class="border-t border-garis px-5 py-2 text-xs text-slate-600">Ketuk kartu untuk melihat rincian dan target tiap aspek. Target diatur admin di menu Target &amp; Patokan.</p>
     </section>
 
     {{-- Inti dashboard: hal yang butuh keputusan kepala sekolah --}}
