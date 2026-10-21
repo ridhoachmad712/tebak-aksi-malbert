@@ -39,7 +39,6 @@ class DasborKepsek extends Component
             'belumBerubah' => Data::belumBerubah(),
             'pelanggaranBerat' => Data::pelanggaranBerat(),
             'pencatatan' => collect(TugasAdmin::pencatatanKelas())->sortBy([['hari_terlewat', 'desc'], ['minggu_ini', 'asc']])->values(),
-            'kelasPerhatian' => Data::kelasPerhatian($indikator),
             'kelasNaik' => Data::kelasNaik($indikator, $monev['indikatorLalu']),
             'labelLalu' => $periode['sebelumnya']['label'] ?? null,
             'karya' => Data::karyaTerbaru(),

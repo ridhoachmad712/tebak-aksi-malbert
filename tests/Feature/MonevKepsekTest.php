@@ -181,7 +181,6 @@ class MonevKepsekTest extends TestCase
             ->assertSee('Ekosistem Literat')
             ->assertSee('Perlu tindakan Bapak/Ibu')
             ->assertSee('Pencatatan kelas minggu ini')
-            ->assertSee('Kelas yang paling butuh perhatian')
             ->assertSee('Kabar baik')
             ->assertSee('Cetak ringkasan Monev');
 

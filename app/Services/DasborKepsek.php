@@ -32,36 +32,6 @@ class DasborKepsek
             ->get();
     }
 
-    /**
-     * Kelas dengan capaian paling jauh di bawah target, paling banyak 3, beserta alasannya.
-     *
-     * @return list<array{kelas: \App\Models\Kelas, alasan: list<string>}>
-     */
-    public static function kelasPerhatian(array $indikator): array
-    {
-        $patokan = [
-            'persen' => ['murid aktif', $indikator['murid_aktif']['target']],
-            'budaya' => ['Budaya Membaca', $indikator['budaya_membaca']['target']],
-            'literasi' => ['Kemampuan Literasi', $indikator['kemampuan_literasi']['target']],
-        ];
-
-        return collect($indikator['per_kelas'])->map(function ($r) use ($patokan) {
-            $kurang = 0;
-            $alasan = [];
-            foreach ($patokan as $kunci => [$nama, $target]) {
-                if ($r[$kunci] !== null && $r[$kunci] < $target) {
-                    $kurang += $target - $r[$kunci];
-                    $alasan[] = $nama.' '.Rekap::persenTeks($r[$kunci]);
-                }
-            }
-            if ($r['kasus_aktif']) {
-                $alasan[] = $r['kasus_aktif'].' kasus dibina';
-            }
-
-            return ['kelas' => $r['kelas'], 'alasan' => $alasan, 'kurang' => $kurang];
-        })->filter(fn ($r) => $r['kurang'] > 0)->sortByDesc('kurang')->take(3)->values()->all();
-    }
-
     /** Kelas dengan kenaikan murid aktif terbesar dibanding bulan lalu (minimal 1 poin). */
     public static function kelasNaik(array $indikator, ?array $indikatorLalu): ?array
     {
