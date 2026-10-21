@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Livewire\Guru\RekapKelas;
+use App\Livewire\MonevKelas;
+use App\Models\KasusPembinaan;
 use App\Models\Kelas;
 use App\Models\User;
 use App\Services\Rekap;
@@ -19,8 +21,8 @@ class MonevKepsekTest extends TestCase
 
     public function test_kasus_peta_dan_rincian_mengikuti_periode_dengan_status_terkini(): void
     {
-        $contoh = \App\Models\KasusPembinaan::firstOrFail();
-        \App\Models\KasusPembinaan::query()->update(['tanggal' => '2026-08-15']);
+        $contoh = KasusPembinaan::firstOrFail();
+        KasusPembinaan::query()->update(['tanggal' => '2026-08-15']);
         $kelas = $contoh->kelas;
         foreach ([['2026-09-01', null], ['2026-09-30', 'positif'], ['2026-08-31', null], ['2026-10-01', null]] as [$tanggal, $status]) {
             $kasus = $contoh->replicate();
@@ -35,7 +37,7 @@ class MonevKepsekTest extends TestCase
         $this->assertSame(1, collect($semua['per_kelas'])->sum('kasus_selesai'));
         $r = Rekap::indikator($dari, $sampai, $kelas)['per_kelas'][0];
         $this->assertSame($r['kasus_total'], $r['kasus_aktif'] + $r['kasus_selesai']);
-        Livewire::withQueryParams(['bulan' => '2026-09'])->test(\App\Livewire\MonevKelas::class, ['kelas' => $kelas])
+        Livewire::withQueryParams(['bulan' => '2026-09'])->test(MonevKelas::class, ['kelas' => $kelas])
             ->assertViewHas('kasusAktif', fn ($kasus) => $kasus->count() === 1 && $kasus->first()->tanggal->toDateString() === '2026-09-01');
         $this->get('/monev?bulan=2026-09')->assertOk()->assertSee('Total kasus')->assertSee('Masih dibina')->assertSee('Selesai');
     }
@@ -91,8 +93,8 @@ class MonevKepsekTest extends TestCase
 
         $kalimat = RingkasanMonev::kalimat($pilar, $this->indikatorContoh(), 'Oktober 2026', 'September');
         $this->assertSame('Oktober 2026: 2 dari 4 target tercapai.', $kalimat[0]);
-        $this->assertStringContainsString('Dibanding September, rata-rata Budaya Membaca naik 2,1 poin', $kalimat[1]);
-        $this->assertStringContainsString('rata-rata Kemampuan Literasi seluruh sekolah (53,6%, target 85%)', $kalimat[2]);
+        $this->assertStringContainsString('Dibanding September, murid mencapai Budaya Membaca naik 2,1 poin', $kalimat[1]);
+        $this->assertStringContainsString('murid mencapai Kemampuan Literasi seluruh sekolah (53,6%, target 85%)', $kalimat[2]);
     }
 
     public function test_periode_pembanding_dan_daftar_bulan_indonesia(): void

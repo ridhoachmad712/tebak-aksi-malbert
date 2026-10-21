@@ -66,6 +66,13 @@ class AspekInovasiTest extends TestCase
         $this->assertSame(50.0, $hasil['Budaya Membaca']['nilai']);
         $this->assertSame(25.0, $hasil['Kemampuan Literasi']['nilai']);
 
+        // Monev memakai cara hitung yang sama (jumlah murid), sehingga angkanya selaras dengan Dashboard
+        $indikator = Rekap::indikator(Carbon::parse('2026-09-01'), Carbon::parse('2026-09-30'));
+        $this->assertSame(50.0, $indikator['budaya_membaca']['nilai']);
+        $this->assertSame(25.0, $indikator['kemampuan_literasi']['nilai']);
+        $this->assertStringStartsWith('1 dari 4 murid', $indikator['kemampuan_literasi']['keterangan']);
+        $this->assertSame(25.0, $indikator['per_kelas'][0]['literasi']);
+
         $this->assertSame(33.3, $hasil['Penguatan Karakter']['nilai']);
         $this->assertSame('Minggu 1: 1 · Minggu 2: 1 · Minggu 3: 0 · Minggu 4: 1', $hasil['Penguatan Karakter']['rincian']);
         $this->assertSame('tercapai', $hasil['Penguatan Karakter']['status']);

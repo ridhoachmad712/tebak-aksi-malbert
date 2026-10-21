@@ -26,9 +26,7 @@ class Pengaturan extends Model
         'target_guru_aktif' => 85,
         'target_keberhasilan_pembinaan' => 80,
         'target_penurunan_pelanggaran' => 20,
-        'target_budaya_membaca' => 85,
-        'target_kemampuan_literasi' => 85,
-        // Target lima aspek inovasi (Dashboard kepala sekolah), dihitung per jumlah murid
+        // Target lima aspek inovasi (Dashboard kepala sekolah dan Monev), dihitung per jumlah murid
         'target_aspek_budaya' => 80,
         'target_aspek_literasi' => 80,
         'target_penurunan_bulanan' => 20,

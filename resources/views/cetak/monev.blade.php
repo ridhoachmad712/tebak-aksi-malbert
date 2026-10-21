@@ -135,7 +135,7 @@
             </tfoot>
         @endif
     </table>
-    <p class="catatan">Warna hanya pada capaian di bawah target: kuning bila kurang paling banyak {{ RingkasanMonev::SELISIH_RINGAN }} poin, merah bila lebih jauh. Kasus dihitung berdasarkan tanggal kejadian dalam periode terpilih. Masih dibina dan Selesai menunjukkan status terkini, bukan status pada akhir periode. Rata-rata dihitung antar kelas; persentase yang belum tersedia tidak ikut dihitung.</p>
+    <p class="catatan">Warna hanya pada capaian di bawah target: kuning bila kurang paling banyak {{ RingkasanMonev::SELISIH_RINGAN }} poin, merah bila lebih jauh. Budaya Membaca dan Kemampuan Literasi menunjukkan persentase murid yang rata-rata indikatornya mencapai batas murid aktif. Kasus dihitung berdasarkan tanggal kejadian dalam periode terpilih. Masih dibina dan Selesai menunjukkan status terkini, bukan status pada akhir periode. Rata-rata dihitung antar kelas; persentase yang belum tersedia tidak ikut dihitung.</p>
 
     @if ($indikator['tindak_lanjut']->isNotEmpty())
         <h2>Murid belum berubah setelah 4 minggu pembinaan</h2>

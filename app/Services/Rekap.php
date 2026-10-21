@@ -247,6 +247,14 @@ class Rekap
         return $nilai ? round(array_sum($nilai) / count($nilai), 1) : null;
     }
 
+    /** Jumlah murid yang persentase pada kolom tersebut mencapai batas murid aktif. */
+    public static function jumlahMencapai(Collection $murid, string $kolom): int
+    {
+        $batas = Pengaturan::angka('batas_murid_aktif');
+
+        return $murid->filter(fn ($b) => $b[$kolom] !== null && $b[$kolom] >= $batas)->count();
+    }
+
     /**
      * Rekap per murid aktif untuk satu kelas dalam satu periode.
      *
@@ -397,8 +405,8 @@ class Rekap
                 'aktif' => $aktif,
                 'belum' => $murid->count() - $aktif,
                 'persen' => self::persen($aktif, $murid->count()),
-                'budaya' => self::rerata($murid->pluck('budaya_persen')->all()),
-                'literasi' => self::rerata($murid->pluck('literasi_persen')->all()),
+                'budaya' => self::persen(self::jumlahMencapai($murid, 'budaya_persen'), $murid->count()),
+                'literasi' => self::persen(self::jumlahMencapai($murid, 'literasi_persen'), $murid->count()),
                 'kasus_total' => $kasusKelas->count(),
                 'kasus_aktif' => $kasusAktif,
                 'kasus_selesai' => $kasusKelas->count() - $kasusAktif,
@@ -430,6 +438,10 @@ class Rekap
 
         $tindakLanjut = $kasus->filter(fn ($k) => self::statusTerkini($k) === 'belum' && ($k->status_akhir || $k->pemantauan->count() >= 4))->values();
         $targetMuridAktif = Pengaturan::angka('target_murid_aktif');
+        // Budaya Membaca dan Kemampuan Literasi dihitung per jumlah murid, sama seperti laporan hasil inovasi dan Dashboard
+        $budayaMencapai = self::jumlahMencapai($semuaMurid, 'budaya_persen');
+        $literasiMencapai = self::jumlahMencapai($semuaMurid, 'literasi_persen');
+        $batasHari = (int) Pengaturan::angka('batas_murid_aktif');
 
         return [
             'murid_aktif' => [
@@ -460,14 +472,14 @@ class Rekap
                 },
             ],
             'budaya_membaca' => [
-                'nilai' => self::rerata($semuaMurid->pluck('budaya_persen')->all()),
-                'target' => Pengaturan::angka('target_budaya_membaca'),
-                'keterangan' => 'Rata-rata hadir, konsisten, dan jurnal',
+                'nilai' => self::persen($budayaMencapai, $semuaMurid->count()),
+                'target' => Pengaturan::angka('target_aspek_budaya'),
+                'keterangan' => $budayaMencapai.' dari '.$semuaMurid->count().' murid rata-rata hadir, konsisten, dan jurnal ≥ '.$batasHari.'% hari',
             ],
             'kemampuan_literasi' => [
-                'nilai' => self::rerata($semuaMurid->pluck('literasi_persen')->all()),
-                'target' => Pengaturan::angka('target_kemampuan_literasi'),
-                'keterangan' => 'Rata-rata memahami, merangkum, dan menyampaikan',
+                'nilai' => self::persen($literasiMencapai, $semuaMurid->count()),
+                'target' => Pengaturan::angka('target_aspek_literasi'),
+                'keterangan' => $literasiMencapai.' dari '.$semuaMurid->count().' murid rata-rata memahami, merangkum, dan menyampaikan ≥ '.$batasHari.'% hari',
             ],
             'per_kelas' => $perKelas,
             'kelas_di_bawah_target' => collect($perKelas)->filter(fn ($r) => $r['persen'] !== null && $r['persen'] < $targetMuridAktif)->values(),

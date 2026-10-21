@@ -16,10 +16,10 @@ class RingkasanMonev
     public const PILAR = [
         'Budaya Membaca' => [
             'murid_aktif' => 'Murid aktif memanfaatkan Teras Baca',
-            'budaya_membaca' => 'Rata-rata Budaya Membaca',
+            'budaya_membaca' => 'Murid mencapai Budaya Membaca',
         ],
         'Kemampuan Literasi' => [
-            'kemampuan_literasi' => 'Rata-rata Kemampuan Literasi',
+            'kemampuan_literasi' => 'Murid mencapai Kemampuan Literasi',
         ],
         'Karakter' => [
             'keberhasilan_pembinaan' => 'Keberhasilan pembinaan',

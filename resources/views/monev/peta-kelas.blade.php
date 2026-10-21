@@ -65,4 +65,4 @@
         @endif
     </table>
 </div>
-<p class="border-t border-garis px-4 py-2 text-xs text-slate-600">Hanya sel di bawah target yang berwarna. Kasus dihitung berdasarkan tanggal kejadian dalam periode terpilih. Masih dibina dan Selesai menunjukkan status terkini, bukan status pada akhir periode. Rata-rata dihitung antar kelas; persentase yang belum tersedia tidak ikut dihitung. Pilih nama kelas untuk melihat murid yang perlu perhatian dan kasus pembinaannya.</p>
+<p class="border-t border-garis px-4 py-2 text-xs text-slate-600">Hanya sel di bawah target yang berwarna. Budaya Membaca dan Kemampuan Literasi menunjukkan persentase murid yang rata-rata indikatornya mencapai batas murid aktif. Kasus dihitung berdasarkan tanggal kejadian dalam periode terpilih. Masih dibina dan Selesai menunjukkan status terkini, bukan status pada akhir periode. Rata-rata dihitung antar kelas; persentase yang belum tersedia tidak ikut dihitung. Pilih nama kelas untuk melihat murid yang perlu perhatian dan kasus pembinaannya.</p>

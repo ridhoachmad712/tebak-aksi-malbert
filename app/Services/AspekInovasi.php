@@ -36,9 +36,9 @@ class AspekInovasi
         $adaHari = Rekap::hariKegiatan($dari, $sampai)->isNotEmpty();
 
         // 1. Budaya Membaca: murid yang hadir, konsisten, dan mengisi jurnal (rata-ratanya) minimal batas hari
-        $budaya = $murid->filter(fn ($b) => $b['budaya_persen'] !== null && $b['budaya_persen'] >= $batas)->count();
+        $budaya = Rekap::jumlahMencapai($murid, 'budaya_persen');
         // 2. Kemampuan Literasi: murid yang memahami, merangkum, dan menyampaikan (rata-ratanya) minimal batas hari
-        $literasi = $murid->filter(fn ($b) => $b['literasi_persen'] !== null && $b['literasi_persen'] >= $batas)->count();
+        $literasi = Rekap::jumlahMencapai($murid, 'literasi_persen');
 
         // 3. Penguatan Karakter: jumlah murid berbeda yang melanggar, bulan ini dibanding bulan lalu, dan per minggu
         $kelasIds = $kelasList->pluck('id');
@@ -70,7 +70,7 @@ class AspekInovasi
         $aspek = [
             [
                 'nama' => 'Budaya Membaca',
-                'uraian' => "murid membaca 15 menit secara konsisten dan mengisi jurnal (≥ ".(int) $batas.'% hari)',
+                'uraian' => 'murid membaca 15 menit secara konsisten dan mengisi jurnal (≥ '.(int) $batas.'% hari)',
                 'capaian' => "{$budaya} dari {$n} murid",
                 'nilai' => $adaHari ? $persen($budaya, $n) : null,
                 'target' => Pengaturan::angka('target_aspek_budaya'),

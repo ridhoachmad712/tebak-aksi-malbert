@@ -246,8 +246,8 @@ Rekap di layar menampilkan **jumlah centang / jumlah hari kegiatan** beserta war
 | Guru aktif memanfaatkan Teras Baca | Guru aktif ÷ seluruh guru × 100% | ≥ 85% |
 | Keberhasilan pembinaan | Murid binaan berstatus 🟩/⭐ ÷ seluruh murid binaan × 100% | ≥ 80% |
 | Penurunan pelanggaran per semester | (Baseline − jumlah semester ini) ÷ baseline × 100% | ≥ 20% |
-| Rata-rata Budaya Membaca | Rata-rata % tiga indikator Budaya Membaca | diatur admin |
-| Rata-rata Kemampuan Literasi | Rata-rata % tiga indikator Kemampuan Literasi | diatur admin |
+| Murid mencapai Budaya Membaca | Murid yang rata-rata % tiga indikator Budaya Membaca ≥ batas murid aktif ÷ seluruh murid × 100% (sama dengan Dashboard dan laporan hasil inovasi) | ≥ 80% |
+| Murid mencapai Kemampuan Literasi | Murid yang rata-rata % tiga indikator Kemampuan Literasi ≥ batas murid aktif ÷ seluruh murid × 100% (sama dengan Dashboard dan laporan hasil inovasi) | ≥ 80% |
 
 Tampilan tambahan:
 - **Capaian per kelas I–VI:** jumlah murid, aktif, belum aktif, % aktif

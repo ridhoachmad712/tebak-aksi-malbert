@@ -63,11 +63,9 @@ class PengaturanTarget extends Page
                 $persen('target_guru_aktif', 'Guru aktif memanfaatkan Teras Baca'),
                 $persen('target_keberhasilan_pembinaan', 'Keberhasilan pembinaan', 'Murid binaan berstatus Berubah positif / Konsisten positif.'),
                 $persen('target_penurunan_pelanggaran', 'Penurunan pelanggaran per semester'),
-                $persen('target_budaya_membaca', 'Rata-rata Budaya Membaca'),
-                $persen('target_kemampuan_literasi', 'Rata-rata Kemampuan Literasi'),
             ]),
             Section::make('Target 5 aspek inovasi')
-                ->description('Ditampilkan di Dashboard kepala sekolah, dihitung per jumlah murid seperti laporan hasil inovasi. Kepatuhan Perilaku memakai target Keberhasilan pembinaan, dan murid aktif pada Ekosistem Literat memakai target Murid aktif di atas.')
+                ->description('Ditampilkan di Dashboard kepala sekolah dan Monev, dihitung per jumlah murid seperti laporan hasil inovasi. Kepatuhan Perilaku memakai target Keberhasilan pembinaan, dan murid aktif pada Ekosistem Literat memakai target Murid aktif di atas.')
                 ->columns(2)->schema([
                     $persen('target_aspek_budaya', 'Budaya Membaca', 'Murid yang membaca konsisten dan mengisi jurnal minimal sebesar batas murid aktif.'),
                     $persen('target_aspek_literasi', 'Kemampuan Literasi', 'Murid yang memahami, merangkum, atau menceritakan kembali isi bacaan.'),
