@@ -188,6 +188,31 @@ class Rekap
         return $hari;
     }
 
+    /**
+     * Bulan yang ditampilkan bawaan di tampilan kepala sekolah dan halaman depan:
+     * bulan lalu selama bulan berjalan masih punya hari kegiatan tersisa, agar yang tampil data satu bulan penuh.
+     */
+    public static function bulanBawaan(): string
+    {
+        $daftar = self::daftarBulan();
+        $ini = today()->format('Y-m');
+
+        $masihAda = false;
+        for ($d = today()->addDay(); $d->lte(today()->endOfMonth()); $d->addDay()) {
+            if (self::hariKegiatanIni($d)) {
+                $masihAda = true;
+                break;
+            }
+        }
+
+        $lalu = today()->subMonthNoOverflow()->format('Y-m');
+        if ($masihAda && array_key_exists($lalu, $daftar)) {
+            return $lalu;
+        }
+
+        return array_key_exists($ini, $daftar) ? $ini : array_key_first($daftar);
+    }
+
     public static function hariKegiatanIni(?Carbon $tanggal = null): bool
     {
         $tanggal ??= today();

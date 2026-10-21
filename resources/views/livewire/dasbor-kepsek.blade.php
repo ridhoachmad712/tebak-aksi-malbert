@@ -1,13 +1,7 @@
 @use('App\Services\Rekap')
 @use('App\Services\TugasAdmin')
 @php
-    $namaPendek = [
-        'murid_aktif' => 'Murid aktif membaca',
-        'budaya_membaca' => 'Budaya Membaca',
-        'kemampuan_literasi' => 'Kemampuan Literasi',
-        'guru_aktif' => 'Wali kelas aktif mencatat',
-    ];
-    $parameter = ['bulan' => today()->format('Y-m')];
+    $parameter = ['bulan' => $bulan];
     $jumlahTindakan = $belumBerubah->count() + $pelanggaranBerat->count();
 @endphp
 
@@ -21,25 +15,62 @@
         <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 font-semibold text-amber-900">Tahun ajaran aktif belum diatur, sehingga capaian belum bisa dihitung. Admin dapat mengaturnya di Halaman Admin, menu Tahun Ajaran.</div>
     @endunless
 
-    {{-- Status bulan berjalan --}}
-    <section class="kartu p-5" aria-labelledby="judul-status">
-        <div class="flex flex-wrap items-start justify-between gap-2">
+    {{-- Capaian lima aspek inovasi, dihitung per jumlah murid seperti laporan hasil inovasi sekolah --}}
+    <section class="kartu" aria-labelledby="judul-status" wire:loading.class="opacity-60">
+        <div class="flex flex-wrap items-start justify-between gap-3 border-b border-garis px-5 py-4">
             <div>
-                <h2 id="judul-status" class="text-xs font-extrabold uppercase tracking-wide text-slate-600">Capaian bulan ini</h2>
-                <p class="mt-1 text-base font-bold text-slate-900">{{ $kalimat }}</p>
+                <h2 id="judul-status" class="text-xs font-extrabold uppercase tracking-wide text-slate-600">Capaian 5 aspek inovasi</h2>
+                <p class="mt-1 text-base font-bold text-slate-900">
+                    @if ($aspekInovasi['dinilai'])
+                        {{ $labelBulanAspek }}: {{ $aspekInovasi['tercapai'] }} dari {{ $aspekInovasi['dinilai'] }} aspek mencapai target.
+                    @else
+                        {{ $labelBulanAspek }}: belum ada catatan yang cukup untuk dinilai.
+                    @endif
+                </p>
+                <p class="text-xs text-slate-600">Dihitung dari {{ $aspekInovasi['jumlah_murid'] }} murid aktif berdasarkan catatan guru.</p>
             </div>
-            <a href="{{ route('monev', $parameter) }}" wire:navigate class="tombol-kedua">Lihat Monev lengkap</a>
+            <div class="flex flex-wrap items-center gap-2">
+                <select wire:model.live="bulan" aria-label="Bulan" class="isian w-auto pr-9 font-bold">
+                    @foreach (Rekap::daftarBulan() as $nilai => $teks)
+                        <option value="{{ $nilai }}">{{ $teks }}</option>
+                    @endforeach
+                </select>
+                <a href="{{ route('monev', ['bulan' => $bulan]) }}" wire:navigate class="tombol-kedua">Lihat Monev lengkap</a>
+            </div>
         </div>
-        <dl class="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-            @foreach ($namaPendek as $kunci => $nama)
-                @php $a = $angka[$kunci]; @endphp
-                <div class="rounded-lg border border-garis px-4 py-3">
-                    <dt class="text-sm font-semibold text-slate-700">{{ $nama }}</dt>
-                    <dd class="mt-1 text-2xl"><x-nilai-target :nilai="$a['nilai']" :target="$a['target']" /></dd>
-                    <dd class="text-xs text-slate-600">target ≥ {{ Rekap::persenTeks((float) $a['target']) }}{{ $a['status'] === 'kurang' ? ' · kurang '.Rekap::persenTeks($a['selisih'], false).' poin' : '' }}</dd>
+        {{-- Lima kartu singkat: angka besar lebih dulu, rincian di bawahnya --}}
+        <div class="grid grid-cols-2 gap-3 p-4 lg:grid-cols-5">
+            @foreach ($aspekInovasi['aspek'] as $a)
+                <div @class(["flex flex-col rounded-lg border border-garis px-4 py-3", "col-span-2 lg:col-span-1" => $loop->last]) title="{{ ucfirst($a['uraian']) }}">
+                    <p class="text-sm font-bold text-slate-800">{{ $a['nama'] }}</p>
+                    <p class="mt-1 text-3xl leading-none">
+                        @if ($a['status'] === 'tanpa_data')
+                            <span class="font-bold text-slate-400">–</span>
+                        @else
+                            <x-nilai-target :nilai="$a['nilai']" :target="$a['target']" class="px-1" />
+                        @endif
+                    </p>
+                    <p class="mt-1 text-xs text-slate-600">target ≥ {{ Rekap::persenTeks((float) $a['target']) }}</p>
+                    @isset($a['nilai2'])
+                        <p class="mt-1 text-xs text-slate-600">berkarya <x-nilai-target :nilai="$a['nilai2']" :target="$a['target2']" class="text-sm" /> · target ≥ {{ Rekap::persenTeks((float) $a['target2']) }}</p>
+                    @endisset
+                    <p class="mt-2 text-sm text-slate-800">{{ $a['capaian'] }}</p>
+                    @isset($a['rincian'])
+                        <p class="mt-0.5 text-xs text-slate-600">{{ $a['rincian'] }}</p>
+                    @endisset
+                    <p class="mt-auto pt-2 text-xs font-bold {{ $a['status'] === 'kurang' ? 'text-slate-900' : 'text-slate-600' }}">
+                        @if ($a['status'] === 'tanpa_data')
+                            <span class="font-normal">{{ $a['kosong'] ?? 'Belum ada catatan pada bulan ini.' }}</span>
+                        @elseif ($a['status'] === 'tercapai')
+                            Tercapai
+                        @else
+                            Belum tercapai
+                        @endif
+                    </p>
                 </div>
             @endforeach
-        </dl>
+        </div>
+        <p class="border-t border-garis px-5 py-2 text-xs text-slate-600">Hanya persentase di bawah target yang berwarna. Target diatur admin di menu Target &amp; Patokan.</p>
     </section>
 
     {{-- Inti dashboard: hal yang butuh keputusan kepala sekolah --}}

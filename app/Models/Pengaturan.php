@@ -28,6 +28,11 @@ class Pengaturan extends Model
         'target_penurunan_pelanggaran' => 20,
         'target_budaya_membaca' => 85,
         'target_kemampuan_literasi' => 85,
+        // Target lima aspek inovasi (Dashboard kepala sekolah), dihitung per jumlah murid
+        'target_aspek_budaya' => 80,
+        'target_aspek_literasi' => 80,
+        'target_penurunan_bulanan' => 20,
+        'target_murid_berkarya' => 100,
         'batas_murid_aktif' => 75,
         'batas_guru_aktif' => 75,
         'batas_centang_cetak' => 75,
@@ -95,10 +100,11 @@ class Pengaturan extends Model
 
     public static function semua(): array
     {
-        return Cache::rememberForever('pengaturan', fn () => array_merge(
+        // Nilai bawaan digabung di luar cache agar kunci pengaturan baru langsung terbaca setelah pembaruan aplikasi
+        return array_merge(
             self::BAWAAN,
-            static::query()->pluck('nilai', 'kunci')->all(),
-        ));
+            Cache::rememberForever('pengaturan', fn () => static::query()->pluck('nilai', 'kunci')->all()),
+        );
     }
 
     public static function ambil(string $kunci, mixed $bawaan = null): mixed

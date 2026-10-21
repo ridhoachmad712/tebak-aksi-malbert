@@ -21,7 +21,9 @@ trait PilihPeriode
     {
         $this->periode = $this->periode === 'semester' ? 'semester' : 'bulan';
         $daftar = Rekap::daftarBulan();
-        $this->bulan = array_key_exists($this->bulan, $daftar) ? $this->bulan : array_key_first($daftar);
+        // Guru melihat bulan berjalan; kepala sekolah dan admin melihat bulan lalu selama bulan berjalan belum selesai
+        $bawaan = auth()->user()?->isGuru() ? array_key_first($daftar) : Rekap::bulanBawaan();
+        $this->bulan = array_key_exists($this->bulan, $daftar) ? $this->bulan : $bawaan;
         $this->semester = in_array($this->semester, ['1', '2'], true) ? $this->semester : (string) Rekap::semesterDari(today());
     }
 

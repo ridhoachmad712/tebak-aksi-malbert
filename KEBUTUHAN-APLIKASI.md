@@ -257,6 +257,22 @@ Tampilan tambahan:
 
 ---
 
+### 6.4a Bulan yang Tampil Bawaan
+
+Di tampilan kepala sekolah (Dashboard, Monev, Rekap, cetak ringkasan Monev), di tampilan admin untuk Monev, dan di angka halaman depan, bulan yang tampil bawaan adalah **bulan lalu selama bulan berjalan masih punya hari kegiatan tersisa**, agar yang terlihat data satu bulan penuh. Pada hari kegiatan terakhir bulan berjalan, bulan berjalan yang tampil. Pada bulan pertama tahun ajaran, bulan berjalan yang tampil. Guru tetap melihat bulan berjalan. Bulan lain tetap bisa dipilih.
+
+### 6.5 Capaian 5 Aspek Inovasi (Dashboard Kepala Sekolah)
+
+Ditambahkan 21 Oktober 2026 mengikuti laporan hasil inovasi sekolah. Dihitung **per jumlah murid** untuk bulan yang dipilih, dengan target diatur admin di Target & Patokan.
+
+| Aspek | Cara menghitung | Target bawaan |
+|---|---|---|
+| Budaya Membaca | Murid yang rata-rata Hadir, Konsisten, dan Jurnal-nya ≥ batas murid aktif (75%) | ≥ 80% murid |
+| Kemampuan Literasi | Murid yang rata-rata Memahami, Merangkum, dan Menyampaikan-nya ≥ batas murid aktif (75%) | ≥ 80% murid |
+| Penguatan Karakter | Penurunan jumlah murid berbeda yang melanggar dibanding bulan sebelumnya, disertai rincian per minggu (1–7, 8–14, 15–21, 22–akhir bulan) | turun ≥ 20% per bulan |
+| Kepatuhan Perilaku | Murid binaan bulan itu yang status terakhirnya Berubah positif atau Konsisten positif | ≥ 80% |
+| Ekosistem Literat | Murid aktif memanfaatkan Teras Baca, dan murid yang menghasilkan minimal 1 karya dalam bulan itu (tercapai bila keduanya tercapai) | ≥ 85% aktif dan 100% berkarya |
+
 ## 7. Aturan Perhitungan
 
 | Data | Cara hitung |

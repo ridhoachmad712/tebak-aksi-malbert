@@ -96,8 +96,9 @@ class MonevKepsekTest extends TestCase
             ->assertSee('Kemampuan Literasi')
             ->assertSee('Pelaksanaan')
             ->assertSee('Peta kelas')
-            ->assertSee(route('monev.kelas', ['kelas' => $kelas->id, 'bulan' => today()->format('Y-m')]), false)
-            ->assertSee(Rekap::labelBulan(today()))
+            // Kepala sekolah melihat bulan bawaan: bulan lalu selama bulan berjalan belum selesai
+            ->assertSee(route('monev.kelas', ['kelas' => $kelas->id, 'bulan' => Rekap::bulanBawaan()]), false)
+            ->assertSee(Rekap::daftarBulan()[Rekap::bulanBawaan()])
             ->assertDontSee('type="month"', false);
 
         // Tautan lama dengan ?kelas= diarahkan ke halaman rincian kelas
@@ -150,7 +151,9 @@ class MonevKepsekTest extends TestCase
         $this->get('/arah')->assertRedirect(route('kepsek.dasbor'));
 
         $halaman = $this->get('/dashboard')->assertOk()
-            ->assertSee('Capaian bulan ini')
+            ->assertSee('Capaian 5 aspek inovasi')
+            ->assertSee('Kepatuhan Perilaku')
+            ->assertSee('Ekosistem Literat')
             ->assertSee('Perlu tindakan Bapak/Ibu')
             ->assertSee('Pencatatan kelas minggu ini')
             ->assertSee('Kelas yang paling butuh perhatian')

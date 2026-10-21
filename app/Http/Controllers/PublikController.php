@@ -12,8 +12,10 @@ use App\Models\ManualBook;
 use App\Models\Murid;
 use App\Models\Pengaduan;
 use App\Models\Pengaturan;
+use App\Services\Rekap;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 
@@ -21,15 +23,18 @@ class PublikController extends Controller
 {
     public function beranda(): View
     {
-        $awalBulan = today()->startOfMonth();
+        // Bulan lalu selama bulan berjalan belum selesai, agar yang tampil angka satu bulan penuh
+        $bulan = Carbon::createFromFormat('!Y-m', Rekap::bulanBawaan());
+        $rentang = [$bulan->copy()->startOfMonth()->toDateString(), $bulan->copy()->endOfMonth()->toDateString()];
 
         // Statistik publik hanya berupa angka agregat, tanpa nama murid
         $statistik = [
-            'kegiatan' => KegiatanHarian::whereDate('tanggal', '>=', $awalBulan)->count(),
+            'kegiatan' => KegiatanHarian::whereBetween('tanggal', $rentang)->count(),
             'membaca' => KegiatanHarianMurid::where('hadir', true)
-                ->whereHas('kegiatanHarian', fn ($q) => $q->whereDate('tanggal', '>=', $awalBulan))->count(),
-            'karya' => KaryaLiterasi::whereDate('tanggal', '>=', $awalBulan)->count(),
+                ->whereHas('kegiatanHarian', fn ($q) => $q->whereBetween('tanggal', $rentang))->count(),
+            'karya' => KaryaLiterasi::whereBetween('tanggal', $rentang)->count(),
             'murid' => Murid::where('aktif', true)->count(),
+            'bulan' => Rekap::labelBulan($bulan),
         ];
 
         $idFoto = Pengaturan::ambil('beranda_foto_id');

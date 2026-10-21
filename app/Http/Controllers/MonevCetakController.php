@@ -20,7 +20,7 @@ class MonevCetakController extends Controller
         ]);
 
         $jenis = ($data['periode'] ?? 'bulan') === 'semester' && Rekap::tahunAjaranAktif() ? 'semester' : 'bulan';
-        $periode = Rekap::periode($jenis, $data['bulan'] ?? today()->format('Y-m'), $data['semester'] ?? (string) Rekap::semesterDari(today()));
+        $periode = Rekap::periode($jenis, $data['bulan'] ?? Rekap::bulanBawaan(), $data['semester'] ?? (string) Rekap::semesterDari(today()));
 
         return Pdf::loadView('cetak.monev', RingkasanMonev::susun($periode) + [
             'label' => $periode['label'],

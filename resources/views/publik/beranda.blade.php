@@ -68,7 +68,7 @@
         <section class="border-b border-garis">
             <div class="mx-auto max-w-6xl px-4 py-10">
                 <div class="flex flex-wrap items-baseline justify-between gap-2">
-                    <h2 class="text-lg font-extrabold">{{ Rekap::labelBulan(today()) }} dalam angka</h2>
+                    <h2 class="text-lg font-extrabold">{{ $statistik['bulan'] }} dalam angka</h2>
                     <p class="text-sm text-slate-600">Dihitung dari catatan harian guru. Nama murid tidak ditampilkan.</p>
                 </div>
                 <dl class="mt-6 grid grid-cols-2 gap-y-8 lg:grid-cols-4 lg:divide-x lg:divide-garis">
