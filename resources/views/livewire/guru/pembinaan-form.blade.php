@@ -104,22 +104,30 @@
                 @endif
             </fieldset>
 
-            <div>
-                <label for="kondisi" class="label">Kondisi awal <span class="font-normal text-slate-600">(opsional)</span></label>
-                <textarea id="kondisi" wire:model="kondisiAwal" rows="2" placeholder="Contoh: Sering mengganggu teman saat membaca" class="isian"></textarea>
-                {{-- Saran hanya dipakai bila guru mengetuknya --}}
-                @if ($saranKondisi && blank($kondisiAwal))
-                    <button type="button" wire:click="$set('kondisiAwal', @js($saranKondisi))" class="mt-2 inline-flex min-h-10 items-center gap-1 rounded-lg border border-dashed border-slate-400 px-3 text-sm font-semibold text-slate-700 hover:border-slate-700">
-                        <x-heroicon-m-plus class="h-4 w-4" /> Pakai: "{{ $saranKondisi }}"
-                    </button>
-                @endif
-                @error('kondisiAwal') <p class="galat">{{ $message }}</p> @enderror
-            </div>
-
-            <div>
-                <label for="komitmen" class="label">Komitmen murid <span class="font-normal text-slate-600">(opsional)</span></label>
-                <textarea id="komitmen" wire:model="komitmen" rows="2" placeholder="Contoh: Saya akan membaca dengan tertib dan tidak mengganggu teman" class="isian"></textarea>
-            </div>
+            {{-- Pendekatan OTFD: guru menuliskan hasil percakapan singkat dengan murid --}}
+            @php $modelOtfd = ['kondisi_awal' => 'kondisiAwal', 'pikiran' => 'pikiran', 'perasaan' => 'perasaan', 'komitmen' => 'komitmen']; @endphp
+            <fieldset class="rounded-lg border border-garis p-4">
+                <legend class="px-1 font-extrabold">Catatan OTFD <span class="text-sm font-normal text-slate-600">(opsional)</span></legend>
+                <p class="text-sm text-slate-600">Tuliskan singkat hasil berbincang dengan murid, dengan bahasa sehari-hari.</p>
+                <div class="mt-3 space-y-4">
+                    @foreach (KasusPembinaan::OTFD as $kolom => $o)
+                        <div>
+                            <label for="otfd-{{ $kolom }}" class="label flex items-center gap-2">
+                                <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-800 text-xs font-extrabold text-white" aria-hidden="true">{{ $o['huruf'] }}</span>
+                                <span>{{ $o['nama'] }}: <span class="font-semibold">{{ $o['tanya'] }}</span></span>
+                            </label>
+                            <textarea id="otfd-{{ $kolom }}" wire:model="{{ $modelOtfd[$kolom] }}" rows="2" placeholder="{{ $o['contoh'] }}" class="isian"></textarea>
+                            {{-- Saran Observation hanya dipakai bila guru mengetuknya --}}
+                            @if ($kolom === 'kondisi_awal' && $saranKondisi && blank($kondisiAwal))
+                                <button type="button" wire:click="$set('kondisiAwal', @js($saranKondisi))" class="mt-2 inline-flex min-h-10 items-center gap-1 rounded-lg border border-dashed border-slate-400 px-3 text-sm font-semibold text-slate-700 hover:border-slate-700">
+                                    <x-heroicon-m-plus class="h-4 w-4" /> Pakai: "{{ $saranKondisi }}"
+                                </button>
+                            @endif
+                            @error($modelOtfd[$kolom]) <p class="galat">{{ $message }}</p> @enderror
+                        </div>
+                    @endforeach
+                </div>
+            </fieldset>
 
             <div class="flex justify-end gap-2 border-t border-garis pt-4">
                 <a href="{{ $kasus ? route('guru.pembinaan.detail', $kasus) : route('guru.pembinaan') }}" wire:navigate class="tombol-kedua">Batal</a>

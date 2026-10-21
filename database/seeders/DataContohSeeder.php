@@ -141,6 +141,8 @@ class DataContohSeeder extends Seeder
                 $kasus = KasusPembinaan::create([
                     'murid_id' => $murid->id, 'kelas_id' => $kelas->id, 'tanggal' => $tanggal,
                     'kondisi_awal' => $kondisi[array_rand($kondisi)],
+                    'pikiran' => mt_rand(0, 1) ? 'Bukunya terasa sulit, jadi lebih ingin bermain.' : null,
+                    'perasaan' => mt_rand(0, 1) ? 'Bosan dan sedikit malu.' : null,
                     'jenis_pelanggaran_id' => $pelanggaran->random(),
                     'tingkat' => ['ringan', 'ringan', 'sedang', 'berat'][mt_rand(0, 3)],
                     'tindakan_pembinaan_id' => $tindakan->random(),

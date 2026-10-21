@@ -6,11 +6,13 @@ use App\Livewire\Guru\Beranda;
 use App\Livewire\Guru\KegiatanHarianForm;
 use App\Livewire\Guru\PembinaanDetail;
 use App\Livewire\Guru\PembinaanForm;
+use App\Models\HariLibur;
 use App\Models\JenisPelanggaran;
 use App\Models\KasusPembinaan;
 use App\Models\KegiatanHarian;
 use App\Models\Kelas;
 use App\Models\Murid;
+use App\Models\Pengaturan;
 use App\Models\TahunAjaran;
 use App\Models\TindakanPembinaan;
 use App\Models\User;
@@ -100,7 +102,7 @@ class AlurGuruTest extends TestCase
     public function test_rekap_menghitung_dari_hari_kegiatan_dan_mengabaikan_hari_libur(): void
     {
         // 5–9 Oktober 2026 = 5 hari kegiatan; Kamis 8 Oktober libur
-        \App\Models\HariLibur::create(['tanggal' => '2026-10-08', 'keterangan' => 'Libur']);
+        HariLibur::create(['tanggal' => '2026-10-08', 'keterangan' => 'Libur']);
         $ani = $this->murid('Ani');
         foreach (['2026-10-05', '2026-10-06', '2026-10-07'] as $tgl) {
             $k = KegiatanHarian::create(['kelas_id' => $this->kelas->id, 'tanggal' => $tgl]);
@@ -171,6 +173,32 @@ class AlurGuruTest extends TestCase
         $this->assertSame(0, KasusPembinaan::count());
     }
 
+    public function test_pelanggaran_dicatat_dengan_otfd(): void
+    {
+        $ani = $this->murid('Ani');
+
+        Livewire::actingAs($this->guru)->test(PembinaanForm::class)
+            ->assertSee('Catatan OTFD')
+            ->assertSee('Apa yang dirasakan murid?')
+            ->set('muridId', (string) $ani->id)
+            ->set('pelanggaran', (string) JenisPelanggaran::first()->id)
+            ->set('tingkat', 'ringan')
+            ->set('tindakan', (string) TindakanPembinaan::first()->id)
+            ->set('kondisiAwal', 'Mengganggu teman saat membaca')
+            ->set('pikiran', 'Bukunya terlalu sulit')
+            ->set('perasaan', '  Bosan  ')
+            ->set('komitmen', 'Membaca buku bergambar dengan tenang')
+            ->call('simpan')
+            ->assertHasNoErrors();
+
+        $kasus = KasusPembinaan::firstOrFail();
+        $this->assertSame('Bukunya terlalu sulit', $kasus->pikiran);
+        $this->assertSame('Bosan', $kasus->perasaan);
+
+        $this->actingAs($this->guru)->get(route('guru.pembinaan.detail', $kasus))->assertOk()
+            ->assertSeeInOrder(['Observation', 'Mengganggu teman saat membaca', 'Thought', 'Bukunya terlalu sulit', 'Feeling', 'Bosan', 'Desire', 'Membaca buku bergambar dengan tenang']);
+    }
+
     public function test_kondisi_awal_opsional_dan_pemantauan_cepat_dari_beranda(): void
     {
         $ani = $this->murid('Ani');
@@ -210,7 +238,7 @@ class AlurGuruTest extends TestCase
 
     public function test_hari_belum_dicatat_diringkas_menjadi_satu_butir(): void
     {
-        \App\Models\Pengaturan::updateOrCreate(['kunci' => 'ubah_mulai_tanggal'], ['nilai' => '2026-08-14']);
+        Pengaturan::updateOrCreate(['kunci' => 'ubah_mulai_tanggal'], ['nilai' => '2026-08-14']);
         $jumlah = Rekap::hariBelumDicatat($this->kelas)->count();
         $this->assertGreaterThan(20, $jumlah);
 
@@ -231,10 +259,10 @@ class AlurGuruTest extends TestCase
     public function test_batas_ubah_memakai_tanggal_mulai(): void
     {
         // Bawaan: 7 hari ke belakang
-        $this->assertSame('2026-10-07', \App\Models\Pengaturan::ubahMulai()->toDateString());
+        $this->assertSame('2026-10-07', Pengaturan::ubahMulai()->toDateString());
 
-        \App\Models\Pengaturan::simpan(['ubah_mulai_tanggal' => '2026-09-01']);
-        $this->assertSame('2026-09-01', \App\Models\Pengaturan::ubahMulai()->toDateString());
+        Pengaturan::simpan(['ubah_mulai_tanggal' => '2026-09-01']);
+        $this->assertSame('2026-09-01', Pengaturan::ubahMulai()->toDateString());
 
         $komponen = Livewire::actingAs($this->guru)->test(KegiatanHarianForm::class, ['kelas' => $this->kelas->id]);
         $komponen->set('tanggal', '2026-09-01')->assertSet('bolehUbah', true);
@@ -242,7 +270,7 @@ class AlurGuruTest extends TestCase
             ->assertSee('Guru dapat mengubah catatan mulai Selasa, 1 September 2026');
 
         // Tanggal di masa depan tidak membuka hari yang belum tiba
-        \App\Models\Pengaturan::simpan(['ubah_mulai_tanggal' => '2026-12-01']);
-        $this->assertSame('2026-10-14', \App\Models\Pengaturan::ubahMulai()->toDateString());
+        Pengaturan::simpan(['ubah_mulai_tanggal' => '2026-12-01']);
+        $this->assertSame('2026-10-14', Pengaturan::ubahMulai()->toDateString());
     }
 }

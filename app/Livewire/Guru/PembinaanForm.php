@@ -23,6 +23,10 @@ class PembinaanForm extends Component
 
     public string $kondisiAwal = '';
 
+    public string $pikiran = '';
+
+    public string $perasaan = '';
+
     public string $pelanggaran = '';
 
     public string $pelanggaranLain = '';
@@ -45,6 +49,8 @@ class PembinaanForm extends Component
                 'muridId' => (string) $kasus->murid_id,
                 'tanggal' => $kasus->tanggal->toDateString(),
                 'kondisiAwal' => (string) $kasus->kondisi_awal,
+                'pikiran' => (string) $kasus->pikiran,
+                'perasaan' => (string) $kasus->perasaan,
                 'pelanggaran' => $kasus->jenis_pelanggaran_id ? (string) $kasus->jenis_pelanggaran_id : 'lain',
                 'pelanggaranLain' => (string) $kasus->jenis_pelanggaran_lain,
                 'tingkat' => $kasus->tingkat,
@@ -74,6 +80,8 @@ class PembinaanForm extends Component
             'muridId' => ['required', Rule::in($this->kelas->murid()->pluck('murid.id')->map(fn ($id) => (string) $id))],
             'tanggal' => ['required', 'date', 'before_or_equal:today'],
             'kondisiAwal' => ['nullable', 'string', 'max:1000'],
+            'pikiran' => ['nullable', 'string', 'max:1000'],
+            'perasaan' => ['nullable', 'string', 'max:1000'],
             'pelanggaran' => ['required'],
             'pelanggaranLain' => ['required_if:pelanggaran,lain', 'nullable', 'string', 'max:255'],
             'tingkat' => ['required', Rule::in(array_keys(KasusPembinaan::TINGKAT))],
@@ -84,7 +92,7 @@ class PembinaanForm extends Component
             'pelanggaranLain.required_if' => 'Tuliskan jenis pelanggarannya.',
             'tindakanLain.required_if' => 'Tuliskan tindakan pembinaannya.',
         ], [
-            'muridId' => 'murid', 'kondisiAwal' => 'kondisi awal', 'pelanggaran' => 'jenis pelanggaran', 'tindakan' => 'tindakan pembinaan',
+            'muridId' => 'murid', 'kondisiAwal' => 'observation', 'pikiran' => 'thought', 'perasaan' => 'feeling', 'komitmen' => 'desire', 'pelanggaran' => 'jenis pelanggaran', 'tindakan' => 'tindakan pembinaan',
         ]);
 
         $data = [
@@ -92,12 +100,14 @@ class PembinaanForm extends Component
             'kelas_id' => $this->kelasId,
             'tanggal' => $this->tanggal,
             'kondisi_awal' => trim($this->kondisiAwal) ?: null,
+            'pikiran' => trim($this->pikiran) ?: null,
+            'perasaan' => trim($this->perasaan) ?: null,
             'jenis_pelanggaran_id' => $this->pelanggaran === 'lain' ? null : JenisPelanggaran::findOrFail($this->pelanggaran)->id,
             'jenis_pelanggaran_lain' => $this->pelanggaran === 'lain' ? $this->pelanggaranLain : null,
             'tingkat' => $this->tingkat,
             'tindakan_pembinaan_id' => $this->tindakan === 'lain' ? null : TindakanPembinaan::findOrFail($this->tindakan)->id,
             'tindakan_pembinaan_lain' => $this->tindakan === 'lain' ? $this->tindakanLain : null,
-            'komitmen' => $this->komitmen ?: null,
+            'komitmen' => trim($this->komitmen) ?: null,
         ];
 
         if ($this->kasus) {
@@ -119,7 +129,7 @@ class PembinaanForm extends Component
         return view('livewire.guru.pembinaan-form', [
             'daftarMurid' => $this->kelas?->muridAktif()->get() ?? collect(),
             'daftarPelanggaran' => $daftarPelanggaran,
-            // Saran kondisi awal dari jenis pelanggaran; hanya terisi bila guru mengetuknya
+            // Saran Observation (kondisi awal) dari jenis pelanggaran; hanya terisi bila guru mengetuknya
             'saranKondisi' => $daftarPelanggaran->firstWhere('id', (int) $this->pelanggaran)?->nama,
             'daftarTindakan' => TindakanPembinaan::aktif()->urut()->get(),
         ])->title($this->kasus ? 'Ubah Kasus' : 'Catat Pelanggaran');

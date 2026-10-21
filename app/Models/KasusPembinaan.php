@@ -14,7 +14,7 @@ class KasusPembinaan extends Model
     protected $table = 'kasus_pembinaan';
 
     protected $fillable = [
-        'murid_id', 'kelas_id', 'tanggal', 'kondisi_awal', 'jenis_pelanggaran_id', 'jenis_pelanggaran_lain',
+        'murid_id', 'kelas_id', 'tanggal', 'kondisi_awal', 'pikiran', 'perasaan', 'jenis_pelanggaran_id', 'jenis_pelanggaran_lain',
         'tingkat', 'tindakan_pembinaan_id', 'tindakan_pembinaan_lain', 'komitmen', 'status_akhir', 'user_id',
     ];
 
@@ -28,6 +28,17 @@ class KasusPembinaan extends Model
         'ringan' => 'Cukup dengan teguran/pengingatan dan pembiasaan',
         'sedang' => 'Perlu pendampingan dan pembinaan lebih lanjut',
         'berat' => 'Perlu penanganan sesuai tata tertib dan prosedur sekolah',
+    ];
+
+    /**
+     * Catatan pelanggaran dengan pendekatan OTFD (Observation, Thought, Feeling, Desire).
+     * Kunci = kolom tabel; Observation memakai kondisi_awal dan Desire memakai komitmen.
+     */
+    public const OTFD = [
+        'kondisi_awal' => ['huruf' => 'O', 'nama' => 'Observation', 'tanya' => 'Apa yang guru lihat?', 'contoh' => 'Contoh: Mengganggu teman saat membaca dan berbicara keras'],
+        'pikiran' => ['huruf' => 'T', 'nama' => 'Thought', 'tanya' => 'Apa yang dipikirkan murid?', 'contoh' => 'Contoh: Merasa bukunya sulit, jadi ingin bermain saja'],
+        'perasaan' => ['huruf' => 'F', 'nama' => 'Feeling', 'tanya' => 'Apa yang dirasakan murid?', 'contoh' => 'Contoh: Bosan dan malu karena belum lancar membaca'],
+        'komitmen' => ['huruf' => 'D', 'nama' => 'Desire', 'tanya' => 'Apa yang ingin murid lakukan atau perbaiki?', 'contoh' => 'Contoh: Saya akan membaca buku bergambar dan tidak mengganggu teman'],
     ];
 
     /** Skala perkembangan untuk pemantauan mingguan dan status akhir. */

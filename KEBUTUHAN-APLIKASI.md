@@ -146,11 +146,10 @@ Dicatat **hanya saat ada pelanggaran**.
 |---|---|:-:|
 | Murid | Pilih dari daftar | ✓ |
 | Tanggal kejadian | Tanggal (bawaan: hari ini) | ✓ |
-| Kondisi Awal | Teks singkat (bisa memakai saran dari jenis pelanggaran yang dipilih) | – |
 | Jenis Pelanggaran | Pilih dari daftar admin, atau tulis sendiri | ✓ |
 | Tingkat | Ringan / Sedang / Berat | ✓ |
 | Tindakan Pembinaan | Pilih dari daftar admin, atau tulis sendiri | ✓ |
-| Komitmen murid | Teks singkat | – |
+| **Catatan OTFD** | Empat teks singkat hasil berbincang dengan murid: **O**bservation (apa yang guru lihat; tercatat sebagai Kondisi Awal di laporan, bisa memakai saran dari jenis pelanggaran), **T**hought (apa yang dipikirkan murid), **F**eeling (apa yang dirasakan murid), **D**esire (apa yang ingin murid lakukan atau perbaiki; menggantikan Komitmen murid) | – |
 
 Keterangan tingkat:
 - **Ringan:** cukup diselesaikan dengan teguran/pengingatan dan pembiasaan
@@ -421,7 +420,7 @@ Masukan setelah uji coba. **Status: belum dikerjakan, kecuali yang ditandai Sele
 
 | No | Catatan | Rincian rencana | Bagian terkait |
 |---|---|---|---|
-| 1 | Pelanggaran memakai pendekatan **OTFD** | Pembinaan pelanggaran memakai alur **Observation–Thought–Feeling–Desire** (sebelumnya direncanakan untuk Tahap 2). Saat mencatat atau memantau kasus, guru mengisi: **Observation** (apa yang terlihat), **Thought** (apa yang dipikirkan murid), **Feeling** (apa yang dirasakan murid), **Desire** (apa yang ingin murid lakukan atau perbaiki). **Perlu dipastikan:** diisi sekali saat kasus dicatat, atau setiap pemantauan mingguan; wajib atau opsional; isian berupa teks bebas atau pilihan. | 5.3 Kasus Pembinaan, laporan Pelanggaran |
+| 1 | Pelanggaran memakai pendekatan **OTFD** | Pembinaan pelanggaran memakai alur **Observation–Thought–Feeling–Desire** (sebelumnya direncanakan untuk Tahap 2). Saat mencatat atau memantau kasus, guru mengisi: **Observation** (apa yang terlihat), **Thought** (apa yang dipikirkan murid), **Feeling** (apa yang dirasakan murid), **Desire** (apa yang ingin murid lakukan atau perbaiki). **Selesai:** diisi sekali di halaman Catat Pelanggaran, berupa empat teks singkat yang opsional. Observation memakai kolom Kondisi Awal (tetap tampil di laporan baku), Desire menggantikan Komitmen murid. Keempatnya tampil di rincian kasus. | 5.3 Kasus Pembinaan, laporan Pelanggaran |
 | 2 | Pratinjau foto yang diunggah di halaman Karya Literasi (di rekap karya) | Foto karya tampil sebagai gambar kecil yang bisa diperbesar, baik di daftar Karya Literasi maupun di rekap (laporan Ekosistem Literat). | 5.4 Karya Literasi, 5.5 Rekap |
 | 3 | Warna tombol **Simpan catatan** diubah agar terlihat | Tombol *Simpan catatan* di Kegiatan Harian (isian catatan singkat) saat ini bergaya tombol kedua (putih); diubah menjadi tombol yang lebih menonjol agar guru tidak lupa menekannya. **Selesai:** tombol kini memakai warna aksen (jingga) seperti tombol utama. | 5.2 Kegiatan Harian |
 | 4 | Foto dokumentasi bisa diunggah lebih dari satu | Guru dapat memilih beberapa foto sekaligus dan menambah foto lagi tanpa menghapus yang sudah ada. Catatan teknis: kotak unggah sudah mengizinkan banyak berkas; **perlu dipastikan** di HP guru apakah yang terjadi hanya satu foto terpilih atau foto lama tertimpa. | 5.2 Kegiatan Harian (foto dokumentasi) |

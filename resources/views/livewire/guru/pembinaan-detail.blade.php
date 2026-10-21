@@ -25,10 +25,6 @@
     <section class="kartu">
         <dl class="grid gap-4 p-5 sm:grid-cols-2">
             <div>
-                <dt class="text-sm font-bold text-slate-600">Kondisi awal</dt>
-                <dd class="mt-0.5">{{ $kasus->kondisi_awal ?: 'Tidak dicatat' }}</dd>
-            </div>
-            <div>
                 <dt class="text-sm font-bold text-slate-600">Jenis pelanggaran</dt>
                 <dd class="mt-0.5">{{ $kasus->namaPelanggaran() }}, tingkat {{ strtolower(KasusPembinaan::TINGKAT[$kasus->tingkat]) }}
                     @if ($kasus->jenisPelanggaran?->aspekKarakter)
@@ -40,11 +36,21 @@
                 <dt class="text-sm font-bold text-slate-600">Tindakan pembinaan</dt>
                 <dd class="mt-0.5">{{ $kasus->namaTindakan() }}</dd>
             </div>
-            <div>
-                <dt class="text-sm font-bold text-slate-600">Komitmen murid</dt>
-                <dd class="mt-0.5">{{ $kasus->komitmen ?: 'Tidak dicatat' }}</dd>
-            </div>
         </dl>
+        <div class="border-t border-garis px-5 py-4">
+            <h2 class="font-extrabold">Catatan OTFD</h2>
+            <dl class="mt-2 grid gap-3 sm:grid-cols-2">
+                @foreach (KasusPembinaan::OTFD as $kolom => $o)
+                    <div class="flex gap-2">
+                        <span class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-800 text-xs font-extrabold text-white" aria-hidden="true">{{ $o['huruf'] }}</span>
+                        <div>
+                            <dt class="text-sm font-bold text-slate-600">{{ $o['nama'] }}: {{ $o['tanya'] }}</dt>
+                            <dd @class(['mt-0.5', 'text-slate-500' => blank($kasus->$kolom)])>{{ $kasus->$kolom ?: 'Belum dicatat' }}</dd>
+                        </div>
+                    </div>
+                @endforeach
+            </dl>
+        </div>
         <div class="flex flex-wrap gap-2 border-t border-garis px-5 py-3">
             <a href="{{ route('guru.pembinaan.ubah', $kasus) }}" wire:navigate class="tombol-kedua"><x-heroicon-o-pencil-square class="h-4 w-4" /> Ubah data kasus</a>
             <button wire:click="hapus" wire:confirm="Hapus kasus ini beserta seluruh pemantauannya?" class="tombol-bahaya"><x-heroicon-o-trash class="h-4 w-4" /> Hapus</button>
