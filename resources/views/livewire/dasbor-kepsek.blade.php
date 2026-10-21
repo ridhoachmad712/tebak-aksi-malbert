@@ -15,19 +15,32 @@
         <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 font-semibold text-amber-900">Tahun ajaran aktif belum diatur, sehingga capaian belum bisa dihitung. Admin dapat mengaturnya di Halaman Admin, menu Tahun Ajaran.</div>
     @endunless
 
-    {{-- Capaian lima aspek inovasi, dihitung per jumlah murid seperti laporan hasil inovasi sekolah --}}
+    {{-- Capaian lima aspek inovasi, berfokus pada jumlah murid seperti laporan hasil inovasi sekolah --}}
+    @php
+        $statusAspek = collect($aspekInovasi['aspek'])->countBy('status');
+        $bagianRingkas = array_filter([
+            ($statusAspek['tercapai'] ?? 0) ? ($statusAspek['tercapai']).' aspek tercapai' : null,
+            ($statusAspek['kurang'] ?? 0) ? ($statusAspek['kurang']).' aspek belum tercapai' : null,
+            (($statusAspek['tanpa_data'] ?? 0) + ($statusAspek['belum_cukup'] ?? 0)) ? (($statusAspek['tanpa_data'] ?? 0) + ($statusAspek['belum_cukup'] ?? 0)).' aspek belum dapat dinilai' : null,
+        ]);
+    @endphp
     <section class="kartu" aria-labelledby="judul-status" wire:loading.class="opacity-60">
         <div class="flex flex-wrap items-start justify-between gap-3 border-b border-garis px-5 py-4">
-            <div>
+            <div class="min-w-0">
                 <h2 id="judul-status" class="text-xs font-extrabold uppercase tracking-wide text-slate-600">Capaian 5 aspek inovasi</h2>
-                <p class="mt-1 text-base font-bold text-slate-900">
-                    @if ($aspekInovasi['dinilai'])
-                        {{ $labelBulanAspek }}: {{ $aspekInovasi['tercapai'] }} dari {{ $aspekInovasi['dinilai'] }} aspek mencapai target.
-                    @else
-                        {{ $labelBulanAspek }}: belum ada catatan yang cukup untuk dinilai.
-                    @endif
-                </p>
-                <p class="text-xs text-slate-600">Dihitung dari {{ $aspekInovasi['jumlah_murid'] }} murid aktif berdasarkan catatan guru.</p>
+                <p class="mt-1 text-base font-bold text-slate-900">{{ $labelBulanAspek }}: {{ $bagianRingkas ? implode(', ', $bagianRingkas) : 'belum ada catatan yang cukup untuk dinilai' }}.</p>
+                @if (isset($aspekInovasi['sumber_historis']))
+                    {{-- Sumber data tetap terlihat, ringkas, dengan rincian yang bisa dibuka --}}
+                    <details class="mt-0.5 text-xs text-slate-600">
+                        <summary class="cursor-pointer">Sumber: Rekap historis sekolah, {{ $aspekInovasi['jumlah_murid'] }} murid. <span class="font-bold underline">Lihat keterangan</span></summary>
+                        <p class="mt-1">{{ $aspekInovasi['sumber_historis'] }}.</p>
+                        @if ($aspekInovasi['catatan_historis'])
+                            <p class="mt-1">{{ $aspekInovasi['catatan_historis'] }}</p>
+                        @endif
+                    </details>
+                @else
+                    <p class="text-xs text-slate-600">Dihitung dari {{ $aspekInovasi['jumlah_murid'] }} murid aktif berdasarkan catatan guru.</p>
+                @endif
             </div>
             <div class="flex flex-wrap items-center gap-2">
                 <select wire:model.live="bulan" aria-label="Bulan" class="isian w-auto pr-9 font-bold">
@@ -38,39 +51,12 @@
                 <a href="{{ route('monev', ['bulan' => $bulan]) }}" wire:navigate class="tombol-kedua">Lihat Monev lengkap</a>
             </div>
         </div>
-        {{-- Lima kartu singkat: angka besar lebih dulu, rincian di bawahnya --}}
         <div class="grid grid-cols-2 gap-3 p-4 lg:grid-cols-5">
             @foreach ($aspekInovasi['aspek'] as $a)
-                <div @class(["flex flex-col rounded-lg border border-garis px-4 py-3", "col-span-2 lg:col-span-1" => $loop->last]) title="{{ ucfirst($a['uraian']) }}">
-                    <p class="text-sm font-bold text-slate-800">{{ $a['nama'] }}</p>
-                    <p class="mt-1 text-3xl leading-none">
-                        @if ($a['status'] === 'tanpa_data')
-                            <span class="font-bold text-slate-400">–</span>
-                        @else
-                            <x-nilai-target :nilai="$a['nilai']" :target="$a['target']" class="px-1" />
-                        @endif
-                    </p>
-                    <p class="mt-1 text-xs text-slate-600">target ≥ {{ Rekap::persenTeks((float) $a['target']) }}</p>
-                    @isset($a['nilai2'])
-                        <p class="mt-1 text-xs text-slate-600">berkarya <x-nilai-target :nilai="$a['nilai2']" :target="$a['target2']" class="text-sm" /> · target ≥ {{ Rekap::persenTeks((float) $a['target2']) }}</p>
-                    @endisset
-                    <p class="mt-2 text-sm text-slate-800">{{ $a['capaian'] }}</p>
-                    @isset($a['rincian'])
-                        <p class="mt-0.5 text-xs text-slate-600">{{ $a['rincian'] }}</p>
-                    @endisset
-                    <p class="mt-auto pt-2 text-xs font-bold {{ $a['status'] === 'kurang' ? 'text-slate-900' : 'text-slate-600' }}">
-                        @if ($a['status'] === 'tanpa_data')
-                            <span class="font-normal">{{ $a['kosong'] ?? 'Belum ada catatan pada bulan ini.' }}</span>
-                        @elseif ($a['status'] === 'tercapai')
-                            Tercapai
-                        @else
-                            Belum tercapai
-                        @endif
-                    </p>
-                </div>
+                @include('dasbor.kartu-aspek', ['a' => $a, 'akhir' => $loop->last])
             @endforeach
         </div>
-        <p class="border-t border-garis px-5 py-2 text-xs text-slate-600">Hanya persentase di bawah target yang berwarna. Target diatur admin di menu Target &amp; Patokan.</p>
+        <p class="border-t border-garis px-5 py-2 text-xs text-slate-600">Garis tegak pada batang menandai target. Batang dan angka berwarna hanya bila di bawah target. Target diatur admin di menu Target &amp; Patokan.</p>
     </section>
 
     {{-- Inti dashboard: hal yang butuh keputusan kepala sekolah --}}

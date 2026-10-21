@@ -82,7 +82,9 @@ class AspekInovasiTest extends TestCase
         $kepsek = User::create(['name' => 'Kepala Uji', 'email' => 'kepala@tebakaksi.test', 'password' => 'password', 'peran' => 'kepsek', 'status' => 'aktif']);
         $this->actingAs($kepsek)->get('/dashboard?bulan=2026-09')->assertOk()
             ->assertSee('Capaian 5 aspek inovasi')
-            ->assertSee('September 2026: 1 dari 5 aspek mencapai target.')
+            ->assertSee('September 2026: 1 aspek tercapai, 4 aspek belum tercapai.')
+            ->assertSee('kurang 2 murid lagi')
+            ->assertSee('Tidak berubah dalam sebulan')
             ->assertSee('Minggu 1: 1 · Minggu 2: 1 · Minggu 3: 0 · Minggu 4: 1');
     }
 

@@ -35,6 +35,7 @@ class PublikController extends Controller
             'karya' => KaryaLiterasi::whereBetween('tanggal', $rentang)->count(),
             'murid' => Murid::where('aktif', true)->count(),
             'bulan' => Rekap::labelBulan($bulan),
+            'bulan_kode' => $bulan->format('Y-m'),
         ];
 
         $idFoto = Pengaturan::ambil('beranda_foto_id');

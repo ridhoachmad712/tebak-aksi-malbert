@@ -103,6 +103,12 @@
     @endif
 
     <main class="mx-auto max-w-6xl px-4 py-6">
+        @if (\App\Models\Pengaturan::ambil('data_awal_rekonstruksi_bulan'))
+            <div class="mb-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900" role="note">
+                <p class="font-bold">Data awal rekonstruksi September 2026</p>
+                <p>{{ \App\Models\Pengaturan::ambil('data_awal_rekonstruksi_catatan') }}</p>
+            </div>
+        @endif
         {{ $slot }}
     </main>
 

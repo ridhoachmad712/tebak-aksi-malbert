@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\KaryaLiterasi;
 use App\Models\KasusPembinaan;
 use App\Models\Kelas;
 use App\Models\Pengaturan;
@@ -20,6 +21,10 @@ class AspekInovasi
     public static function bulan(string $bulan): array
     {
         $tgl = Carbon::createFromFormat('!Y-m', $bulan);
+        if ($historis = RekapHistoris::bulan($tgl->format('Y-m'))) {
+            return RekapHistoris::aspek($historis);
+        }
+
         [$dari, $sampai] = Rekap::periodeBulan($tgl->year, $tgl->month);
         $lalu = $tgl->copy()->subMonth();
         [$dariLalu, $sampaiLalu] = Rekap::periodeBulan($lalu->year, $lalu->month);
@@ -58,6 +63,8 @@ class AspekInovasi
         // 5. Ekosistem Literat: murid aktif memanfaatkan Teras Baca dan murid yang menghasilkan minimal 1 karya
         $aktif = $murid->where('aktif', true)->count();
         $berkarya = $murid->filter(fn ($b) => $b['karya'] >= 1)->count();
+        $jumlahKarya = KaryaLiterasi::whereIn('kelas_id', $kelasIds)
+            ->whereBetween('tanggal', [$dari->toDateString(), $sampai->toDateString()])->count();
 
         $persen = fn ($a, $b) => Rekap::persen($a, $b);
         $aspek = [
@@ -67,6 +74,7 @@ class AspekInovasi
                 'capaian' => "{$budaya} dari {$n} murid",
                 'nilai' => $adaHari ? $persen($budaya, $n) : null,
                 'target' => Pengaturan::angka('target_aspek_budaya'),
+                'jumlah' => $budaya, 'dari' => $n, 'satuan' => 'murid',
             ],
             [
                 'nama' => 'Kemampuan Literasi',
@@ -74,6 +82,7 @@ class AspekInovasi
                 'capaian' => "{$literasi} dari {$n} murid",
                 'nilai' => $adaHari ? $persen($literasi, $n) : null,
                 'target' => Pengaturan::angka('target_aspek_literasi'),
+                'jumlah' => $literasi, 'dari' => $n, 'satuan' => 'murid',
             ],
             [
                 'nama' => 'Penguatan Karakter',
@@ -82,6 +91,8 @@ class AspekInovasi
                 'nilai' => $penurunan,
                 'target' => Pengaturan::angka('target_penurunan_bulanan'),
                 'rincian' => collect($perMinggu)->map(fn ($j, $m) => "Minggu {$m}: {$j}")->join(' · '),
+                'mingguan' => array_values($perMinggu),
+                'pembanding' => $pelanggarLalu > 0 ? 'Bulan ini '.$pelanggarIni.' murid, '.Rekap::labelBulan($lalu).' '.$pelanggarLalu.' murid' : null,
                 'kosong' => $pelanggarLalu === 0 ? 'Belum bisa dihitung: bulan lalu tidak ada pelanggaran yang dicatat.' : null,
             ],
             [
@@ -90,6 +101,7 @@ class AspekInovasi
                 'capaian' => "{$berubah} dari {$binaan} murid binaan",
                 'nilai' => $persen($berubah, $binaan),
                 'target' => Pengaturan::angka('target_keberhasilan_pembinaan'),
+                'jumlah' => $berubah, 'dari' => $binaan, 'satuan' => 'murid binaan',
                 'kosong' => $binaan === 0 ? 'Tidak ada murid yang dibina bulan ini.' : null,
             ],
             [
@@ -101,6 +113,8 @@ class AspekInovasi
                 'target' => Pengaturan::angka('target_murid_aktif'),
                 'nilai2' => $adaHari ? $persen($berkarya, $n) : null,
                 'target2' => Pengaturan::angka('target_murid_berkarya'),
+                'jumlah' => $aktif, 'dari' => $n, 'satuan' => 'murid aktif',
+                'jumlah2' => $berkarya, 'dari2' => $n, 'jumlah_karya' => $jumlahKarya,
             ],
         ];
 

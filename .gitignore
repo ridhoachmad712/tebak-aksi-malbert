@@ -31,3 +31,6 @@ Thumbs.db
 
 # Dokumen sumber berisi data murid asli: jangan masuk repo
 /Docs/
+
+# Ekspor dan rekonsiliasi database berisi data siswa serta akun
+/tmp/rekonsiliasi-september/
