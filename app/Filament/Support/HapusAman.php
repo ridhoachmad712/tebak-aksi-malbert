@@ -19,6 +19,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Penghapusan yang menjaga riwayat: data yang sudah dipakai catatan guru tidak boleh dihapus.
@@ -29,10 +30,16 @@ class HapusAman
     public static function alasan(Model $record): ?string
     {
         return match (true) {
-            $record instanceof TahunAjaran => $record->kelas()->exists()
-                ? 'Tahun ajaran ini masih memiliki kelas. Hapus atau pindahkan kelasnya terlebih dahulu.' : null,
-            $record instanceof Kelas => $record->kegiatanHarian()->exists() || KasusPembinaan::where('kelas_id', $record->id)->exists()
-                ? 'Kelas ini sudah memiliki catatan kegiatan atau kasus pembinaan, sehingga disimpan sebagai riwayat.' : null,
+            $record instanceof TahunAjaran => match (true) {
+                $record->kelas()->exists() => 'Tahun ajaran ini masih memiliki kelas. Hapus atau pindahkan kelasnya terlebih dahulu.',
+                self::adaBaris('rekap_historis_bulanan', 'tahun_ajaran_id', $record->id) => 'Tahun ajaran ini memiliki rekap historis bulanan (capaian sekolah sebelum memakai aplikasi), sehingga disimpan sebagai riwayat.',
+                default => null,
+            },
+            $record instanceof Kelas => match (true) {
+                $record->kegiatanHarian()->exists() || KasusPembinaan::where('kelas_id', $record->id)->exists() => 'Kelas ini sudah memiliki catatan kegiatan atau kasus pembinaan, sehingga disimpan sebagai riwayat.',
+                self::adaBaris('rencana_rekonsiliasi_kelas', 'kelas_id', $record->id) => 'Kelas ini masih tercatat di rencana rekonsiliasi data, sehingga belum dapat dihapus.',
+                default => null,
+            },
             $record instanceof Murid => DB::table('kegiatan_harian_murid')->where('murid_id', $record->id)->exists()
                 || $record->kasusPembinaan()->exists()
                 || DB::table('karya_murid')->where('murid_id', $record->id)->exists()
@@ -47,6 +54,12 @@ class HapusAman
             $record instanceof JenisKegiatan => self::dipakai(DB::table('kegiatan_harian_jenis')->where('jenis_kegiatan_id', $record->id)->count(), 'catatan harian'),
             default => null,
         };
+    }
+
+    /** Tabel tambahan yang mungkin belum ada di semua server diperiksa dengan aman. */
+    protected static function adaBaris(string $tabel, string $kolom, int $id): bool
+    {
+        return Schema::hasTable($tabel) && DB::table($tabel)->where($kolom, $id)->exists();
     }
 
     protected static function dipakai(int $jumlah, string $apa): ?string

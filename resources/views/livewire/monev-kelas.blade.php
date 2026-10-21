@@ -16,6 +16,8 @@
         </div>
     </div>
 
+    <x-pita-rekonstruksi :dari="$this->dataPeriode()['dari']" :sampai="$this->dataPeriode()['sampai']" />
+
     @include('monev.ringkasan')
 
     <section class="kartu" aria-labelledby="judul-perhatian" wire:loading.class="opacity-60">
