@@ -351,12 +351,11 @@ Daftar pengaduan dari halaman publik dengan status **Baru → Diproses → Seles
 | **Beranda** | Profil singkat TEBAK AKSI, statistik umum (misalnya jumlah kegiatan dan karya bulan ini), sorotan galeri dan berita |
 | **Konten tambahan** | Halaman/berita buatan admin |
 | **Galeri** | Foto kegiatan dan karya terpilih |
-| **Karya Literasi** | Semua karya literasi milik murid, langsung tampil setelah dicatat guru tanpa persetujuan admin. Menampilkan foto, judul, nama murid pemilik, jenis karya, kelas, dan tanggal; dapat disaring per bulan dan kelas. Beranda menampilkan 4 karya terbaru yang berfoto. Karya milik guru tidak ditampilkan. |
 | **Diseminasi** | Dokumentasi kegiatan diseminasi |
 | **Manual Book** | Panduan penggunaan aplikasi dan program |
 | **Layanan Pengaduan** | Formulir: nama (opsional), kontak (opsional), kategori, isi pengaduan |
 
-Statistik publik hanya berupa **angka agregat**, tanpa nama murid. Pengecualian: halaman Karya Literasi menampilkan nama murid pemilik karya (keputusan sekolah).
+Statistik publik hanya berupa **angka agregat**, tanpa nama murid.
 
 ---
 
@@ -382,7 +381,7 @@ Alasan: Laravel berjalan baik di hosting Hostinger biasa tanpa server khusus, me
 - Semua halaman selain halaman publik **wajib login**.
 - Guru hanya melihat data murid di kelas yang menjadi aksesnya.
 - Kata sandi disimpan terenkripsi (hash). Tersedia fitur lupa kata sandi melalui admin.
-- Halaman publik **tidak menampilkan nama murid** dalam statistik. Foto yang tampil di galeri dipilih admin. Pengecualian yang diputuskan sekolah: halaman **Karya Literasi** menampilkan nama murid pemilik karya beserta fotonya, langsung setelah dicatat guru. Guru perlu memastikan foto karya tidak memuat data pribadi lain (alamat, nomor telepon, wajah murid lain).
+- Halaman publik **tidak menampilkan nama murid** dalam statistik. Foto yang tampil di galeri dipilih admin.
 - Formulir pengaduan dilindungi dari spam (pembatasan kiriman dan pengecekan otomatis).
 - Cadangan database: memakai cadangan otomatis Hostinger, ditambah tombol unduh cadangan oleh admin.
 - Selama pengembangan dan uji coba, data yang dipakai adalah **data contoh**, bukan data murid asli.
@@ -427,6 +426,6 @@ Masukan setelah uji coba. **Status: belum dikerjakan, kecuali yang ditandai Sele
 | 4 | Foto dokumentasi bisa diunggah lebih dari satu | Guru dapat memilih beberapa foto sekaligus dan menambah foto lagi tanpa menghapus yang sudah ada. Catatan teknis: kotak unggah sudah mengizinkan banyak berkas; **perlu dipastikan** di HP guru apakah yang terjadi hanya satu foto terpilih atau foto lama tertimpa. | 5.2 Kegiatan Harian (foto dokumentasi) |
 | 5 | Bentuk pembinaan berupa karya | Tindakan pembinaan dapat berupa **tugas membuat karya** (misalnya menulis refleksi atau poster). Karya hasil pembinaan dicatat dan dihubungkan dengan kasusnya, sehingga terlihat di rincian kasus. **Perlu dipastikan:** apakah karya pembinaan ikut dihitung di Karya Literasi dan laporan Ekosistem Literat, atau dipisahkan. | 5.3 Kasus Pembinaan, 5.4 Karya Literasi |
 | 6 | Pratinjau karya | Halaman pratinjau satu karya: foto (bisa diperbesar), judul, jenis, pemilik, kelas, tanggal, dan buku sumber, tanpa harus membuka formulir ubah. | 5.4 Karya Literasi |
-| 7 | Karya murid ditampilkan di halaman depan, terpisah dari dokumentasi kegiatan | **Selesai:** menu dan halaman publik **Karya Literasi** (`/karya-literasi`) menampilkan semua karya milik murid beserta nama murid, langsung setelah guru mencatatnya (tanpa persetujuan admin), dengan saringan bulan dan kelas. Beranda menampilkan 4 karya terbaru. Menu ditambahkan otomatis ke menu publik yang tersimpan (setelah Galeri). | 9. Halaman Publik, 11. Keamanan dan Privasi |
+| 7 | Karya murid ditampilkan per bulan dan kelas | **Selesai (dipindah ke admin):** karya literasi tidak ditampilkan di halaman publik. Admin melihatnya di menu **Karya Literasi** (kelompok Catatan Guru) dengan saringan Bulan, Kelas, Pemilik (karya murid/guru), dan Jenis karya, pencarian judul atau nama murid, serta foto yang bisa dibuka ukuran penuh. Karya langsung masuk daftar setelah guru menyimpannya, tanpa persetujuan admin. | 8. Panel Admin |
 | 8 | Sembunyikan riwayat pengisian | **Selesai:** bagian *Riwayat pengisian* tidak lagi ditampilkan di halaman Kegiatan Harian. Jejak pengisian tetap dicatat di sistem karena dipakai untuk menghitung guru aktif mengisi kegiatan harian di Monev. | 5.2 Kegiatan Harian |
 

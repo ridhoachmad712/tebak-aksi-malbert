@@ -127,28 +127,6 @@
         </section>
     @endif
 
-    @if ($karyaTerbaru->isNotEmpty())
-        <section class="border-t border-garis">
-            <div class="mx-auto max-w-6xl px-4 py-14">
-                <div class="flex items-end justify-between gap-3">
-                    <h2 class="text-2xl font-extrabold">Karya literasi terbaru</h2>
-                    <a href="{{ route('karya.publik') }}" class="tautan">Lihat semua karya</a>
-                </div>
-                <div class="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
-                    @foreach ($karyaTerbaru as $k)
-                        <a href="{{ route('karya.publik', ['kelas' => $k->kelas_id]) }}" class="group overflow-hidden rounded-xl border border-garis bg-white">
-                            <img src="{{ $k->foto->first()->url() }}" alt="Foto karya {{ $k->judul }}" loading="lazy" class="aspect-square w-full object-cover">
-                            <span class="block p-3">
-                                <span class="block font-extrabold leading-snug group-hover:underline">{{ $k->judul }}</span>
-                                <span class="block text-sm text-slate-700">{{ $k->murid->pluck('nama')->join(', ') }} · Kelas {{ $k->kelas->nama }}</span>
-                            </span>
-                        </a>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-    @endif
-
     @if (Pengaturan::aktif('beranda_tampil_jalan_pintas'))
         <section class="border-t border-garis">
             <div class="mx-auto grid max-w-6xl gap-10 px-4 py-14 lg:grid-cols-[1.4fr_1fr]">
@@ -156,8 +134,7 @@
                     <h2 class="text-2xl font-extrabold">Untuk orang tua dan masyarakat</h2>
                     <ul class="mt-4 divide-y divide-garis border-y border-garis">
                         @foreach ([
-                            [route('karya.publik'), 'Karya Literasi', 'Karya murid dari kegiatan Teras Baca, per bulan dan kelas.'],
-                            [route('galeri'), 'Galeri', 'Foto kegiatan Teras Baca.'],
+                            [route('galeri'), 'Galeri', 'Foto kegiatan Teras Baca dan karya literasi murid.'],
                             [route('berita'), 'Berita', 'Kabar kegiatan literasi di sekolah.'],
                             [route('diseminasi'), 'Diseminasi', 'Dokumentasi berbagi praktik baik dengan sekolah lain.'],
                             [route('pengaduan'), 'Layanan Pengaduan', 'Sampaikan saran, pertanyaan, atau keluhan tentang program.'],
