@@ -16,6 +16,7 @@ Route::controller(PublikController::class)->group(function () {
     Route::get('/halaman/{slug}', 'halaman')->name('halaman');
     Route::get('/berita', 'berita')->name('berita');
     Route::get('/galeri', 'galeri')->name('galeri');
+    Route::get('/karya-literasi', 'karya')->name('karya.publik');
     Route::get('/diseminasi', 'diseminasi')->name('diseminasi');
     Route::get('/diseminasi/{diseminasi}', 'diseminasiDetail')->name('diseminasi.detail');
     Route::get('/manual-book', 'manual')->name('manual');

@@ -7,6 +7,7 @@ use App\Models\Foto;
 use App\Models\KaryaLiterasi;
 use App\Models\KegiatanHarian;
 use App\Models\KegiatanHarianMurid;
+use App\Models\Kelas;
 use App\Models\Konten;
 use App\Models\ManualBook;
 use App\Models\Murid;
@@ -45,6 +46,10 @@ class PublikController extends Controller
             'fotoPembuka' => $idFoto ? Foto::where('tampil_galeri', true)->find($idFoto) : null,
             'berita' => Konten::terbit()->where('jenis', 'berita')->latest('terbit_pada')->limit(3)->get(),
             'galeri' => Foto::where('tampil_galeri', true)->latest()->limit(8)->get(),
+            'karyaTerbaru' => KaryaLiterasi::with(['kelas', 'murid', 'foto'])
+                ->whereNull('guru_pemilik_id')->whereHas('murid')->whereHas('foto')
+                ->whereHas('kelas', fn ($q) => $q->aktif())
+                ->latest('tanggal')->latest('id')->limit(4)->get(),
         ]);
     }
 
@@ -61,6 +66,29 @@ class PublikController extends Controller
     public function galeri(): View
     {
         return view('publik.galeri', ['foto' => Foto::where('tampil_galeri', true)->latest()->paginate(24)]);
+    }
+
+    /** Karya literasi murid langsung tampil setelah dicatat guru, dapat disaring per bulan dan kelas. */
+    public function karya(Request $request): View
+    {
+        $daftarBulan = Rekap::daftarBulan();
+        $daftarKelas = Kelas::aktif()->orderBy('tingkat')->orderBy('nama')->get();
+        $bulan = array_key_exists((string) $request->query('bulan'), $daftarBulan) ? (string) $request->query('bulan') : '';
+        $kelas = $daftarKelas->firstWhere('id', $request->integer('kelas'));
+
+        $karya = KaryaLiterasi::with(['kelas', 'jenisKarya', 'murid', 'foto'])
+            ->whereNull('guru_pemilik_id')
+            ->whereHas('murid')
+            ->whereHas('kelas', fn ($q) => $q->aktif())
+            ->when($bulan, function ($q) use ($bulan) {
+                $awal = Carbon::createFromFormat('!Y-m', $bulan);
+                $q->whereBetween('tanggal', [$awal->toDateString(), $awal->copy()->endOfMonth()->toDateString()]);
+            })
+            ->when($kelas, fn ($q) => $q->where('kelas_id', $kelas->id))
+            ->latest('tanggal')->latest('id')
+            ->paginate(24)->withQueryString();
+
+        return view('publik.karya', compact('karya', 'daftarBulan', 'daftarKelas', 'bulan', 'kelas'));
     }
 
     public function diseminasi(): View
