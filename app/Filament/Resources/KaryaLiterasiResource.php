@@ -11,8 +11,9 @@ use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\Layout\Stack;
+use Filament\Tables\Columns\ViewColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -45,18 +46,18 @@ class KaryaLiterasiResource extends Resource
         return $table
             ->defaultSort('tanggal', 'desc')
             ->modifyQueryUsing(fn ($query) => $query->with(['murid', 'guruPemilik', 'kelas', 'jenisKarya', 'foto']))
+            // Tampilan kartu seperti galeri: foto, judul, nama murid, jenis, kelas, dan tanggal
+            ->contentGrid(['md' => 2, 'lg' => 3, 'xl' => 4])
+            ->paginated([12, 24, 48])->defaultPaginationPageOption(24)
+            ->searchPlaceholder('Cari judul atau nama murid')
             ->columns([
-                // Ketuk foto untuk membuka ukuran penuh di tab baru (bisa diperbesar)
-                ImageColumn::make('foto_pertama')->label('Foto')->disk('public')->state(fn (KaryaLiterasi $k) => $k->foto->first()?->path)->imageHeight(80)
-                    ->url(fn (KaryaLiterasi $k) => $k->foto->first()?->url(), shouldOpenInNewTab: true)
-                    ->placeholder('Belum ada foto'),
-                TextColumn::make('judul')->searchable()->weight('bold')->description(fn (KaryaLiterasi $k) => $k->namaJenis())->wrap(),
-                TextColumn::make('pemilik')->label('Nama murid / pemilik')->state(fn (KaryaLiterasi $k) => $k->namaPemilik())->wrap()
-                    ->searchable(query: fn (Builder $query, string $search) => $query->where(fn ($q) => $q
-                        ->whereHas('murid', fn ($m) => $m->where('nama', 'like', "%{$search}%"))
-                        ->orWhereHas('guruPemilik', fn ($u) => $u->where('name', 'like', "%{$search}%")))),
-                TextColumn::make('kelas.nama')->label('Kelas')->placeholder('-'),
-                TextColumn::make('tanggal')->date('d/m/Y')->sortable(),
+                Stack::make([
+                    ViewColumn::make('judul')->view('filament.kartu-karya')
+                        ->searchable(query: fn (Builder $query, string $search) => $query->where(fn ($q) => $q
+                            ->where('judul', 'like', "%{$search}%")
+                            ->orWhereHas('murid', fn ($m) => $m->where('nama', 'like', "%{$search}%"))
+                            ->orWhereHas('guruPemilik', fn ($u) => $u->where('name', 'like', "%{$search}%")))),
+                ]),
             ])
             ->filters([
                 SelectFilter::make('bulan')->label('Bulan')->options(fn () => Rekap::daftarBulan())
@@ -77,7 +78,9 @@ class KaryaLiterasiResource extends Resource
                     }),
                 SelectFilter::make('jenis_karya_id')->label('Jenis karya')->relationship('jenisKarya', 'nama'),
             ])
-            ->filtersFormColumns(2)
+            ->filtersLayout(FiltersLayout::AboveContent)
+            ->deferFilters(false)
+            ->filtersFormColumns(['md' => 2, 'xl' => 4])
             ->recordActions([
                 Action::make('buka')->label('Buka')->icon(Heroicon::OutlinedArrowTopRightOnSquare)->url(fn (KaryaLiterasi $k) => route('guru.karya.ubah', $k)),
                 DeleteAction::make()->before(fn (KaryaLiterasi $record) => $record->foto->each->delete()),

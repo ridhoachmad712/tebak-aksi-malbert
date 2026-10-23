@@ -3,17 +3,18 @@
 namespace App\Filament\Resources\KaryaLiterasiResource\Pages;
 
 use App\Filament\Resources\KaryaLiterasiResource;
-use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRecords;
+use Illuminate\Contracts\View\View;
 
 class ManageKaryaLiterasi extends ManageRecords
 {
     protected static string $resource = KaryaLiterasiResource::class;
 
-    protected function getHeaderActions(): array
+    /** Penampil foto yang bisa diperbesar, dibuka dari foto pada kartu karya. */
+    public function getFooter(): ?View
     {
-        return [
-            CreateAction::make(),
-        ];
+        return view('filament.penampil-foto');
     }
+
+    // Karya dicatat guru di halaman guru, jadi tidak ada tombol tambah di sini
 }
