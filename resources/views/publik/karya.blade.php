@@ -64,11 +64,6 @@
         </div>
         <div class="mt-6">{{ $karya->links() }}</div>
 
-        <div x-cloak x-show="buka" x-on:click="buka = null" x-on:keydown.escape.window="buka = null" class="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4">
-            <figure class="max-w-4xl" x-on:click.stop>
-                <img :src="buka?.url" alt="" class="max-h-[80vh] rounded-lg">
-                <figcaption class="mt-2 text-center font-bold text-white" x-text="buka?.ket"></figcaption>
-            </figure>
-        </div>
+        <x-penampil-foto />
     </section>
 </x-layouts.publik>
