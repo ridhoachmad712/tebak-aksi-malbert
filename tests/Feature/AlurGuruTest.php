@@ -3,11 +3,14 @@
 namespace Tests\Feature;
 
 use App\Livewire\Guru\Beranda;
+use App\Livewire\Guru\KaryaForm;
 use App\Livewire\Guru\KegiatanHarianForm;
 use App\Livewire\Guru\PembinaanDetail;
 use App\Livewire\Guru\PembinaanForm;
 use App\Models\HariLibur;
+use App\Models\JenisKarya;
 use App\Models\JenisPelanggaran;
+use App\Models\KaryaLiterasi;
 use App\Models\KasusPembinaan;
 use App\Models\KegiatanHarian;
 use App\Models\Kelas;
@@ -19,7 +22,9 @@ use App\Models\User;
 use App\Services\Rekap;
 use Database\Seeders\DataAwalSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -202,6 +207,32 @@ class AlurGuruTest extends TestCase
 
         $this->actingAs($this->guru)->get(route('guru.pembinaan.detail', $kasus))->assertOk()
             ->assertSeeInOrder(['Observation', 'Mengganggu teman saat membaca', 'Thought', 'Bukunya terlalu sulit', 'Feeling', 'Bosan', 'Desire', 'Membaca buku bergambar dengan tenang']);
+    }
+
+    public function test_karya_literasi_wajib_memiliki_foto(): void
+    {
+        Storage::fake('public');
+        $isian = fn () => Livewire::actingAs($this->guru)->test(KaryaForm::class)
+            ->set('muridDipilih', [(string) $this->murid('Ani')->id])
+            ->set('jenis', (string) JenisKarya::first()->id)
+            ->set('judul', 'Rangkuman Cerita');
+
+        // Tanpa foto ditolak
+        $isian()->assertSee('wajib, minimal 1 foto')->call('simpan')->assertHasErrors(['fotoBaru' => 'required']);
+        $this->assertSame(0, KaryaLiterasi::count());
+
+        // Dengan foto tersimpan
+        $isian()->set('fotoBaru', [UploadedFile::fake()->image('karya.jpg')])->call('simpan')->assertHasNoErrors();
+        $karya = KaryaLiterasi::firstOrFail();
+        $this->assertSame(1, $karya->foto()->count());
+
+        // Saat diubah, foto lama sudah cukup; foto terakhir tidak bisa dihapus tanpa pengganti
+        Livewire::actingAs($this->guru)->test(KaryaForm::class, ['karya' => $karya])
+            ->call('hapusFoto', $karya->foto()->value('id'))
+            ->assertHasErrors('fotoBaru')
+            ->call('simpan')
+            ->assertHasNoErrors();
+        $this->assertSame(1, $karya->foto()->count());
     }
 
     public function test_kondisi_awal_opsional_dan_pemantauan_cepat_dari_beranda(): void

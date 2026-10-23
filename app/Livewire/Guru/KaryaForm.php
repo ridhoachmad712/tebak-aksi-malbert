@@ -69,6 +69,8 @@ class KaryaForm extends Component
     {
         abort_unless($this->kelas, 403);
         $idMurid = $this->kelas?->murid()->pluck('murid.id')->map(fn ($id) => (string) $id)->all() ?? [];
+        // Setiap karya wajib punya minimal satu foto: foto lama yang tersimpan atau foto baru
+        $adaFotoLama = (bool) $this->karya?->foto()->exists();
 
         $this->validate([
             'pemilik' => ['required', 'in:murid,guru'],
@@ -79,8 +81,10 @@ class KaryaForm extends Component
             'jenisLain' => ['required_if:jenis,lain', 'nullable', 'string', 'max:255'],
             'judul' => ['required', 'string', 'max:255'],
             'bukuSumber' => ['nullable', 'string', 'max:255'],
+            'fotoBaru' => $adaFotoLama ? ['array'] : ['required', 'array'],
             'fotoBaru.*' => ['image', 'max:'.SimpanFoto::MAKS_KB],
         ], [
+            'fotoBaru.required' => 'Unggah minimal satu foto karya.',
             'muridDipilih.required_if' => 'Pilih minimal satu murid pemilik karya.',
             'jenisLain.required_if' => 'Tuliskan jenis karyanya.',
         ], ['jenis' => 'jenis karya', 'bukuSumber' => 'buku sumber', 'fotoBaru.*' => 'foto']);
@@ -115,6 +119,12 @@ class KaryaForm extends Component
 
     public function hapusFoto(int $id): void
     {
+        // Foto terakhir tidak boleh dihapus sebelum ada foto pengganti, karena foto wajib ada
+        if ($this->karya?->foto()->count() <= 1 && empty($this->fotoBaru)) {
+            $this->addError('fotoBaru', 'Foto karya wajib ada. Pilih foto pengganti dulu, lalu hapus foto ini.');
+
+            return;
+        }
         $this->karya?->foto()->whereKey($id)->first()?->delete();
         $this->karya?->load('foto');
     }

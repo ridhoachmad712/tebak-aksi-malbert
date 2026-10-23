@@ -184,7 +184,7 @@ Dicatat **saat ada karya**.
 | Jenis karya | Pilih dari daftar admin, atau tulis sendiri | ✓ |
 | Judul karya | Teks | ✓ |
 | Judul buku sumber | Teks | – |
-| Foto karya | Unggah gambar | – |
+| Foto karya | Unggah gambar, minimal 1 foto; foto terakhir tidak bisa dihapus sebelum ada pengganti | ✓ |
 
 Admin dapat memilih karya untuk ditampilkan di **Galeri publik**.
 

@@ -87,7 +87,7 @@
         </div>
 
         <div>
-            <span class="label">Foto karya <span class="font-normal text-slate-600">(opsional)</span></span>
+            <span class="label">Foto karya <span class="font-normal text-slate-600">(wajib, minimal 1 foto)</span></span>
             <div class="grid grid-cols-3 gap-2 sm:grid-cols-4">
                 @foreach ($karya?->foto ?? [] as $f)
                     <div wire:key="f-{{ $f->id }}" class="relative aspect-square overflow-hidden rounded-lg bg-slate-100">
@@ -106,6 +106,7 @@
                     <input type="file" wire:model="fotoBaru" accept="image/*" multiple class="sr-only">
                 </label>
             </div>
+            @error('fotoBaru') <p class="galat">{{ $message }}</p> @enderror
             @error('fotoBaru.*') <p class="galat">{{ $message }}</p> @enderror
         </div>
 
