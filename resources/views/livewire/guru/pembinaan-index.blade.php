@@ -19,6 +19,12 @@
             </button>
         @endforeach
         <div class="ml-auto flex flex-wrap gap-2">
+            <select wire:model.live="bulan" class="isian w-auto pr-9 font-bold" aria-label="Saring bulan kejadian">
+                <option value="">Semua bulan</option>
+                @foreach ($daftarBulan as $nilai => $teks)
+                    <option value="{{ $nilai }}">{{ $teks }}</option>
+                @endforeach
+            </select>
             @if ($daftarKelas->count() > 1)
                 <select wire:model.live="kelas" class="isian w-auto pr-9 font-bold" aria-label="Saring kelas">
                     <option value="">Semua kelas</option>
@@ -32,8 +38,15 @@
     </div>
 
     @if ($kasus->isNotEmpty())
+        {{-- Satu kelompok per bulan kejadian, terbaru di atas --}}
+        @foreach ($perBulan as $kodeBulan => $kasusBulan)
+        <section class="space-y-2" aria-labelledby="bulan-{{ $kodeBulan }}">
+        <h2 id="bulan-{{ $kodeBulan }}" class="text-sm font-extrabold uppercase tracking-wide text-slate-600">
+            {{ \App\Services\Rekap::labelBulan(\Illuminate\Support\Carbon::createFromFormat('!Y-m', $kodeBulan)) }}
+            <span class="font-bold normal-case tracking-normal">· {{ $kasusBulan->count() }} kasus</span>
+        </h2>
         <ul class="kartu divide-y divide-garis">
-            @foreach ($kasus as $k)
+            @foreach ($kasusBulan as $k)
                 @php
                     $belum = $k->mingguBelumDipantau();
                     $terisi = $k->pemantauan->keyBy('minggu');
@@ -62,10 +75,14 @@
                 </li>
             @endforeach
         </ul>
+        </section>
+        @endforeach
     @else
         <div class="kartu p-5 text-sm text-slate-600">
             @if ($cari)
-                Tidak ada kasus untuk murid bernama "{{ $cari }}".
+                Tidak ada kasus untuk murid bernama "{{ $cari }}"{{ $bulan ? ' pada '.$daftarBulan[$bulan] : '' }}.
+            @elseif ($bulan && array_key_exists($bulan, $daftarBulan))
+                Tidak ada kasus {{ $tab === 'selesai' ? 'yang selesai' : ($tab === 'perlu' ? 'yang perlu dipantau' : 'dalam pembinaan') }} dengan kejadian pada {{ $daftarBulan[$bulan] }}. Pilih <button type="button" wire:click="$set('bulan', '')" class="font-bold underline">Semua bulan</button> untuk melihat kasus lainnya.
             @elseif ($tab === 'perlu')
                 Tidak ada murid yang menunggu pemantauan minggu ini.
             @elseif ($tab === 'selesai')

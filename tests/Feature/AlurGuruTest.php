@@ -7,6 +7,7 @@ use App\Livewire\Guru\KaryaForm;
 use App\Livewire\Guru\KegiatanHarianForm;
 use App\Livewire\Guru\PembinaanDetail;
 use App\Livewire\Guru\PembinaanForm;
+use App\Livewire\Guru\PembinaanIndex;
 use App\Models\HariLibur;
 use App\Models\JenisKarya;
 use App\Models\JenisPelanggaran;
@@ -207,6 +208,29 @@ class AlurGuruTest extends TestCase
 
         $this->actingAs($this->guru)->get(route('guru.pembinaan.detail', $kasus))->assertOk()
             ->assertSeeInOrder(['Observation', 'Mengganggu teman saat membaca', 'Thought', 'Bukunya terlalu sulit', 'Feeling', 'Bosan', 'Desire', 'Membaca buku bergambar dengan tenang']);
+    }
+
+    public function test_pembinaan_dipisahkan_per_bulan(): void
+    {
+        $kasus = fn (string $nama, string $tanggal, ?string $status = null) => KasusPembinaan::create([
+            'murid_id' => $this->murid($nama)->id, 'kelas_id' => $this->kelas->id, 'tanggal' => $tanggal,
+            'jenis_pelanggaran_id' => JenisPelanggaran::first()->id, 'tingkat' => 'ringan',
+            'tindakan_pembinaan_id' => TindakanPembinaan::first()->id, 'status_akhir' => $status,
+        ]);
+        $kasus('Ani', '2026-09-15');
+        $kasus('Budi', '2026-10-05');
+        $kasus('Citra', '2026-09-02', 'positif');
+
+        // Semua bulan: dikelompokkan, bulan terbaru di atas
+        Livewire::actingAs($this->guru)->test(PembinaanIndex::class)
+            ->assertSeeInOrder(['Oktober 2026', 'Budi', 'September 2026', 'Ani'])
+            ->assertDontSee('Citra')
+            ->set('bulan', '2026-09')
+            ->assertSee('Ani')->assertDontSee('Budi')
+            ->set('tab', 'selesai')
+            ->assertSee('Citra')
+            ->set('bulan', '2026-10')
+            ->assertSee('Tidak ada kasus yang selesai dengan kejadian pada Oktober 2026');
     }
 
     public function test_karya_literasi_wajib_memiliki_foto(): void
