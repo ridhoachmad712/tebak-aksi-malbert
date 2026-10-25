@@ -56,7 +56,9 @@
                         <div class="min-w-0 flex-1">
                             <p class="font-extrabold">{{ $k->murid->nama }} <span class="font-semibold text-slate-600">· Kelas {{ $k->kelas->nama }}</span></p>
                             <p class="truncate text-sm text-slate-600">{{ $k->namaPelanggaran() }} · {{ KasusPembinaan::TINGKAT[$k->tingkat] }} · dicatat {{ $k->tanggal->format('d/m/Y') }}</p>
-                            @if ($belum)
+                            @if ($k->terkunci())
+                                <p class="mt-1 inline-flex items-center gap-1 text-sm font-bold text-slate-600"><x-heroicon-o-lock-closed class="h-4 w-4" /> Bulan ini dikunci admin</p>
+                            @elseif ($belum)
                                 <p class="mt-1 text-sm font-bold text-amber-800">Minggu ke-{{ implode(', ', $belum) }} belum dipantau</p>
                             @elseif ($k->siapDitutup())
                                 <p class="mt-1 text-sm font-bold text-toska-800">Siap ditetapkan status akhirnya</p>

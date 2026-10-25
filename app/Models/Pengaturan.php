@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Rekap;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -40,6 +41,8 @@ class Pengaturan extends Model
         // Guru boleh mengubah catatan mulai tanggal ini; bila kosong, 7 hari ke belakang (batas_ubah_hari lama)
         'ubah_mulai_tanggal' => '',
         'batas_ubah_hari' => 7,
+        // Bulan (Y-m) yang dikunci admin: semua isian bertanggal di bulan ini hanya bisa dilihat
+        'bulan_terkunci' => [],
         'nama_sekolah' => 'UPT SPF SD Inpres Mallengkeri Bertingkat',
         'nama_kepala_sekolah' => '',
         'nip_kepala_sekolah' => '',
@@ -131,6 +134,34 @@ class Pengaturan extends Model
     public static function aktif(string $kunci): bool
     {
         return filter_var(self::ambil($kunci, false), FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /** Bulan yang dikunci admin, dalam bentuk Y-m. */
+    public static function bulanTerkunci(): array
+    {
+        return array_values(array_filter(self::daftar('bulan_terkunci'), fn ($b) => is_string($b) && preg_match('/^\d{4}-\d{2}$/', $b)));
+    }
+
+    /** Apakah isian bertanggal ini berada di bulan yang dikunci admin (berlaku untuk guru maupun admin). */
+    public static function terkunci(Carbon|string|null $tanggal): bool
+    {
+        return $tanggal !== null && $tanggal !== ''
+            && in_array(Carbon::parse($tanggal)->format('Y-m'), self::bulanTerkunci(), true);
+    }
+
+    /** Aturan validasi: tanggal isian tidak boleh berada di bulan yang dikunci admin. */
+    public static function aturanTidakTerkunci(): \Closure
+    {
+        return function (string $atribut, mixed $nilai, \Closure $gagal) {
+            if (self::terkunci($nilai)) {
+                $gagal('Bulan '.Rekap::labelBulan(Carbon::parse($nilai)).' sudah dikunci admin. Pilih tanggal di bulan lain atau hubungi admin.');
+            }
+        };
+    }
+
+    public static function pesanTerkunci(Carbon|string $tanggal): string
+    {
+        return 'Isian '.Rekap::labelBulan(Carbon::parse($tanggal)).' sudah dikunci admin, sehingga hanya bisa dilihat. Hubungi admin bila perlu koreksi.';
     }
 
     /** Pengaturan berbentuk daftar (disimpan sebagai JSON). */

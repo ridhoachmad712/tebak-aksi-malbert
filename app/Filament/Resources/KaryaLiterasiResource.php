@@ -83,7 +83,7 @@ class KaryaLiterasiResource extends Resource
             ->filtersFormColumns(['md' => 2, 'xl' => 4])
             ->recordActions([
                 Action::make('buka')->label('Buka')->icon(Heroicon::OutlinedArrowTopRightOnSquare)->url(fn (KaryaLiterasi $k) => route('guru.karya.ubah', $k)),
-                DeleteAction::make()->before(fn (KaryaLiterasi $record) => $record->foto->each->delete()),
+                DeleteAction::make()->hidden(fn (KaryaLiterasi $record) => $record->terkunci())->before(fn (KaryaLiterasi $record) => $record->foto->each->delete()),
             ]);
     }
 

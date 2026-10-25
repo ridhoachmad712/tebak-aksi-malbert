@@ -5,6 +5,7 @@ namespace App\Livewire\Guru;
 use App\Livewire\Guru\Concerns\PilihKelas;
 use App\Models\JenisPelanggaran;
 use App\Models\KasusPembinaan;
+use App\Models\Pengaturan;
 use App\Models\TindakanPembinaan;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -43,6 +44,12 @@ class PembinaanForm extends Component
     {
         if ($kasus?->exists) {
             abort_unless(auth()->user()->bolehAksesKelas($kasus->kelas_id), 403);
+            if ($kasus->terkunci()) {
+                session()->flash('galat', Pengaturan::pesanTerkunci($kasus->tanggal));
+                $this->redirectRoute('guru.pembinaan.detail', $kasus, navigate: true);
+
+                return;
+            }
             $this->kasus = $kasus;
             $this->inisialisasiKelas($kasus->kelas_id);
             $this->fill([
@@ -75,10 +82,11 @@ class PembinaanForm extends Component
     public function simpan()
     {
         abort_unless($this->kelas, 403);
+        abort_if($this->kasus?->terkunci(), 403, $this->kasus ? Pengaturan::pesanTerkunci($this->kasus->tanggal) : '');
 
         $this->validate([
             'muridId' => ['required', Rule::in($this->kelas->murid()->pluck('murid.id')->map(fn ($id) => (string) $id))],
-            'tanggal' => ['required', 'date', 'before_or_equal:today'],
+            'tanggal' => ['required', 'date', 'before_or_equal:today', Pengaturan::aturanTidakTerkunci()],
             'kondisiAwal' => ['nullable', 'string', 'max:1000'],
             'pikiran' => ['nullable', 'string', 'max:1000'],
             'perasaan' => ['nullable', 'string', 'max:1000'],

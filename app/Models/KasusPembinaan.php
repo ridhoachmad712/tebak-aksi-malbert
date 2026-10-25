@@ -99,6 +99,12 @@ class KasusPembinaan extends Model
         return $this->tindakanPembinaan?->nama ?? $this->tindakan_pembinaan_lain ?? '-';
     }
 
+    /** Bulan kejadian dikunci admin: kasus, pemantauan, dan status akhirnya tidak bisa diubah. */
+    public function terkunci(): bool
+    {
+        return Pengaturan::terkunci($this->tanggal);
+    }
+
     public function labelStatus(): string
     {
         if (! $this->status_akhir) {

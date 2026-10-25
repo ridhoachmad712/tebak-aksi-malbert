@@ -3,7 +3,6 @@
 namespace App\Livewire\Guru;
 
 use App\Livewire\Guru\Concerns\PilihKelas;
-use App\Models\Foto;
 use App\Models\JenisKegiatan;
 use App\Models\KegiatanHarian;
 use App\Models\Pengaturan;
@@ -148,7 +147,8 @@ class KegiatanHarianForm extends Component
     {
         $tgl = Carbon::parse($this->tanggal);
 
-        if (! $this->kelas || $tgl->isFuture() || ! $this->hariKegiatan) {
+        // Bulan yang dikunci admin tidak bisa diubah siapa pun, termasuk admin
+        if (! $this->kelas || $tgl->isFuture() || ! $this->hariKegiatan || Pengaturan::terkunci($tgl)) {
             return false;
         }
 

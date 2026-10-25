@@ -52,7 +52,7 @@ class PembinaanIndex extends Component
             ->when($bulan, fn ($q) => $q->whereBetween('tanggal', [$bulan->toDateString(), $bulan->copy()->endOfMonth()->toDateString()]));
 
         $aktif = (clone $dasar)->dalamPembinaan()->latest('tanggal')->get();
-        $perlu = $aktif->filter(fn ($k) => $k->perluDipantau() || $k->siapDitutup())->values();
+        $perlu = $aktif->filter(fn ($k) => ! $k->terkunci() && ($k->perluDipantau() || $k->siapDitutup()))->values();
 
         $kasus = match ($this->tab) {
             'perlu' => $perlu,

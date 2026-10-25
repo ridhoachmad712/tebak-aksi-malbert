@@ -5,6 +5,7 @@ namespace App\Livewire\Guru;
 use App\Livewire\Guru\Concerns\PilihKelas;
 use App\Models\JenisKarya;
 use App\Models\KaryaLiterasi;
+use App\Models\Pengaturan;
 use App\Services\SimpanFoto;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -40,6 +41,12 @@ class KaryaForm extends Component
             $boleh = $karya->guru_pemilik_id === auth()->id()
                 || ($karya->kelas_id && auth()->user()->bolehAksesKelas($karya->kelas_id));
             abort_unless($boleh, 403);
+            if ($karya->terkunci()) {
+                session()->flash('galat', Pengaturan::pesanTerkunci($karya->tanggal));
+                $this->redirectRoute('guru.karya', navigate: true);
+
+                return;
+            }
 
             $this->karya = $karya;
             $this->inisialisasiKelas($karya->kelas_id);
@@ -68,6 +75,7 @@ class KaryaForm extends Component
     public function simpan()
     {
         abort_unless($this->kelas, 403);
+        $this->pastikanTidakTerkunci();
         $idMurid = $this->kelas?->murid()->pluck('murid.id')->map(fn ($id) => (string) $id)->all() ?? [];
         // Setiap karya wajib punya minimal satu foto: foto lama yang tersimpan atau foto baru
         $adaFotoLama = (bool) $this->karya?->foto()->exists();
@@ -76,7 +84,7 @@ class KaryaForm extends Component
             'pemilik' => ['required', 'in:murid,guru'],
             'muridDipilih' => ['required_if:pemilik,murid', 'array'],
             'muridDipilih.*' => [Rule::in($idMurid)],
-            'tanggal' => ['required', 'date', 'before_or_equal:today'],
+            'tanggal' => ['required', 'date', 'before_or_equal:today', Pengaturan::aturanTidakTerkunci()],
             'jenis' => ['required'],
             'jenisLain' => ['required_if:jenis,lain', 'nullable', 'string', 'max:255'],
             'judul' => ['required', 'string', 'max:255'],
@@ -119,6 +127,7 @@ class KaryaForm extends Component
 
     public function hapusFoto(int $id): void
     {
+        $this->pastikanTidakTerkunci();
         // Foto terakhir tidak boleh dihapus sebelum ada foto pengganti, karena foto wajib ada
         if ($this->karya?->foto()->count() <= 1 && empty($this->fotoBaru)) {
             $this->addError('fotoBaru', 'Foto karya wajib ada. Pilih foto pengganti dulu, lalu hapus foto ini.');
@@ -132,11 +141,18 @@ class KaryaForm extends Component
     public function hapus()
     {
         abort_unless($this->karya, 404);
+        $this->pastikanTidakTerkunci();
         $this->karya->foto->each->delete();
         $this->karya->delete();
         session()->flash('sukses', 'Karya dihapus');
 
         return $this->redirectRoute('guru.karya', navigate: true);
+    }
+
+    /** Karya di bulan yang dikunci admin tidak boleh diubah atau dihapus. */
+    protected function pastikanTidakTerkunci(): void
+    {
+        abort_if($this->karya?->terkunci(), 403, $this->karya ? Pengaturan::pesanTerkunci($this->karya->tanggal) : '');
     }
 
     public function render()

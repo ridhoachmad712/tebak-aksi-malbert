@@ -150,7 +150,8 @@ class Rekap
             ->pluck('tanggal')->map(fn ($t) => $t->toDateString());
 
         return self::hariKegiatan($dari, today()->subDay())
-            ->reject(fn ($t) => $tercatat->contains($t->toDateString()))->values();
+            // Hari di bulan yang dikunci admin tidak diingatkan karena tidak bisa diisi lagi
+            ->reject(fn ($t) => $tercatat->contains($t->toDateString()) || Pengaturan::terkunci($t))->values();
     }
 
     public static function labelBulan(Carbon $tanggal): string

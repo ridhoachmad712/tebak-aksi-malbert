@@ -55,7 +55,11 @@
             @unless ($this->bolehUbah)
                 <div class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
                     <x-heroicon-o-lock-closed class="mt-0.5 h-5 w-5 shrink-0" />
-                    <p>Catatan ini hanya bisa dilihat. Guru dapat mengubah catatan mulai {{ \App\Services\Rekap::tanggalPanjang(\App\Models\Pengaturan::ubahMulai()) }}. Hubungi admin jika perlu koreksi.</p>
+                    @if (\App\Models\Pengaturan::terkunci($tanggal))
+                        <p>{{ \App\Models\Pengaturan::pesanTerkunci($tanggal) }}</p>
+                    @else
+                        <p>Catatan ini hanya bisa dilihat. Guru dapat mengubah catatan mulai {{ \App\Services\Rekap::tanggalPanjang(\App\Models\Pengaturan::ubahMulai()) }}. Hubungi admin jika perlu koreksi.</p>
+                    @endif
                 </div>
             @endunless
 

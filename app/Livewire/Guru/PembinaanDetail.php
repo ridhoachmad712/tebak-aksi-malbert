@@ -3,6 +3,7 @@
 namespace App\Livewire\Guru;
 
 use App\Models\KasusPembinaan;
+use App\Models\Pengaturan;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -24,8 +25,8 @@ class PembinaanDetail extends Component
     {
         abort_unless(auth()->user()->bolehAksesKelas($kasus->kelas_id), 403);
         $this->kasus = $kasus;
-        // Langsung buka minggu yang belum diisi
-        if ($minggu = $kasus->mingguBelumDipantau()[0] ?? null) {
+        // Langsung buka minggu yang belum diisi (kecuali bulan kejadiannya sudah dikunci admin)
+        if (! $kasus->terkunci() && $minggu = $kasus->mingguBelumDipantau()[0] ?? null) {
             $this->pilihMinggu($minggu);
         }
     }
@@ -43,6 +44,7 @@ class PembinaanDetail extends Component
     public function pantau(string $tingkat): void
     {
         abort_unless($this->minggu, 422);
+        $this->pastikanTidakTerkunci();
         $this->validate(['catatan' => ['nullable', 'string', 'max:1000']]);
         $this->kasus->catatPemantauan($this->minggu, $tingkat, $this->catatan);
         $this->dispatch('notifikasi', pesan: "Minggu ke-{$this->minggu}: ".KasusPembinaan::PERKEMBANGAN[$tingkat]['label']);
@@ -57,27 +59,36 @@ class PembinaanDetail extends Component
     public function tetapkanStatus(string $status): void
     {
         abort_unless(array_key_exists($status, KasusPembinaan::PERKEMBANGAN), 422);
+        $this->pastikanTidakTerkunci();
         $this->kasus->update(['status_akhir' => $status]);
         $this->dispatch('notifikasi', pesan: 'Status akhir ditetapkan');
     }
 
     public function bukaKembali(): void
     {
+        $this->pastikanTidakTerkunci();
         $this->kasus->update(['status_akhir' => null]);
     }
 
     public function hapus()
     {
+        $this->pastikanTidakTerkunci();
         $this->kasus->delete();
         session()->flash('sukses', 'Kasus dihapus');
 
         return $this->redirectRoute('guru.pembinaan', navigate: true);
     }
 
+    /** Kasus yang bulan kejadiannya dikunci admin tidak boleh diubah, dipantau, atau dihapus. */
+    protected function pastikanTidakTerkunci(): void
+    {
+        abort_if($this->kasus->terkunci(), 403, Pengaturan::pesanTerkunci($this->kasus->tanggal));
+    }
+
     public function render()
     {
         $this->kasus->loadMissing(['murid', 'kelas', 'jenisPelanggaran.aspekKarakter', 'tindakanPembinaan', 'pencatat']);
 
-        return view('livewire.guru.pembinaan-detail');
+        return view('livewire.guru.pembinaan-detail', ['terkunci' => $this->kasus->terkunci()]);
     }
 }

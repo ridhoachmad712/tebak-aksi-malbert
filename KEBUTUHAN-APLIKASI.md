@@ -406,7 +406,7 @@ Seluruh usulan bawaan di bawah ini telah disetujui.
 | No | Pertanyaan | Keputusan |
 |---|---|---|
 | 1 | Murid yang **sakit/izin** pada hari kegiatan: apakah tetap dihitung tidak hadir? | Tetap dihitung tidak hadir (✓/tidak saja), agar sederhana |
-| 2 | Sampai kapan guru boleh **mengubah catatan hari sebelumnya**? | Guru: mulai tanggal yang diatur admin di Pengaturan (bawaan 7 hari ke belakang). Admin: kapan saja |
+| 2 | Sampai kapan guru boleh **mengubah catatan hari sebelumnya**? | Guru: mulai tanggal yang diatur admin di Pengaturan (bawaan 7 hari ke belakang). Admin: kapan saja. **Kunci per bulan:** admin dapat mencentang bulan di Pengaturan → Kunci isian per bulan; Kegiatan Harian, kasus pembinaan (termasuk pemantauan dan status akhir), dan karya literasi bertanggal di bulan itu hanya bisa dilihat oleh siapa pun, termasuk admin, sampai centangnya dihilangkan. Tujuannya agar capaian bulan yang sudah dilaporkan tidak berubah. |
 | 3 | **Guru aktif** dihitung dari kelas mana untuk guru mapel? | Dari semua hari ia tercatat mengisi Kegiatan Harian di kelas mana pun |
 | 4 | Apakah murid tampil **berurutan abjad** di tabel harian? | Ya, berurutan abjad |
 | 5 | **Kategori pengaduan** apa saja? | Saran, Pertanyaan, Keluhan, Lainnya |

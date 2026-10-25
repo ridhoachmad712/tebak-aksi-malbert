@@ -5,8 +5,10 @@ namespace App\Filament\Pages;
 use App\Models\BaselinePelanggaran;
 use App\Models\Pengaturan;
 use App\Models\TahunAjaran;
+use App\Services\Rekap;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -47,6 +49,7 @@ class PengaturanTarget extends Page
         }
         // Tanggal mulai ubah yang belum pernah diatur ditampilkan sesuai perhitungan yang sedang berlaku
         $nilai['ubah_mulai_tanggal'] = Pengaturan::ubahMulai()->toDateString();
+        $nilai['bulan_terkunci'] = Pengaturan::bulanTerkunci();
         $this->form->fill($nilai);
     }
 
@@ -58,6 +61,13 @@ class PengaturanTarget extends Page
         $ta = TahunAjaran::aktif();
 
         return $schema->statePath('data')->components([
+            Section::make('Kunci isian per bulan')
+                ->description('Bulan yang dicentang dikunci: Kegiatan Harian, kasus pembinaan (termasuk pemantauan dan status akhirnya), dan karya literasi bertanggal di bulan itu hanya bisa dilihat, oleh guru maupun admin, sehingga capaian bulan tersebut tidak berubah lagi. Hilangkan centang untuk membuka kembali.')
+                ->schema([
+                    CheckboxList::make('bulan_terkunci')->hiddenLabel()
+                        ->options(fn () => array_reverse(Rekap::daftarBulan(), true))
+                        ->columns(['default' => 2, 'md' => 4])->bulkToggleable(),
+                ]),
             Section::make('Target capaian program')->description('Ditampilkan di Monev sebagai pembanding hasil.')->columns(3)->schema([
                 $persen('target_murid_aktif', 'Murid aktif memanfaatkan Teras Baca'),
                 $persen('target_guru_aktif', 'Guru aktif memanfaatkan Teras Baca'),
@@ -119,6 +129,7 @@ class PengaturanTarget extends Page
             }
         }
 
+        $data['bulan_terkunci'] = array_values(array_unique($data['bulan_terkunci'] ?? []));
         Pengaturan::simpan(array_intersect_key($data, Pengaturan::BAWAAN));
 
         Notification::make()->success()->title('Pengaturan disimpan')->send();

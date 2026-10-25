@@ -22,6 +22,13 @@
         </div>
     </div>
 
+    @if ($terkunci)
+        <div class="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900" role="note">
+            <x-heroicon-o-lock-closed class="mt-0.5 h-5 w-5 shrink-0" />
+            <p>{{ \App\Models\Pengaturan::pesanTerkunci($kasus->tanggal) }}</p>
+        </div>
+    @endif
+
     <section class="kartu">
         <dl class="grid gap-4 p-5 sm:grid-cols-2">
             <div>
@@ -51,10 +58,12 @@
                 @endforeach
             </dl>
         </div>
-        <div class="flex flex-wrap gap-2 border-t border-garis px-5 py-3">
-            <a href="{{ route('guru.pembinaan.ubah', $kasus) }}" wire:navigate class="tombol-kedua"><x-heroicon-o-pencil-square class="h-4 w-4" /> Ubah data kasus</a>
-            <button wire:click="hapus" wire:confirm="Hapus kasus ini beserta seluruh pemantauannya?" class="tombol-bahaya"><x-heroicon-o-trash class="h-4 w-4" /> Hapus</button>
-        </div>
+        @unless ($terkunci)
+            <div class="flex flex-wrap gap-2 border-t border-garis px-5 py-3">
+                <a href="{{ route('guru.pembinaan.ubah', $kasus) }}" wire:navigate class="tombol-kedua"><x-heroicon-o-pencil-square class="h-4 w-4" /> Ubah data kasus</a>
+                <button wire:click="hapus" wire:confirm="Hapus kasus ini beserta seluruh pemantauannya?" class="tombol-bahaya"><x-heroicon-o-trash class="h-4 w-4" /> Hapus</button>
+            </div>
+        @endunless
     </section>
 
     <section class="kartu p-5">
@@ -87,7 +96,7 @@
             @endforeach
         </div>
 
-        @if ($minggu)
+        @if ($minggu && ! $terkunci)
             {{-- Sekali ketuk langsung tersimpan --}}
             <div class="mt-5 rounded-lg border border-garis bg-krem p-4">
                 <p class="font-extrabold">Perkembangan {{ str($kasus->murid->nama)->before(' ') }} pada minggu ke-{{ $minggu }}</p>
@@ -112,7 +121,11 @@
         <h2 class="text-lg font-extrabold">Status akhir</h2>
         @if ($kasus->status_akhir)
             <p class="teks-bantu mt-1">Status akhir sudah ditetapkan: <b>{{ $kasus->labelStatus() }}</b>.</p>
-            <button wire:click="bukaKembali" class="tombol-kedua mt-3">Ubah status atau lanjutkan pembinaan</button>
+            @unless ($terkunci)
+                <button wire:click="bukaKembali" class="tombol-kedua mt-3">Ubah status atau lanjutkan pembinaan</button>
+            @endunless
+        @elseif ($terkunci)
+            <p class="teks-bantu mt-1">Status akhir belum ditetapkan.</p>
         @else
             <p class="teks-bantu mt-1">
                 {{ $kasus->siapDitutup() ? 'Pemantauan 4 minggu sudah lengkap. Tetapkan status akhir murid ini.' : 'Tetapkan setelah masa pemantauan selesai. Selama belum ditetapkan, status kasus adalah Dalam pembinaan.' }}

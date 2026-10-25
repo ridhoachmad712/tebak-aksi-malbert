@@ -47,7 +47,9 @@ class KasusPembinaanResource extends Resource
                 TextColumn::make('murid.nama')->label('Murid')->searchable()->weight('bold')->description(fn (KasusPembinaan $k) => 'Kelas '.$k->kelas->nama),
                 TextColumn::make('pelanggaran')->state(fn (KasusPembinaan $k) => $k->namaPelanggaran())->wrap(),
                 TextColumn::make('tingkat')->badge()->formatStateUsing(fn ($state) => KasusPembinaan::TINGKAT[$state])
-                    ->color(fn ($state) => match ($state) { 'berat' => 'danger', 'sedang' => 'warning', default => 'gray' }),
+                    ->color(fn ($state) => match ($state) {
+                        'berat' => 'danger', 'sedang' => 'warning', default => 'gray'
+                    }),
                 TextColumn::make('pemantauan_ringkas')->label('Minggu 1–4')
                     ->state(fn (KasusPembinaan $k) => collect(range(1, 4))->map(fn ($m) => ($p = $k->pemantauan->firstWhere('minggu', $m)) ? KasusPembinaan::PERKEMBANGAN[$p->tingkat]['singkat'] : '–')->join(' · ')),
                 TextColumn::make('status')->state(fn (KasusPembinaan $k) => $k->labelStatus()),
@@ -65,7 +67,8 @@ class KasusPembinaanResource extends Resource
             ])
             ->recordActions([
                 Action::make('buka')->label('Buka')->icon(Heroicon::OutlinedArrowTopRightOnSquare)->url(fn (KasusPembinaan $k) => route('guru.pembinaan.detail', $k)),
-                DeleteAction::make(),
+                // Kasus di bulan yang dikunci admin tidak bisa dihapus
+                DeleteAction::make()->hidden(fn (KasusPembinaan $record) => $record->terkunci()),
             ]);
     }
 

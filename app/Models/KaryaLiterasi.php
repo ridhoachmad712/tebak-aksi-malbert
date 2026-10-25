@@ -49,6 +49,12 @@ class KaryaLiterasi extends Model
         return $this->morphMany(Foto::class, 'fotoable');
     }
 
+    /** Bulan karya dikunci admin: karya tidak bisa diubah atau dihapus. */
+    public function terkunci(): bool
+    {
+        return Pengaturan::terkunci($this->tanggal);
+    }
+
     public function namaJenis(): string
     {
         return $this->jenisKarya?->nama ?? $this->jenis_karya_lain ?? '-';

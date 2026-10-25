@@ -6,7 +6,6 @@ use App\Livewire\Guru\Concerns\PilihKelas;
 use App\Models\KaryaLiterasi;
 use App\Models\KasusPembinaan;
 use App\Models\KegiatanHarian;
-use App\Models\Pengaturan;
 use App\Services\Rekap;
 use App\Services\RingkasanMonev;
 use Livewire\Attributes\Layout;
@@ -29,6 +28,7 @@ class Beranda extends Component
     {
         $kasus = KasusPembinaan::with('pemantauan', 'murid')->dalamPembinaan()->findOrFail($kasusId);
         abort_unless(auth()->user()->bolehAksesKelas($kasus->kelas_id), 403);
+        abort_if($kasus->terkunci(), 403);
         $minggu = $kasus->mingguBelumDipantau()[0] ?? null;
         abort_unless($minggu, 422);
 
@@ -58,8 +58,10 @@ class Beranda extends Component
 
             $kasus = KasusPembinaan::with(['murid', 'kelas', 'pemantauan', 'jenisPelanggaran'])
                 ->dalamPembinaan()->whereIn('kelas_id', $this->daftarKelas->pluck('id'))->get();
-            $data['perluDipantau'] = $kasus->filter->perluDipantau()->values();
-            $data['siapDitutup'] = $kasus->filter->siapDitutup()->values();
+            // Kasus di bulan yang dikunci admin tidak lagi diingatkan karena tidak bisa diisi
+            $bisaDiisi = $kasus->reject->terkunci();
+            $data['perluDipantau'] = $bisaDiisi->filter->perluDipantau()->values();
+            $data['siapDitutup'] = $bisaDiisi->filter->siapDitutup()->values();
 
             [$dari, $sampai] = Rekap::periodeBulan($hariIni->year, $hariIni->month);
             $rekap = Rekap::rekapKelas($kelas, $dari, $sampai);
