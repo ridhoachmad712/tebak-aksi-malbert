@@ -164,6 +164,10 @@ class AlurGuruTest extends TestCase
         $this->assertSame('positif', $kasus->status_akhir);
         $this->assertSame('mulai', $kasus->pemantauan()->where('minggu', 1)->value('tingkat'));
         $this->assertSame('Mulai tertib saat membaca', $kasus->pemantauan()->where('minggu', 1)->value('catatan'));
+
+        // Catatan tetap tersimpan, tetapi daftar "Catatan pemantauan" tidak ditampilkan di rincian kasus
+        Livewire::actingAs($this->guru)->test(PembinaanDetail::class, ['kasus' => $kasus])
+            ->assertDontSee('Catatan pemantauan');
     }
 
     public function test_guru_tidak_bisa_mencatat_kasus_untuk_murid_kelas_lain(): void

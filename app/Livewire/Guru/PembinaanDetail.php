@@ -76,7 +76,7 @@ class PembinaanDetail extends Component
 
     public function render()
     {
-        $this->kasus->loadMissing(['murid', 'kelas', 'jenisPelanggaran.aspekKarakter', 'tindakanPembinaan', 'pemantauan.user', 'pencatat']);
+        $this->kasus->loadMissing(['murid', 'kelas', 'jenisPelanggaran.aspekKarakter', 'tindakanPembinaan', 'pencatat']);
 
         return view('livewire.guru.pembinaan-detail');
     }

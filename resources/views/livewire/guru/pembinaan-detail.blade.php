@@ -106,15 +106,6 @@
                 </div>
             </div>
         @endif
-
-        @if ($kasus->pemantauan->whereNotNull('catatan')->isNotEmpty())
-            <h3 class="mt-5 text-sm font-bold text-slate-600">Catatan pemantauan</h3>
-            <ul class="mt-1 space-y-1 text-sm text-slate-700">
-                @foreach ($kasus->pemantauan->whereNotNull('catatan') as $p)
-                    <li><b>Minggu {{ $p->minggu }}:</b> {{ $p->catatan }} <span class="text-slate-600">({{ $p->user?->name }})</span></li>
-                @endforeach
-            </ul>
-        @endif
     </section>
 
     <section class="kartu p-5">
