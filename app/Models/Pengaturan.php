@@ -70,6 +70,11 @@ class Pengaturan extends Model
         'beranda_tampil_galeri' => true,
         'beranda_tampil_jalan_pintas' => true,
         'beranda_tampil_berita' => true,
+        // Bagian Dashboard kepala sekolah yang ditampilkan
+        'dasbor_tampil_aspek' => true,
+        'dasbor_tampil_tindakan' => true,
+        'dasbor_tampil_pencatatan' => true,
+        'dasbor_tampil_kabar' => true,
         'alur_judul' => 'Yang terjadi di setiap sesi Teras Baca',
         'alur_langkah' => [
             ['judul' => 'Membaca 15 menit', 'keterangan' => 'Murid memilih buku sendiri dan membaca dengan tenang, lalu mencatatnya di jurnal literasi.'],

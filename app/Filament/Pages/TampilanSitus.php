@@ -55,6 +55,7 @@ class TampilanSitus extends Page
         'beranda_tombol2_teks', 'beranda_tombol2_tujuan', 'beranda_foto_id',
         'beranda_tampil_angka', 'beranda_tampil_alur', 'beranda_tampil_galeri', 'beranda_tampil_jalan_pintas', 'beranda_tampil_berita',
         'alur_judul', 'alur_langkah', 'menu_publik', 'tema_warna',
+        'dasbor_tampil_aspek', 'dasbor_tampil_tindakan', 'dasbor_tampil_pencatatan', 'dasbor_tampil_kabar',
     ];
 
     public ?array $data = [];
@@ -65,7 +66,7 @@ class TampilanSitus extends Page
         foreach (self::KUNCI as $kunci) {
             $nilai[$kunci] = match (true) {
                 in_array($kunci, ['alur_langkah', 'menu_publik'], true) => Pengaturan::daftar($kunci),
-                str_starts_with($kunci, 'beranda_tampil_') => Pengaturan::aktif($kunci),
+                str_starts_with($kunci, 'beranda_tampil_'), str_starts_with($kunci, 'dasbor_tampil_') => Pengaturan::aktif($kunci),
                 default => Pengaturan::ambil($kunci) ?: null,
             };
         }
@@ -135,6 +136,17 @@ class TampilanSitus extends Page
                         Toggle::make('beranda_tampil_jalan_pintas')->label('Jalan pintas orang tua dan guru'),
                         Toggle::make('beranda_tampil_berita')->label('Berita terbaru')->helperText('Hanya muncul bila ada berita terbit.'),
                     ]),
+                ]),
+
+                Tab::make('Dashboard Kepsek')->icon(Heroicon::OutlinedPresentationChartLine)->schema([
+                    Section::make('Bagian yang ditampilkan di Dashboard kepala sekolah')
+                        ->description('Matikan bagian yang tidak perlu dilihat kepala sekolah. Datanya tetap tersimpan dan tetap bisa dilihat di Monev.')
+                        ->columns(2)->schema([
+                            Toggle::make('dasbor_tampil_aspek')->label('Capaian 5 aspek inovasi'),
+                            Toggle::make('dasbor_tampil_tindakan')->label('Perlu tindakan Bapak/Ibu')->helperText('Murid belum berubah setelah 4 minggu dan pelanggaran berat.'),
+                            Toggle::make('dasbor_tampil_pencatatan')->label('Pencatatan kelas minggu ini'),
+                            Toggle::make('dasbor_tampil_kabar')->label('Kabar baik')->helperText('Kelas paling meningkat dan karya terbaru.'),
+                        ]),
                 ]),
 
                 Tab::make('Alur Sesi')->icon(Heroicon::OutlinedListBullet)->schema([

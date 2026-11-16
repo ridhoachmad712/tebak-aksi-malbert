@@ -8,6 +8,9 @@ use App\Models\Pengaturan;
 use App\Models\Pengumuman;
 use App\Models\TahunAjaran;
 use App\Models\User;
+use App\Services\Rekap;
+use App\Services\RingkasanMonev;
+use App\Services\TugasAdmin;
 use Database\Seeders\DataAwalSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -111,7 +114,7 @@ class TampilanSitusTest extends TestCase
         $this->actingAs(User::where('peran', 'admin')->first());
 
         // Langkah persiapan mengarah ke halaman yang memang punya isian nama kepala sekolah
-        $langkah = collect(\App\Services\TugasAdmin::persiapan())->firstWhere('label', 'Nama kepala sekolah untuk laporan cetak sudah diisi');
+        $langkah = collect(TugasAdmin::persiapan())->firstWhere('label', 'Nama kepala sekolah untuk laporan cetak sudah diisi');
         $this->assertSame(TampilanSitus::getUrl(), $langkah['url']);
         $this->assertFalse($langkah['selesai']);
 
@@ -123,7 +126,33 @@ class TampilanSitusTest extends TestCase
             ->assertHasNoErrors();
 
         $this->assertSame('Kepala Sekolah Uji, S.Pd.', Pengaturan::ambil('nama_kepala_sekolah'));
-        $this->assertTrue(collect(\App\Services\TugasAdmin::persiapan())->firstWhere('label', 'Nama kepala sekolah untuk laporan cetak sudah diisi')['selesai']);
-        $this->assertStringContainsString('Kepala Sekolah Uji, S.Pd.', view('cetak.monev', \App\Services\RingkasanMonev::susun(\App\Services\Rekap::periode('bulan', '2026-10', '1')) + ['label' => 'Oktober 2026', 'labelLalu' => null])->render());
+        $this->assertTrue(collect(TugasAdmin::persiapan())->firstWhere('label', 'Nama kepala sekolah untuk laporan cetak sudah diisi')['selesai']);
+        $this->assertStringContainsString('Kepala Sekolah Uji, S.Pd.', view('cetak.monev', RingkasanMonev::susun(Rekap::periode('bulan', '2026-10', '1')) + ['label' => 'Oktober 2026', 'labelLalu' => null])->render());
+    }
+
+    public function test_admin_mengatur_bagian_dashboard_kepala_sekolah(): void
+    {
+        $kepsek = User::create(['name' => 'Kepala Uji', 'email' => 'kepala-dasbor@tebakaksi.test', 'password' => 'password', 'peran' => 'kepsek', 'status' => 'aktif']);
+        $this->actingAs($kepsek)->get('/dashboard')->assertOk()
+            ->assertSee('Capaian 5 aspek inovasi')->assertSee('Pencatatan kelas minggu ini')->assertSee('Kabar baik');
+
+        $this->actingAs(User::where('peran', 'admin')->first());
+        Livewire::test(TampilanSitus::class)
+            ->assertSee('Dashboard Kepsek')
+            ->assertSet('data.dasbor_tampil_pencatatan', true)
+            ->set('data.dasbor_tampil_pencatatan', false)
+            ->call('simpan')
+            ->assertHasNoErrors();
+        $this->assertFalse(Pengaturan::aktif('dasbor_tampil_pencatatan'));
+
+        $this->actingAs($kepsek)->get('/dashboard')->assertOk()
+            ->assertDontSee('Pencatatan kelas minggu ini')
+            ->assertSee('Capaian 5 aspek inovasi')->assertSee('Perlu tindakan Bapak/Ibu')->assertSee('Kabar baik');
+
+        // Semua bagian disembunyikan: muncul keterangan, bukan halaman kosong
+        Pengaturan::simpan(['dasbor_tampil_aspek' => false, 'dasbor_tampil_tindakan' => false, 'dasbor_tampil_kabar' => false]);
+        $this->actingAs($kepsek)->get('/dashboard')->assertOk()
+            ->assertDontSee('Capaian 5 aspek inovasi')->assertDontSee('Kabar baik')
+            ->assertSee('Semua bagian Dashboard sedang disembunyikan admin');
     }
 }

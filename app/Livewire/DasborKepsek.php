@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Pengaturan;
 use App\Services\AspekInovasi;
 use App\Services\DasborKepsek as Data;
 use App\Services\Rekap;
@@ -29,20 +30,22 @@ class DasborKepsek extends Component
 
     public function render()
     {
+        // Bagian yang disembunyikan admin (Tampilan Situs → Dashboard Kepsek) tidak dihitung sama sekali
+        $tampil = collect(['aspek', 'tindakan', 'pencatatan', 'kabar'])->mapWithKeys(fn ($b) => [$b => Pengaturan::aktif("dasbor_tampil_$b")])->all();
         $periode = Rekap::periode('bulan', $this->bulan, (string) Rekap::semesterDari(today()));
-        $monev = RingkasanMonev::susun($periode);
-        $indikator = $monev['indikator'];
+        $monev = $tampil['kabar'] ? RingkasanMonev::susun($periode) : null;
 
         return view('livewire.dasbor-kepsek', [
+            'tampil' => $tampil,
             'ta' => Rekap::tahunAjaranAktif(),
             'label' => $periode['label'],
-            'belumBerubah' => Data::belumBerubah(),
-            'pelanggaranBerat' => Data::pelanggaranBerat(),
-            'pencatatan' => collect(TugasAdmin::pencatatanKelas())->sortBy([['hari_terlewat', 'desc'], ['minggu_ini', 'asc']])->values(),
-            'kelasNaik' => Data::kelasNaik($indikator, $monev['indikatorLalu']),
+            'belumBerubah' => $tampil['tindakan'] ? Data::belumBerubah() : collect(),
+            'pelanggaranBerat' => $tampil['tindakan'] ? Data::pelanggaranBerat() : collect(),
+            'pencatatan' => $tampil['pencatatan'] ? collect(TugasAdmin::pencatatanKelas())->sortBy([['hari_terlewat', 'desc'], ['minggu_ini', 'asc']])->values() : collect(),
+            'kelasNaik' => $monev ? Data::kelasNaik($monev['indikator'], $monev['indikatorLalu']) : null,
             'labelLalu' => $periode['sebelumnya']['label'] ?? null,
-            'karya' => Data::karyaTerbaru(),
-            'aspekInovasi' => AspekInovasi::bulan($this->bulan),
+            'karya' => $tampil['kabar'] ? Data::karyaTerbaru() : collect(),
+            'aspekInovasi' => $tampil['aspek'] ? AspekInovasi::bulan($this->bulan) : null,
             'labelBulanAspek' => Rekap::daftarBulan()[$this->bulan] ?? $this->bulan,
         ]);
     }

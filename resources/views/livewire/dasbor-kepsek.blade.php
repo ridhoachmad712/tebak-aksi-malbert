@@ -15,6 +15,7 @@
         <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 font-semibold text-amber-900">Tahun ajaran aktif belum diatur, sehingga capaian belum bisa dihitung. Admin dapat mengaturnya di Halaman Admin, menu Tahun Ajaran.</div>
     @endunless
 
+    @if ($tampil['aspek'])
     {{-- Capaian lima aspek inovasi, berfokus pada jumlah murid seperti laporan hasil inovasi sekolah --}}
     @php
         $statusAspek = collect($aspekInovasi['aspek'])->countBy('status');
@@ -46,7 +47,9 @@
             @endforeach
         </div>
     </section>
+    @endif
 
+    @if ($tampil['tindakan'])
     {{-- Inti dashboard: hal yang butuh keputusan kepala sekolah, satu baris per murid --}}
     @php
         $daftarTindakan = $pelanggaranBerat->map(fn ($k) => ['kasus' => $k, 'berat' => true])
@@ -83,8 +86,12 @@
             <p class="px-4 py-3 text-sm text-slate-700">Tidak ada yang perlu ditindaklanjuti saat ini.</p>
         @endif
     </section>
+    @endif
 
-    <div class="grid gap-6 lg:grid-cols-2">
+    @if ($tampil['pencatatan'] || $tampil['kabar'])
+    {{-- Dua kolom hanya bila kedua bagian tampil --}}
+    <div @class(['grid gap-6', 'lg:grid-cols-2' => $tampil['pencatatan'] && $tampil['kabar']])>
+        @if ($tampil['pencatatan'])
         {{-- Hanya kelas yang tertinggal yang ditampilkan; daftar lengkap bisa dibuka --}}
         @php $kelasTertinggal = $pencatatan->filter(fn ($k) => $k['jumlah_murid'] > 0 && $k['hari_terlewat'] >= 2); @endphp
         <section class="kartu min-w-0 self-start overflow-hidden" aria-labelledby="judul-pencatatan">
@@ -127,7 +134,9 @@
                 </details>
             @endif
         </section>
+        @endif
 
+        @if ($tampil['kabar'])
         <section class="kartu min-w-0 self-start" aria-labelledby="judul-kabar">
             <h2 id="judul-kabar" class="border-b border-garis px-4 py-3 font-extrabold">Kabar baik</h2>
             <ul class="divide-y divide-garis text-sm">
@@ -145,5 +154,11 @@
                 @endif
             </ul>
         </section>
+        @endif
     </div>
+    @endif
+
+    @unless (in_array(true, $tampil, true))
+        <div class="kartu p-5 text-sm text-slate-700">Semua bagian Dashboard sedang disembunyikan admin. Admin dapat menampilkannya kembali di Halaman Admin, menu Tampilan Situs, tab Dashboard Kepsek. Capaian lengkap tetap ada di <a href="{{ route('monev', $parameter) }}" wire:navigate class="font-bold underline">Monev</a>.</div>
+    @endunless
 </div>
